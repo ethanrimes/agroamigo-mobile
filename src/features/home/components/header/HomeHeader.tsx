@@ -22,7 +22,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     <Box
       className="w-full"
       style={{
-        backgroundColor: theme.colors.secondary.default,
+        backgroundColor: theme.colors.primary.default,
         ...theme.componentShadows.header,
       }}
     >

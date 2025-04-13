@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 // Import base theme
@@ -31,43 +31,29 @@ interface ThemeContextType {
   spacing: typeof spacing;
   borders: typeof borders;
   shadows: typeof shadows;
+  // Theme-specific color categories
+  primaryColor: string;
+  secondaryColor: string;
+  infoColor: string;
+  warningColor: string;
+  errorColor: string;
+  successColor: string;
 }
 
-// Create a properly structured light theme with correct types
-const lightTheme: Theme = {
-  colors: colors.light,
-  typography: typography,
-  spacing: spacing,
-  borders: borders,
-  shadows: shadows,
-  // Add component-specific shadows explicitly
-  componentShadows: shadows.componentShadows,
-  // Add other shadow utilities
-  elevations: shadows.elevations,
-  shadowEffects: shadows.shadowEffects,
-  createShadow: shadows.createShadow,
-  isDark: false
-};
-
-// Create a properly structured dark theme with correct types
-const darkTheme: DarkTheme = {
-  colors: colors.dark,
-  typography: typography,
-  spacing: spacing,
-  borders: borders,
-  shadows: shadows,
-  // Add component-specific shadows explicitly
-  componentShadows: shadows.componentShadows,
-  // Add other shadow utilities
-  elevations: shadows.elevations,
-  shadowEffects: shadows.shadowEffects,
-  createShadow: shadows.createShadow,
-  isDark: true
-};
-
-// Create the context with default values
+// Create a context with default values
 const ThemeContext = createContext<ThemeContextType>({
-  theme: lightTheme,
+  theme: {
+    colors: colors.light,
+    typography: typography,
+    spacing: spacing,
+    borders: borders,
+    shadows: shadows,
+    componentShadows: shadows.componentShadows,
+    elevations: shadows.elevations,
+    shadowEffects: shadows.shadowEffects,
+    createShadow: shadows.createShadow,
+    isDark: false
+  },
   isDark: false,
   setTheme: () => {},
   themeMode: 'light',
@@ -79,6 +65,12 @@ const ThemeContext = createContext<ThemeContextType>({
   spacing: spacing,
   borders: borders,
   shadows: shadows,
+  primaryColor: colors.light.primary.default,
+  secondaryColor: colors.light.secondary.default,
+  infoColor: colors.light.info.default,
+  warningColor: colors.light.action.warning,
+  errorColor: colors.light.action.error,
+  successColor: colors.light.action.success,
 });
 
 // Theme Provider Props
@@ -90,7 +82,7 @@ interface ThemeProviderProps {
 // Theme Provider Component
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ 
   children, 
-  initialTheme = 'system'
+  initialTheme = 'dark'
 }) => {
   // Get device color scheme
   const deviceColorScheme = useColorScheme();
@@ -103,15 +95,36 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     ? deviceColorScheme === 'dark'
     : themeMode === 'dark';
 
-  // Get the appropriate theme based on dark mode setting
-  const currentTheme = isDark ? darkTheme : lightTheme;
-  
-  // Get current theme colors
+  // Get the current colors based on theme
   const currentColors = isDark ? colors.dark : colors.light;
+  
+  // Create a memoized theme with specific default colors based on current theme
+  const currentTheme = useMemo(() => {
+    return {
+      colors: currentColors,
+      typography: typography,
+      spacing: spacing,
+      borders: borders,
+      shadows: shadows,
+      componentShadows: shadows.componentShadows,
+      elevations: shadows.elevations,
+      shadowEffects: shadows.shadowEffects,
+      createShadow: shadows.createShadow,
+      isDark
+    };
+  }, [currentColors, isDark]);
       
   // Get library-specific themes
   const currentRNETheme = isDark ? rneTheme.dark : rneTheme.light;
   const currentD3Theme = isDark ? d3Theme.dark : d3Theme.light;
+
+  // Extract specific default colors from the current theme
+  const primaryColor = currentColors.primary.default;
+  const secondaryColor = currentColors.secondary.default;
+  const infoColor = currentColors.info.default;
+  const warningColor = currentColors.action.warning;
+  const errorColor = currentColors.action.error;
+  const successColor = currentColors.action.success;
 
   // Function to change theme
   const setTheme = (theme: 'light' | 'dark' | 'system') => {
@@ -125,7 +138,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     }
   }, [deviceColorScheme, themeMode]);
 
-  // Create context value
+  // Create context value with conditional colors
   const contextValue: ThemeContextType = {
     theme: currentTheme,
     isDark,
@@ -140,6 +153,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     spacing: spacing,
     borders: borders,
     shadows: shadows,
+    // Add theme-specific default colors
+    primaryColor,
+    secondaryColor,
+    infoColor,
+    warningColor,
+    errorColor,
+    successColor,
   };
 
   return (

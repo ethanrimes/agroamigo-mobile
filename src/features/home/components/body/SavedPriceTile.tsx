@@ -29,7 +29,7 @@ const SavedPriceTile: React.FC<SavedPriceTileProps> = ({
       <Box
         className="w-140 h-120"
         style={{
-          backgroundColor: theme.colors.info.default,
+          backgroundColor: theme.colors.secondary.default,
           // borderRadius: theme.borderRadii.lg,
           padding: theme.spacing.spacing.md,
           marginRight: theme.spacing.spacing.md,
