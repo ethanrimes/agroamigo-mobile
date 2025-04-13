@@ -11,11 +11,8 @@ import {
   shadows 
 } from '../base';
 
-// Import theme adapters
-import { gluestackTheme, rneTheme, d3Theme } from '../adapters';
-
-// Import library providers
-import { GluestackUIProvider } from '@gluestack-ui/themed';
+// Import other theme adapters (keep these)
+import { rneTheme, d3Theme } from '../adapters';
 import { ThemeProvider as RNEThemeProvider } from '@rneui/themed';
 
 // Theme Context interface
@@ -25,7 +22,6 @@ interface ThemeContextType {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   themeMode: 'light' | 'dark' | 'system';
   // Library-specific themes
-  gluestack: typeof gluestackTheme.light | typeof gluestackTheme.dark;
   rne: typeof rneTheme.light | typeof rneTheme.dark;
   d3: typeof d3Theme.light | typeof d3Theme.dark;
   d3Helpers: typeof d3Theme.helpers;
@@ -75,7 +71,6 @@ const ThemeContext = createContext<ThemeContextType>({
   isDark: false,
   setTheme: () => {},
   themeMode: 'light',
-  gluestack: gluestackTheme.light,
   rne: rneTheme.light,
   d3: d3Theme.light,
   d3Helpers: d3Theme.helpers,
@@ -115,7 +110,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const currentColors = isDark ? colors.dark : colors.light;
       
   // Get library-specific themes
-  const currentGluestackTheme = isDark ? gluestackTheme.dark : gluestackTheme.light;
   const currentRNETheme = isDark ? rneTheme.dark : rneTheme.light;
   const currentD3Theme = isDark ? d3Theme.dark : d3Theme.light;
 
@@ -137,7 +131,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     isDark,
     setTheme,
     themeMode,
-    gluestack: currentGluestackTheme,
     rne: currentRNETheme,
     d3: currentD3Theme,
     d3Helpers: d3Theme.helpers,
@@ -151,11 +144,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   return (
     <ThemeContext.Provider value={contextValue}>
-      <GluestackUIProvider config={currentGluestackTheme}>
-        <RNEThemeProvider theme={currentRNETheme}>
-          {children}
-        </RNEThemeProvider>
-      </GluestackUIProvider>
+      <RNEThemeProvider theme={currentRNETheme}>
+        {children}
+      </RNEThemeProvider>
     </ThemeContext.Provider>
   );
 };
