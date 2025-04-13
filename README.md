@@ -98,7 +98,7 @@
 │   │   │   │       ├── index.ts   # Export body components
 │   │   │   │       ├── HomePageContentSpace.tsx
 │   │   │   │       ├── HomePageContentElement.tsx
-│   │   │   │       ├── SharedPricesCarousel.tsx
+│   │   │   │       ├── SavedPricesCarousel.tsx
 │   │   │   │       ├── SavedPriceTile.tsx
 │   │   │   │       ├── TrendTicker.tsx
 │   │   │   │       ├── HomeNewsSection.tsx

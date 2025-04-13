@@ -29,6 +29,11 @@ export type Theme = {
   spacing: Spacing;
   borders: Borders;
   shadows: Shadows;
+  // Add shadow sub-properties explicitly to the type definition
+  componentShadows: typeof shadows.componentShadows;
+  elevations: typeof shadows.elevations;
+  shadowEffects: typeof shadows.shadowEffects;
+  createShadow: typeof shadows.createShadow;
   isDark: boolean;
 };
 
@@ -38,6 +43,11 @@ export type DarkTheme = {
   spacing: Spacing;
   borders: Borders;
   shadows: Shadows;
+  // Add shadow sub-properties explicitly to the type definition
+  componentShadows: typeof shadows.componentShadows;
+  elevations: typeof shadows.elevations;
+  shadowEffects: typeof shadows.shadowEffects;
+  createShadow: typeof shadows.createShadow;
   isDark: boolean;
 };
 

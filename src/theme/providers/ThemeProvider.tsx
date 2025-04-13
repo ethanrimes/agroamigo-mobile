@@ -3,6 +3,13 @@ import { useColorScheme } from 'react-native';
 
 // Import base theme
 import baseTheme, { Theme, DarkTheme } from '../base';
+import { 
+  colors, 
+  typography, 
+  spacing, 
+  borders, 
+  shadows 
+} from '../base';
 
 // Import theme adapters
 import { gluestackTheme, rneTheme, d3Theme } from '../adapters';
@@ -22,25 +29,43 @@ interface ThemeContextType {
   rne: typeof rneTheme.light | typeof rneTheme.dark;
   d3: typeof d3Theme.light | typeof d3Theme.dark;
   d3Helpers: typeof d3Theme.helpers;
+  // Base theme elements for direct access
+  colors: typeof colors.light | typeof colors.dark;
+  typography: typeof typography;
+  spacing: typeof spacing;
+  borders: typeof borders;
+  shadows: typeof shadows;
 }
 
 // Create a properly structured light theme with correct types
 const lightTheme: Theme = {
-  colors: baseTheme.colors.light,
-  typography: baseTheme.typography,
-  spacing: baseTheme.spacing,
-  borders: baseTheme.borders,
-  shadows: baseTheme.shadows,
+  colors: colors.light,
+  typography: typography,
+  spacing: spacing,
+  borders: borders,
+  shadows: shadows,
+  // Add component-specific shadows explicitly
+  componentShadows: shadows.componentShadows,
+  // Add other shadow utilities
+  elevations: shadows.elevations,
+  shadowEffects: shadows.shadowEffects,
+  createShadow: shadows.createShadow,
   isDark: false
 };
 
 // Create a properly structured dark theme with correct types
 const darkTheme: DarkTheme = {
-  colors: baseTheme.colors.dark,
-  typography: baseTheme.typography,
-  spacing: baseTheme.spacing,
-  borders: baseTheme.borders,
-  shadows: baseTheme.shadows,
+  colors: colors.dark,
+  typography: typography,
+  spacing: spacing,
+  borders: borders,
+  shadows: shadows,
+  // Add component-specific shadows explicitly
+  componentShadows: shadows.componentShadows,
+  // Add other shadow utilities
+  elevations: shadows.elevations,
+  shadowEffects: shadows.shadowEffects,
+  createShadow: shadows.createShadow,
   isDark: true
 };
 
@@ -54,6 +79,11 @@ const ThemeContext = createContext<ThemeContextType>({
   rne: rneTheme.light,
   d3: d3Theme.light,
   d3Helpers: d3Theme.helpers,
+  colors: colors.light,
+  typography: typography,
+  spacing: spacing,
+  borders: borders,
+  shadows: shadows,
 });
 
 // Theme Provider Props
@@ -80,6 +110,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Get the appropriate theme based on dark mode setting
   const currentTheme = isDark ? darkTheme : lightTheme;
+  
+  // Get current theme colors
+  const currentColors = isDark ? colors.dark : colors.light;
       
   // Get library-specific themes
   const currentGluestackTheme = isDark ? gluestackTheme.dark : gluestackTheme.light;
@@ -108,6 +141,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     rne: currentRNETheme,
     d3: currentD3Theme,
     d3Helpers: d3Theme.helpers,
+    // Add direct access to base theme elements
+    colors: currentColors,
+    typography: typography,
+    spacing: spacing,
+    borders: borders,
+    shadows: shadows,
   };
 
   return (
