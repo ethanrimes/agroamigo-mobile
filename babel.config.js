@@ -12,8 +12,6 @@ module.exports = function(api) {
             "tailwind.config": "./tailwind.config.js"
           }
         }],
-        // ✅ Required for expo-router to work correctly
-        'expo-router/babel'
       ],
       env: {
         production: {
