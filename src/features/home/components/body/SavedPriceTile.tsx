@@ -1,8 +1,8 @@
 // src/features/home/components/body/SavedPriceTile.tsx
 import React from 'react';
 import { Pressable } from 'react-native';
-import { VStack } from '@/components/ui/vstack';
-import { Box } from '@/components/ui/box';
+import { VStack } from '../../../../components/ui/organization';
+import { Box } from '../../../../components/ui/organization';
 import { Typography } from '../../../../components/ui/typography';
 import { TrendTicker } from '../../../../components/ui/data';
 import { useTheme } from '../../../../theme/providers/ThemeProvider';
@@ -30,7 +30,7 @@ const SavedPriceTile: React.FC<SavedPriceTileProps> = ({
         className="w-140 h-120"
         style={{
           backgroundColor: theme.colors.info.default,
-        //   borderRadius: theme.borderRadii.lg,
+          // borderRadius: theme.borderRadii.lg,
           padding: theme.spacing.spacing.md,
           marginRight: theme.spacing.spacing.md,
           ...theme.componentShadows.card,

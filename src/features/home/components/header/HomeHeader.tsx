@@ -1,7 +1,7 @@
 // src/features/home/components/header/HomeHeader.tsx
 import React from 'react';
-import { VStack } from '@/components/ui/vstack';
-import { Box } from '@/components/ui/box';
+import { VStack } from '../../../../components/ui/organization';
+import { Box } from '../../../../components/ui/organization';
 import ThinHeaderStrip from './ThinHeaderStrip';
 import SearchLocationContainer from './SearchLocationContainer';
 import { Heading } from '../../../../components/ui/typography';

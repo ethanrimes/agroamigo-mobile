@@ -1,6 +1,7 @@
 // src/components/ui/typography/Text.tsx
 import React from 'react';
-import { Text as GluestackText } from "@/components/ui/text";
+import { Text } from '@rneui/themed';
+import { TextStyle, StyleSheet } from 'react-native';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
 
 export interface TypographyProps {
@@ -18,7 +19,7 @@ export interface TypographyProps {
   highlight?: boolean;
   isTruncated?: boolean;
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
-  style?: React.CSSProperties;
+  style?: object;
   sub?: boolean;
   className?: string;
 }
@@ -51,26 +52,50 @@ export const Typography: React.FC<TypographyProps> = ({
   // Get text alignment from props or theme
   const textAlign = align || theme.typography.textAlignments.left;
   
+  // Calculate font weight based on bold prop and text style
+  const fontWeight = bold ? '700' : (textStyle.fontWeight as TextStyle['fontWeight']);
+  
+  // Create styles with proper typing
+  const styles = StyleSheet.create({
+    text: {
+      color: textColor,
+      fontFamily: textStyle.fontFamily,
+      fontSize: textStyle.fontSize,
+      lineHeight: textStyle.lineHeight,
+      textAlign: textAlign as TextStyle['textAlign'],
+      fontWeight: fontWeight,
+      textDecorationLine: underline 
+        ? strikeThrough 
+          ? 'underline line-through' 
+          : 'underline'
+        : strikeThrough 
+          ? 'line-through' 
+          : 'none',
+      fontStyle: italic ? 'italic' : 'normal',
+      backgroundColor: highlight ? theme.colors.primary.light : undefined,
+    },
+    subText: {
+      fontSize: textStyle.fontSize * 0.75,
+      lineHeight: (textStyle.lineHeight || 0) * 0.75,
+    }
+  });
+  
+  if (sub) {
+    return (
+      <Text style={[styles.text, style]} numberOfLines={isTruncated ? 1 : undefined} {...rest}>
+        <Text style={styles.subText}>{children}</Text>
+      </Text>
+    );
+  }
+  
   return (
-    <GluestackText
-      style={[
-        textStyle, 
-        { color: textColor, textAlign }, 
-        style as any
-      ]}
-      bold={bold}
-      italic={italic}
-      underline={underline}
-      strikeThrough={strikeThrough}
-      highlight={highlight}
-      isTruncated={isTruncated}
-      size={size}
-      sub={sub}
-      className={className}
+    <Text
+      style={[styles.text, style]}
+      numberOfLines={isTruncated ? 1 : undefined}
       {...rest}
     >
       {children}
-    </GluestackText>
+    </Text>
   );
 };
 

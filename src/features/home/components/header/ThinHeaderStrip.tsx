@@ -1,7 +1,7 @@
 // src/features/home/components/header/ThinHeaderStrip.tsx
 import React from 'react';
-import { HStack } from '@/components/ui/hstack';
-import { Box } from '@/components/ui/box';
+import { HStack } from '../../../../components/ui/organization';
+import { Box } from '../../../../components/ui/organization';
 import { Logo } from '../../../../components/ui/icons';
 import { useTheme } from '../../../../theme/providers/ThemeProvider';
 

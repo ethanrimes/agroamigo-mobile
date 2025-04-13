@@ -1,7 +1,7 @@
 // src/features/home/components/body/NewsBullet.tsx
 import React from 'react';
-import { HStack } from '@/components/ui/hstack';
-import { Box } from '@/components/ui/box';
+import { HStack } from '../../../../components/ui/organization';
+import { Box } from '../../../../components/ui/organization';
 import { Typography } from '../../../../components/ui/typography';
 import { useTheme } from '../../../../theme/providers/ThemeProvider';
 
@@ -17,7 +17,7 @@ const NewsBullet: React.FC<NewsBulletProps> = ({
   return (
     <HStack space="md" className="items-center w-full">
       <Box
-        className={`h-8 w-8 rounded-full`}
+        className="h-8 w-8 rounded-full"
         style={{ backgroundColor: theme.colors.text.primary }}
       />
       <Typography

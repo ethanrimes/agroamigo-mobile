@@ -1,5 +1,4 @@
 // Export all theme adapters from a single entry point
-
 import rneTheme from './react-native-elements';
 import d3Theme from './d3';
 

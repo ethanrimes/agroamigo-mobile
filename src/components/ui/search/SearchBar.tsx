@@ -1,13 +1,7 @@
 // src/components/ui/search/SearchBar.tsx
 import React from 'react';
-import { 
-  Input, 
-  InputField, 
-  InputSlot, 
-  InputIcon, 
-  Box 
-} from '@gluestack-ui/themed';
-import { Search } from 'lucide-react-native';
+import { View } from 'react-native';
+import { SearchBar as RNESearchBar } from '@rneui/themed';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
 
 interface SearchBarProps {
@@ -23,30 +17,35 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onChangeText,
   onSubmitEditing,
 }) => {
-  const { theme } = useTheme();
+  const { theme, rne } = useTheme();
   
   return (
-    <Box width="100%">
-      <Input
-        backgroundColor={theme.colors.background.primary}
-        borderColor={theme.colors.border.light}
-        borderWidth={1}
-        borderRadius={8}
-      >
-        <InputSlot paddingLeft={12}>
-          <InputIcon as={Search} color={theme.colors.text.tertiary} />
-        </InputSlot>
-        <InputField
-          placeholder={placeholder}
-          value={value}
-          onChangeText={onChangeText}
-          onSubmitEditing={onSubmitEditing}
-          placeholderTextColor={theme.colors.text.tertiary}
-          color={theme.colors.text.primary}
-          fontSize={theme.typography.fontSizes.md}
-        />
-      </Input>
-    </Box>
+    <View style={{ width: '100%' }}>
+      <RNESearchBar
+        placeholder={placeholder}
+        value={value || ''}
+        onChangeText={onChangeText}
+        onSubmitEditing={onSubmitEditing}
+        platform="default"
+        containerStyle={{
+          backgroundColor: 'transparent',
+          borderTopWidth: 0,
+          borderBottomWidth: 0,
+          padding: 0,
+        }}
+        inputContainerStyle={{
+          backgroundColor: theme.colors.background.primary,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: theme.colors.border.light,
+        }}
+        inputStyle={{
+          fontSize: theme.typography.fontSizes.md,
+          color: theme.colors.text.primary,
+        }}
+        placeholderTextColor={theme.colors.text.tertiary}
+      />
+    </View>
   );
 };
 

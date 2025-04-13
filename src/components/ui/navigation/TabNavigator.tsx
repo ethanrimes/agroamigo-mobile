@@ -1,11 +1,10 @@
 // src/components/ui/navigation/TabNavigator.tsx
 import React from 'react';
-import { HStack, Box } from '@gluestack-ui/themed';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { Home, Leaf, ShoppingBag, Globe } from 'lucide-react-native';
-import { Pressable } from 'react-native';
+import { useRouter, usePathname } from 'expo-router';
 import { Typography } from '../typography';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
-import { useRouter, usePathname } from 'expo-router';
 
 interface TabIconProps {
   size: number;
@@ -59,53 +58,61 @@ export const TabNavigator: React.FC = () => {
     return false;
   };
 
+  const styles = StyleSheet.create({
+    tabBar: {
+      backgroundColor: theme.colors.background.primary,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border.light,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+      elevation: 2,
+      flexDirection: 'row',
+      height: 60,
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    },
+    tabButton: {
+      alignItems: 'center',
+      padding: 4,
+    }
+  });
+
   return (
-    <Box
-      backgroundColor={theme.colors.background.primary}
-      borderTopWidth={1}
-      borderTopColor={theme.colors.border.light}
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
-        elevation: 2
-      }}
-    >
-      <HStack height={60} alignItems="center" justifyContent="space-around">
-        {tabs.map((tab) => {
-          const active = isActive(tab.path);
-          const Icon = tab.icon;
-          
-          return (
-            <Pressable
-              key={tab.name}
-              style={{ alignItems: 'center', padding: 4 }}
-              onPress={() => router.push(tab.path as any)}
+    <View style={styles.tabBar}>
+      {tabs.map((tab) => {
+        const active = isActive(tab.path);
+        const Icon = tab.icon;
+        
+        return (
+          <Pressable
+            key={tab.name}
+            style={styles.tabButton}
+            onPress={() => router.push(tab.path as any)}
+          >
+            <Icon
+              size={24}
+              color={
+                active
+                  ? theme.colors.primary.default
+                  : theme.colors.text.tertiary
+              }
+            />
+            <Typography
+              variant="body4"
+              color={
+                active
+                  ? theme.colors.primary.default
+                  : theme.colors.text.tertiary
+              }
             >
-              <Icon
-                size={24}
-                color={
-                  active
-                    ? theme.colors.primary.default
-                    : theme.colors.text.tertiary
-                }
-              />
-              <Typography
-                variant="body4"
-                color={
-                  active
-                    ? theme.colors.primary.default
-                    : theme.colors.text.tertiary
-                }
-              >
-                {tab.label}
-              </Typography>
-            </Pressable>
-          );
-        })}
-      </HStack>
-    </Box>
+              {tab.label}
+            </Typography>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 };
 

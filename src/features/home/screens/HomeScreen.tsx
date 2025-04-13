@@ -1,7 +1,8 @@
 // src/features/home/screens/HomeScreen.tsx
 import React from 'react';
 import { ScrollView, ActivityIndicator } from 'react-native';
-import { VStack, Box } from '@gluestack-ui/themed';
+import { VStack } from '../../../components/ui/organization';
+import { Box } from '../../../components/ui/organization';
 import { HomeHeader } from '../components/header';
 import { 
   SavedPricesCarousel, 
@@ -17,14 +18,20 @@ const HomeScreen: React.FC = () => {
   
   if (isLoading) {
     return (
-      <Box flex={1} justifyContent="center" alignItems="center">
+      <Box 
+        className="flex-1 justify-center items-center"
+        style={{ backgroundColor: theme.colors.background.primary }}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary.default} />
       </Box>
     );
   }
   
   return (
-    <VStack flex={1} backgroundColor={theme.colors.background.primary}>
+    <VStack 
+      className="flex-1"
+      style={{ backgroundColor: theme.colors.background.primary }}
+    >
       <HomeHeader 
         location={location}
         onSearchPress={handleSearchPress}
@@ -35,7 +42,12 @@ const HomeScreen: React.FC = () => {
           paddingVertical: theme.spacing.spacing.lg 
         }}
       >
-        <VStack paddingHorizontal={theme.spacing.spacing.md}>
+        <VStack 
+          space="lg"
+          style={{ 
+            paddingHorizontal: theme.spacing.spacing.md 
+          }}
+        >
           <SavedPricesCarousel 
             prices={prices}
             onPricePress={handlePricePress}

@@ -1,6 +1,7 @@
 // src/components/ui/typography/Heading.tsx
 import React from 'react';
-import { Heading as GluestackHeading } from "@/components/ui/heading";
+import { Text } from '@rneui/themed';
+import { TextStyle, StyleSheet } from 'react-native';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
 
 export interface HeadingProps {
@@ -37,17 +38,6 @@ export const Heading: React.FC<HeadingProps> = ({
 }) => {
   const { theme } = useTheme();
   
-  // Map our variant to GluestackUI size
-  const sizeMap: Record<string, HeadingProps['size']> = {
-    headline1: '5xl',
-    headline2: '3xl',
-    headline3: '2xl',
-    headline4: 'xl',
-  };
-  
-  // Use provided size or map from variant
-  const headingSize = size || sizeMap[variant];
-  
   // Get the text style from theme
   const textStyle = theme.typography.textStyles[variant];
   
@@ -57,25 +47,47 @@ export const Heading: React.FC<HeadingProps> = ({
   // Get text alignment from props or theme
   const textAlign = align || theme.typography.textAlignments.left;
   
+  // Calculate font weight based on bold prop and text style
+  const fontWeight = bold ? '700' : (textStyle.fontWeight as TextStyle['fontWeight']);
+  
+  // Create a style object for the heading
+  const styles = StyleSheet.create({
+    heading: {
+      ...textStyle,
+      color: textColor,
+      textAlign: textAlign as TextStyle['textAlign'],
+      fontWeight: fontWeight,
+      textDecorationLine: underline 
+        ? strikeThrough 
+          ? 'underline line-through' 
+          : 'underline'
+        : strikeThrough 
+          ? 'line-through' 
+          : 'none',
+      fontStyle: italic ? 'italic' : 'normal',
+      backgroundColor: highlight ? theme.colors.primary.light : undefined,
+    }
+  });
+
+  // Get fontSize based on variant
+  const getFontSize = () => {
+    switch(variant) {
+      case 'headline1': return theme.typography.fontSizes.headline1;
+      case 'headline2': return theme.typography.fontSizes.headline2;
+      case 'headline3': return theme.typography.fontSizes.headline3;
+      case 'headline4': return theme.typography.fontSizes.headline4;
+      default: return theme.typography.fontSizes.headline3;
+    }
+  };
+  
   return (
-    <GluestackHeading
-      size={headingSize}
-      bold={bold}
-      isTruncated={isTruncated}
-      underline={underline}
-      strikeThrough={strikeThrough}
-      sub={sub}
-      italic={italic}
-      highlight={highlight}
-      style={[
-        textStyle, 
-        { color: textColor, textAlign }, 
-        style
-      ]}
+    <Text
+      style={[styles.heading, { fontSize: getFontSize() }, style]}
+      numberOfLines={isTruncated ? 1 : undefined}
       {...rest}
     >
       {children}
-    </GluestackHeading>
+    </Text>
   );
 };
 

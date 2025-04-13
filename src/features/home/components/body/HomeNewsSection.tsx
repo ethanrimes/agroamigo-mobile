@@ -1,7 +1,7 @@
 // src/features/home/components/body/HomeNewsSection.tsx
 import React, { useState, useEffect } from 'react';
-import { VStack } from '@/components/ui/vstack';
-import { Box } from '@/components/ui/box';
+import { VStack } from '../../../../components/ui/organization';
+import { Box } from '../../../../components/ui/organization';
 import { Heading } from '../../../../components/ui/typography';
 import { NewsBulletTransition } from '../../../../components/animations';
 import NewsBullet from './NewsBullet';

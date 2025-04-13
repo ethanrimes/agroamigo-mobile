@@ -1,6 +1,6 @@
 // src/features/home/components/header/SearchLocationContainer.tsx
 import React from 'react';
-import { VStack } from '@/components/ui/vstack';
+import { VStack } from '../../../../components/ui/organization';
 import { SearchBar } from '../../../../components/ui/search';
 import { LocationComponent } from '../../../../components/ui/data';
 import { useTheme } from '../../../../theme/providers/ThemeProvider';
