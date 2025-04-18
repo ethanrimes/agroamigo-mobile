@@ -1,10 +1,12 @@
 // src/features/selection/components/SelectionScreen.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SelectionHeader } from './header';
 import { SelectionPageContentSpace, SelectionItem } from './body';
-import { useSelectionData } from '../hooks';
+import SlidingSideDrawer from './SlidingSideDrawer';
+import { useSelectionData } from '../hooks/useSelectionData';
+import { useSelectionFilters } from '../hooks/useSelectionFilters';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
 interface SelectionScreenProps {
@@ -20,8 +22,8 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
 }) => {
   const router = useRouter();
   const { colors } = useTheme();
-  const [filterVisible, setFilterVisible] = useState(false);
   const { data, loading, error } = useSelectionData(type);
+  const { isFilterPaneVisible, openFilters, closeFilters } = useSelectionFilters();
 
   const handleItemPress = (item: SelectionItem) => {
     // Navigate to detail screen based on item type
@@ -34,17 +36,12 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
     }
   };
 
-  const handleFilterPress = () => {
-    setFilterVisible(true);
-    // Here you would implement the logic to show the filter drawer
-  };
-
   return (
     <View className="flex-1 bg-white">
       <SelectionHeader
         title={title}
         location={location}
-        onFilterPress={handleFilterPress}
+        onFilterPress={openFilters}
       />
       
       {loading ? (
@@ -53,7 +50,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
         </View>
       ) : error ? (
         <View className="flex-1 justify-center items-center p-4">
-          <Text className="text-base text-red-500">{error}</Text>
+          <Text className="text-base text-error-default">{error}</Text>
           <Text className="text-base mt-2">
             Por favor, intente nuevamente más tarde.
           </Text>
@@ -64,6 +61,13 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
           onItemPress={handleItemPress}
         />
       )}
+      
+      {/* Side Drawer for Filters */}
+      <SlidingSideDrawer
+        isVisible={isFilterPaneVisible}
+        onClose={closeFilters}
+        screenType={type}
+      />
     </View>
   );
 };
