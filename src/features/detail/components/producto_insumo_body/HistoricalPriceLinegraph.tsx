@@ -1,135 +1,99 @@
-// features/detail/components/producto_insumo_body/HistoricalPriceLinegraph.tsx
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import BaseD3LineGraph from '../../../../components/charts/BaseD3LineGraph';
-import { useTheme } from '../../../../theme/providers/ThemeProvider';
-import { useDetailProductoInsumoData } from '../../hooks/useDetailProductoInsumoData';
-
-const { width: screenWidth } = Dimensions.get('window');
+// src/features/detail/components/producto_insumo_body/HistoricalPriceLinegraph.tsx
+import React, { useState } from 'react';
+import { View, Text, useWindowDimensions } from 'react-native';
+import { useTheme } from '@/src/theme/providers/ThemeProvider';
+import BaseD3LineGraph from '@/src/components/charts/BaseD3LineGraph';
+import GraphButtonWrapper from './GraphButtonWrapper';
+import { LineGraphDataPoint } from '@/src/hooks/useD3';
 
 interface HistoricalPriceLinegraphProps {
-  productId?: string;
-  insumoId?: string;
-  locationId?: string;
-  period?: 'week' | 'month' | 'year' | 'all';
+  data: {
+    date: Date;
+    value: number;
+  }[];
 }
 
-const HistoricalPriceLinegraph: React.FC<HistoricalPriceLinegraphProps> = ({
-  productId,
-  insumoId,
-  locationId,
-  period = 'month',
-}) => {
-  const { colors, spacing, typography } = useTheme();
+const HistoricalPriceLinegraph: React.FC<HistoricalPriceLinegraphProps> = ({ data }) => {
+  const { width } = useWindowDimensions();
+  const { colors, typography } = useTheme();
+  const [period, setPeriod] = useState<'5d' | '1m' | '6m'>('5d');
   
-  // Fetch historical price data using the hook
-  const { historicalPrices, loading, error } = useDetailProductoInsumoData({
-    productId,
-    insumoId,
-    locationId,
-    period,
-  });
-  
-  // Format dates for display
-  const formatDate = (date: Date) => {
-    if (period === 'week') {
-      return date.toLocaleDateString('es-PE', { weekday: 'short' });
-    } else if (period === 'month') {
-      return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
-    } else {
-      return date.toLocaleDateString('es-PE', { month: 'short', year: 'numeric' });
+  // Default dummy data if none provided
+  const getDummyData = (): LineGraphDataPoint[] => {
+    const today = new Date();
+    let daysToGenerate = 0;
+    
+    switch (period) {
+      case '5d':
+        daysToGenerate = 5;
+        break;
+      case '1m':
+        daysToGenerate = 30;
+        break;
+      case '6m':
+        daysToGenerate = 180;
+        break;
     }
+    
+    return Array.from({ length: daysToGenerate }).map((_, i) => {
+      const date = new Date();
+      date.setDate(today.getDate() - (daysToGenerate - i - 1));
+      
+      // Generate some random price data with an upward trend
+      const baseValue = 500;
+      const randomFactor = Math.random() * 100;
+      const trendFactor = i * (10000 / daysToGenerate);
+      const value = baseValue + randomFactor + trendFactor;
+      
+      return { date, value };
+    });
   };
   
-  // Format values with currency
-  const formatPrice = (value: number) => {
-    return `S/ ${value.toFixed(2)}`;
-  };
-
-  // Calculate chart dimensions
-  const chartWidth = screenWidth - spacing.spacing.md * 2;
-  const chartHeight = 250;
-  const chartMargin = { top: 20, right: 20, bottom: 40, left: 50 };
+  const chartData = data || getDummyData();
   
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: colors.text.primary }]}>
-          Precio Histórico
-        </Text>
-        <View style={styles.loadingContainer}>
-          <Text style={{ color: colors.text.secondary }}>Cargando datos...</Text>
-        </View>
-      </View>
-    );
-  }
-  
-  if (error || !historicalPrices || historicalPrices.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: colors.text.primary }]}>
-          Precio Histórico
-        </Text>
-        <View style={styles.errorContainer}>
-          <Text style={{ color: colors.text.secondary }}>
-            No hay datos disponibles para este período.
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: colors.text.primary }]}>
-        Precio Histórico
+    <View className="mb-6">
+      <Text 
+        // style={typography.textStyles.headline4}
+        className="font-semibold mb-4"
+      >
+        Tendencia histórica
       </Text>
-      <BaseD3LineGraph
-        data={historicalPrices}
-        width={chartWidth}
-        height={chartHeight}
-        margin={chartMargin}
-        color={colors.primary.default}
-        showGrid
-        showPoints
-        formatDate={formatDate}
-        formatValue={formatPrice}
-        style={styles.chart}
-      />
+      
+      {/* Line Chart */}
+      <View className="border border-gray-200 rounded-lg p-4 mb-4">
+        <BaseD3LineGraph
+          data={chartData}
+          width={width - 48}
+          height={250}
+          color={colors.action.error}
+          showGrid={true}
+          smoothCurve={true}
+          formatValue={(value) => `$${(value / 1000).toFixed(0)}K`}
+        />
+        
+        {/* Period Selection Buttons */}
+        <View className="flex-row justify-center mt-4">
+          <GraphButtonWrapper 
+            label="5 días" 
+            isActive={period === '5d'} 
+            onPress={() => setPeriod('5d')} 
+          />
+          <GraphButtonWrapper 
+            label="1 mes" 
+            isActive={period === '1m'} 
+            onPress={() => setPeriod('1m')} 
+            className="mx-4"
+          />
+          <GraphButtonWrapper 
+            label="6 meses" 
+            isActive={period === '6m'} 
+            onPress={() => setPeriod('6m')} 
+          />
+        </View>
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 16,
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  chart: {
-    alignSelf: 'center',
-  },
-  loadingContainer: {
-    height: 250,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorContainer: {
-    height: 150,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 export default HistoricalPriceLinegraph;
