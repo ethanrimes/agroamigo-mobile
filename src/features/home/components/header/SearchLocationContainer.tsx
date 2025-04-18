@@ -1,10 +1,10 @@
 // src/features/home/components/header/SearchLocationContainer.tsx
 import React from 'react';
-import { View, Text } from 'react-native';
-import { VStack } from '@/components/ui/vstack';
-import { Box } from '@/components/ui/box';
-import { SearchBar } from '../../../../components/ui/search';
-import { LocationComponent } from '../../../../components/ui/data';
+import { View } from 'react-native';
+import VStack from '@/src/components/ui/organization/VStack';
+import Box from '@/src/components/ui/organization/Box';
+import { SearchBar } from '@/src/components/ui/search';
+import { LocationComponent } from '@/src/components/ui/data';
 
 interface SearchLocationContainerProps {
   location: string;
@@ -17,11 +17,11 @@ const SearchLocationContainer: React.FC<SearchLocationContainerProps> = ({
 }) => {
   return (
     <VStack
-      className="w-full space-y-4" // Changed from space-y-lg to space-y-4 for specific spacing
+      className="w-full space-y-4"
     >
       {/* Narrower SearchBar */}
       <Box className="w-full flex items-center justify-center">
-        <Box className="w-4/5"> {/* SearchBar takes 80% width */}
+        <Box className="w-4/5">
           <SearchBar 
             placeholder="Buscar ..."
             onSubmitEditing={onSearchPress}
@@ -30,7 +30,7 @@ const SearchLocationContainer: React.FC<SearchLocationContainerProps> = ({
       </Box>
       
       {/* Centered LocationComponent */}
-      <Box className="w-full flex items-center justify-center pt-2"> {/* Added pt-2 for extra spacing */}
+      <Box className="w-full flex items-center justify-center pt-2">
         <LocationComponent location={location} />
       </Box>
     </VStack>

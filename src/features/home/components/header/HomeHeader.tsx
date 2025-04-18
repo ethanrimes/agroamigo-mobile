@@ -1,7 +1,8 @@
+// src/features/home/components/header/HomeHeader.tsx
 import React from 'react';
 import { Text } from 'react-native';
-import { Box } from "@/components/ui/box";
-import { VStack } from "@/components/ui/vstack";
+import Box from '@/src/components/ui/organization/Box';
+import VStack from '@/src/components/ui/organization/VStack';
 import { Heading } from "@/components/ui/heading";
 import ThinHeaderStrip from './ThinHeaderStrip';
 import SearchLocationContainer from './SearchLocationContainer';
