@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useFilterStore } from '@/src/store/filterStore';
 
 export const useSelectionFilters = () => {
@@ -31,13 +31,21 @@ export const useSelectionFilters = () => {
     resetFilters();
   }, [resetFilters]);
 
+  // Calculate the total number of applied filters
+  const appliedFiltersCount = useMemo(() => {
+    return Object.values(filters).reduce((count, selectedOptions) => {
+      return count + selectedOptions.length;
+    }, 0);
+  }, [filters]);
+
   return {
     isFilterPaneVisible,
     openFilters,
     closeFilters,
     filters,
     toggleFilter,
-    clearAllFilters
+    clearAllFilters,
+    appliedFiltersCount
   };
 };
 

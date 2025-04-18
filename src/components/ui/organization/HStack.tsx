@@ -16,19 +16,21 @@ const HStack: React.FC<HStackProps> = ({
   style,
   ...props 
 }) => {
-  // Map space values to Gluestack spacing
-  const getSpaceClass = () => {
-    if (!space) return '';
+  // Map your space values to GluestackHStack's expected values
+  const mapSpace = () => {
+    if (!space) return undefined;
     
-    // This will be combined with the provided className
-    return `space-x-${space}`;
+    // Map your xxl to 2xl which GluestackHStack expects
+    if (space === 'xxl') return '2xl';
+    
+    // All other values are the same
+    return space;
   };
-  
-  const combinedClass = `${getSpaceClass()} ${className || ''}`.trim();
   
   return (
     <GluestackHStack 
-      className={combinedClass}
+      className={className || ''}
+      space={mapSpace()} // Use the mapped space value
       style={style}
       {...props}
     >

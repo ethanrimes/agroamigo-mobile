@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
-import SideDrawerHeader from '@/src/features/selection/components/drawer/SideDrawerHeader';
-import SideDrawerContentSpace from '@/src/features/selection/components/drawer/SideDrawerContentSpace';
+import { SideDrawerHeader } from './drawer';
+import { SideDrawerContentSpace } from './drawer';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
 interface SlidingSideDrawerProps {
@@ -14,6 +14,9 @@ interface SlidingSideDrawerProps {
 const { width } = Dimensions.get('window');
 const DRAWER_WIDTH = width * 0.8;
 
+/**
+ * Sliding side drawer component for filters that slides in from the left
+ */
 const SlidingSideDrawer: React.FC<SlidingSideDrawerProps> = ({
   isVisible,
   onClose,
@@ -54,10 +57,12 @@ const SlidingSideDrawer: React.FC<SlidingSideDrawerProps> = ({
     }
   }, [isVisible, translateX, backdropOpacity]);
 
-  if (!isVisible) return null; //  && backdropOpacity._value === 0
+  // Don't render anything if the drawer is fully hidden
+  if (!isVisible) return null;
 
   return (
     <View style={styles.container}>
+      {/* Semi-transparent backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View
           style={[
@@ -70,6 +75,7 @@ const SlidingSideDrawer: React.FC<SlidingSideDrawerProps> = ({
         />
       </TouchableWithoutFeedback>
 
+      {/* Sliding drawer */}
       <Animated.View
         style={[
           styles.drawer,
