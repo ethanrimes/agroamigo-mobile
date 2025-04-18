@@ -1,101 +1,115 @@
 // src/components/ui/typography/Text.tsx
 import React from 'react';
-import { Text } from '@rneui/themed';
-import { TextStyle, StyleSheet } from 'react-native';
-import { useTheme } from '../../../theme/providers/ThemeProvider';
+import { Text as GluestackText } from "@/components/ui/text";
 
 export interface TypographyProps {
-  variant?: 'headline1' | 'headline2' | 'headline3' | 'headline4' | 
-            'body1' | 'body1Medium' | 'body2' | 'body2Medium' | 
-            'body3' | 'body3Medium' | 'body4' | 
-            'caption' | 'button' | 'link' | 'code';
+  variant?: 'headline1' | 'headline2' | 'headline3' | 'headline4' | 'body1' | 'body2' | 'body1Medium' | 'body2Medium' | 'caption';
   color?: string;
   align?: 'left' | 'center' | 'right' | 'justify';
-  children?: React.ReactNode;
+  size?: '4xl' | '3xl' | '2xl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs';
   bold?: boolean;
-  italic?: boolean;
+  isTruncated?: boolean;
   underline?: boolean;
   strikeThrough?: boolean;
-  highlight?: boolean;
-  isTruncated?: boolean;
-  size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
-  style?: object;
   sub?: boolean;
-  className?: string;
+  italic?: boolean;
+  highlight?: boolean;
+  style?: any;
+  children?: React.ReactNode;
+  numberOfLines?: number;
 }
 
 export const Typography: React.FC<TypographyProps> = ({
-  variant = 'body2',
+  variant = 'body1',
   color,
   align,
-  style,
-  children,
+  size,
   bold = false,
-  italic = false,
+  isTruncated = false,
   underline = false,
   strikeThrough = false,
-  highlight = false,
-  isTruncated = false,
-  size,
   sub = false,
-  className,
+  italic = false,
+  highlight = false,
+  style,
+  children,
+  numberOfLines,
   ...rest
 }) => {
-  const { theme } = useTheme();
-  
-  // Get the text style from theme
-  const textStyle = theme.typography.textStyles[variant];
-  
-  // Get text color from props or theme
-  const textColor = color || theme.colors.text.primary;
-  
-  // Get text alignment from props or theme
-  const textAlign = align || theme.typography.textAlignments.left;
-  
-  // Calculate font weight based on bold prop and text style
-  const fontWeight = bold ? '700' : (textStyle.fontWeight as TextStyle['fontWeight']);
-  
-  // Create styles with proper typing
-  const styles = StyleSheet.create({
-    text: {
-      color: textColor,
-      fontFamily: textStyle.fontFamily,
-      fontSize: textStyle.fontSize,
-      lineHeight: textStyle.lineHeight,
-      textAlign: textAlign as TextStyle['textAlign'],
-      fontWeight: fontWeight,
-      textDecorationLine: underline 
-        ? strikeThrough 
-          ? 'underline line-through' 
-          : 'underline'
-        : strikeThrough 
-          ? 'line-through' 
-          : 'none',
-      fontStyle: italic ? 'italic' : 'normal',
-      backgroundColor: highlight ? theme.colors.primary.light : undefined,
-    },
-    subText: {
-      fontSize: textStyle.fontSize * 0.75,
-      lineHeight: (textStyle.lineHeight || 0) * 0.75,
+  // Map variant to size and weight
+  const getPropsFromVariant = () => {
+    switch(variant) {
+      case 'headline1': return { size: '4xl', fontWeight: 'bold' };
+      case 'headline2': return { size: '3xl', fontWeight: 'bold' };
+      case 'headline3': return { size: '2xl', fontWeight: 'bold' };
+      case 'headline4': return { size: 'xl', fontWeight: 'bold' };
+      case 'body1': return { size: 'md', fontWeight: 'normal' };
+      case 'body2': return { size: 'sm', fontWeight: 'normal' };
+      case 'body1Medium': return { size: 'md', fontWeight: 'medium' };
+      case 'body2Medium': return { size: 'sm', fontWeight: 'medium' };
+      case 'caption': return { size: 'xs', fontWeight: 'normal' };
+      default: return { size: 'md', fontWeight: 'normal' };
     }
-  });
+  };
   
-  if (sub) {
-    return (
-      <Text style={[styles.text, style]} numberOfLines={isTruncated ? 1 : undefined} {...rest}>
-        <Text style={styles.subText}>{children}</Text>
-      </Text>
-    );
-  }
+  const variantProps = getPropsFromVariant();
+  
+  // Build the className based on props
+  const getClassNames = () => {
+    const classes = [];
+    
+    // Size
+    const sizeClass = size || variantProps.size;
+    classes.push(`text-${sizeClass}`);
+    
+    // Color
+    if (color) {
+      classes.push(color);
+    }
+    
+    // Alignment
+    if (align) {
+      classes.push(`text-${align}`);
+    }
+    
+    // Font weight
+    if (bold || variantProps.fontWeight === 'bold') {
+      classes.push('font-bold');
+    } else if (variantProps.fontWeight === 'medium') {
+      classes.push('font-medium');
+    }
+    
+    // Text decoration
+    if (underline && strikeThrough) {
+      classes.push('underline line-through');
+    } else if (underline) {
+      classes.push('underline');
+    } else if (strikeThrough) {
+      classes.push('line-through');
+    }
+    
+    // Font style
+    if (italic) {
+      classes.push('italic');
+    }
+    
+    // Background
+    if (highlight) {
+      classes.push('bg-primary-100');
+    }
+    
+    return classes.join(' ');
+  };
   
   return (
-    <Text
-      style={[styles.text, style]}
-      numberOfLines={isTruncated ? 1 : undefined}
+    <GluestackText
+      className={getClassNames()}
+      style={style}
+      numberOfLines={isTruncated ? 1 : numberOfLines}
       {...rest}
     >
       {children}
-    </Text>
+    </GluestackText>
   );
 };
 

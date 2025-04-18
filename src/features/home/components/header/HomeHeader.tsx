@@ -1,11 +1,10 @@
 // src/features/home/components/header/HomeHeader.tsx
 import React from 'react';
-import { VStack } from '../../../../components/ui/organization';
-import { Box } from '../../../../components/ui/organization';
+import { Box } from "@/components/ui/box";
+import { VStack } from "@/components/ui/vstack";
+import { Heading } from "@/components/ui/heading";
 import ThinHeaderStrip from './ThinHeaderStrip';
 import SearchLocationContainer from './SearchLocationContainer';
-import { Heading } from '../../../../components/ui/typography';
-import { useTheme } from '../../../../theme/providers/ThemeProvider';
 
 interface HomeHeaderProps {
   location: string;
@@ -16,29 +15,17 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
   location,
   onSearchPress,
 }) => {
-  const { theme } = useTheme();
-  
   return (
     <Box
-      className="w-full"
-      style={{
-        backgroundColor: theme.colors.primary.default,
-        ...theme.componentShadows.header,
-      }}
+      className="w-full bg-green-shade5 shadow-lg"
     >
       <ThinHeaderStrip />
       <VStack
-        className="w-full"
-        space="md"
-        style={{
-          paddingHorizontal: theme.spacing.screenSpacing.screenMarginHorizontal,
-          paddingVertical: theme.spacing.spacing.md
-        }}
+        className="w-full p-4 space-y-md"
       >
         <Heading
-          variant="headline3"
-          color={theme.colors.neutral.white}
-          align="center"
+          size="2xl"
+          className="text-white text-center"
         >
           Bienvenido
         </Heading>

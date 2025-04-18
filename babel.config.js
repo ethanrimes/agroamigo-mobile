@@ -1,23 +1,27 @@
 module.exports = function(api) {
-    api.cache(true);
-  
-    return {
-      presets: ['babel-preset-expo'],
-      plugins: [
-        // Removed 'nativewind/babel'
-        ['module-resolver', {
-          root: ["./"],
-          alias: {
-            "@": "./",
-            "tailwind.config": "./tailwind.config.js"
-          }
-        }],
-      ],
-      env: {
-        production: {
-          plugins: ['react-native-paper/babel']
+  api.cache(true);
+
+  api.cache(true);
+
+  return {
+    presets: [["babel-preset-expo", {
+      jsxImportSource: "nativewind"
+    }], "nativewind/babel"],
+    plugins: [
+      // Removed 'nativewind/babel'
+      ['module-resolver', {
+        root: ["./"],
+        alias: {
+          "@": "./",
+          "tailwind.config": "./tailwind.config.js"
         }
+      }],
+    ],
+    env: {
+      production: {
+        plugins: ['react-native-paper/babel']
       }
-    };
+    }
   };
+};
   

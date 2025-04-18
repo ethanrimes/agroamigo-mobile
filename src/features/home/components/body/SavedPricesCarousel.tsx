@@ -1,11 +1,10 @@
 // src/features/home/components/body/SavedPricesCarousel.tsx
 import React from 'react';
-import { VStack } from "../../../../components/ui/organization";
-import { Box } from "../../../../components/ui/organization";
-import { Heading } from '../../../../components/ui/typography';
+import { VStack } from "@/components/ui/vstack";
+import { Box } from "@/components/ui/box";
+import { Heading } from '@/components/ui/heading';
 import { CarouselScrolling } from '../../../../components/animations';
 import SavedPriceTile from './SavedPriceTile';
-import { useTheme } from '../../../../theme/providers/ThemeProvider';
 
 interface PriceItem {
   id: string;
@@ -24,28 +23,22 @@ const SavedPricesCarousel: React.FC<SavedPricesCarouselProps> = ({
   prices,
   onPricePress,
 }) => {
-  const { theme } = useTheme();
-  
   return (
     <VStack
-      className="w-full"
-      space="md"
-      style={{
-        paddingHorizontal: theme.spacing.screenSpacing.screenMarginHorizontal
-      }}
+      className="w-full space-y-md px-4"
     >
       <Heading
-        variant="headline4"
-        color={theme.colors.text.primary}
+        size="xl"
+        className="text-typography-900"
       >
         Precios Guardados
       </Heading>
       
-      <Box className="h-130">
+      <Box className="h-[130px]">
         <CarouselScrolling
           autoScroll={true}
           scrollDuration={25000}
-          contentContainerStyle={{ paddingHorizontal: theme.spacing.spacing.xs }}
+          contentContainerStyle={{ paddingHorizontal: 4 }} // xs spacing
         >
           {prices.map((item) => (
             <SavedPriceTile

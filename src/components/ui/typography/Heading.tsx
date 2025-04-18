@@ -1,8 +1,6 @@
 // src/components/ui/typography/Heading.tsx
 import React from 'react';
-import { Text } from '@rneui/themed';
-import { TextStyle, StyleSheet } from 'react-native';
-import { useTheme } from '../../../theme/providers/ThemeProvider';
+import { Heading as GluestackHeading } from "@/components/ui/heading";
 
 export interface HeadingProps {
   variant?: 'headline1' | 'headline2' | 'headline3' | 'headline4';
@@ -17,6 +15,7 @@ export interface HeadingProps {
   italic?: boolean;
   highlight?: boolean;
   style?: any;
+  className?: string;
   children?: React.ReactNode;
 }
 
@@ -24,7 +23,6 @@ export const Heading: React.FC<HeadingProps> = ({
   variant = 'headline3',
   color,
   align,
-  style,
   size,
   bold = false,
   isTruncated = false,
@@ -33,61 +31,90 @@ export const Heading: React.FC<HeadingProps> = ({
   sub = false,
   italic = false,
   highlight = false,
+  style,
+  className = '',
   children,
   ...rest
 }) => {
-  const { theme } = useTheme();
-  
-  // Get the text style from theme
-  const textStyle = theme.typography.textStyles[variant];
-  
-  // Get text color from props or theme
-  const textColor = color || theme.colors.text.primary;
-  
-  // Get text alignment from props or theme
-  const textAlign = align || theme.typography.textAlignments.left;
-  
-  // Calculate font weight based on bold prop and text style
-  const fontWeight = bold ? '700' : (textStyle.fontWeight as TextStyle['fontWeight']);
-  
-  // Create a style object for the heading
-  const styles = StyleSheet.create({
-    heading: {
-      ...textStyle,
-      color: textColor,
-      textAlign: textAlign as TextStyle['textAlign'],
-      fontWeight: fontWeight,
-      textDecorationLine: underline 
-        ? strikeThrough 
-          ? 'underline line-through' 
-          : 'underline'
-        : strikeThrough 
-          ? 'line-through' 
-          : 'none',
-      fontStyle: italic ? 'italic' : 'normal',
-      backgroundColor: highlight ? theme.colors.primary.light : undefined,
-    }
-  });
-
-  // Get fontSize based on variant
-  const getFontSize = () => {
+  // Map variant to size
+  const getSizeFromVariant = () => {
     switch(variant) {
-      case 'headline1': return theme.typography.fontSizes.headline1;
-      case 'headline2': return theme.typography.fontSizes.headline2;
-      case 'headline3': return theme.typography.fontSizes.headline3;
-      case 'headline4': return theme.typography.fontSizes.headline4;
-      default: return theme.typography.fontSizes.headline3;
+      case 'headline1': return '4xl';
+      case 'headline2': return '3xl';
+      case 'headline3': return '2xl';
+      case 'headline4': return 'xl';
+      default: return '2xl';
     }
   };
   
+  // Build the className based on props
+  const getClassNames = () => {
+    const classes = [];
+    
+    // Size
+    const sizeClass = size || getSizeFromVariant();
+    classes.push(`text-${sizeClass}`);
+    
+    // Color
+    if (color) {
+      classes.push(color);
+    }
+    
+    // Alignment
+    if (align) {
+      classes.push(`text-${align}`);
+    }
+    
+    // Font weight
+    if (bold) {
+      classes.push('font-bold');
+    }
+    
+    // Text decoration
+    if (underline && strikeThrough) {
+      classes.push('underline line-through');
+    } else if (underline) {
+      classes.push('underline');
+    } else if (strikeThrough) {
+      classes.push('line-through');
+    }
+    
+    // Font style
+    if (italic) {
+      classes.push('italic');
+    }
+    
+    // Background
+    if (highlight) {
+      classes.push('bg-primary-100');
+    }
+    
+    return classes.join(' ');
+  };
+  
+  // Combine custom classNames with prop-based classes
+  const combinedClassNames = `${getClassNames()} ${className}`;
+  
+  // Only pass valid props to the GluestackHeading component
+  const headingProps = {
+    className: combinedClassNames,
+    style,
+    isTruncated,
+    // Map to supported size (convert from variant if needed)
+    size: size || getSizeFromVariant(),
+    bold,
+    underline,
+    strikeThrough,
+    sub,
+    italic,
+    highlight,
+    ...rest
+  };
+  
   return (
-    <Text
-      style={[styles.heading, { fontSize: getFontSize() }, style]}
-      numberOfLines={isTruncated ? 1 : undefined}
-      {...rest}
-    >
+    <GluestackHeading {...headingProps}>
       {children}
-    </Text>
+    </GluestackHeading>
   );
 };
 

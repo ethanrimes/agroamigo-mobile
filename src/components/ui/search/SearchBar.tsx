@@ -1,8 +1,8 @@
-// src/components/ui/search/SearchBar.tsx
 import React from 'react';
-import { View } from 'react-native';
-import { SearchBar as RNESearchBar } from '@rneui/themed';
-import { useTheme } from '../../../theme/providers/ThemeProvider';
+import { Input } from "@/components/ui/input";
+import { Box } from "@/components/ui/box";
+import { Search } from "lucide-react-native";
+import { View, TextInput } from "react-native";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -17,35 +17,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onChangeText,
   onSubmitEditing,
 }) => {
-  const { theme, rne } = useTheme();
-  
   return (
-    <View style={{ width: '100%' }}>
-      <RNESearchBar
-        placeholder={placeholder}
-        value={value || ''}
-        onChangeText={onChangeText}
-        onSubmitEditing={onSubmitEditing}
-        platform="default"
-        containerStyle={{
-          backgroundColor: 'transparent',
-          borderTopWidth: 0,
-          borderBottomWidth: 0,
-          padding: 0,
-        }}
-        inputContainerStyle={{
-          backgroundColor: theme.colors.background.primary,
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: theme.colors.border.light,
-        }}
-        inputStyle={{
-          fontSize: theme.typography.fontSizes.md,
-          color: theme.colors.text.primary,
-        }}
-        placeholderTextColor={theme.colors.text.tertiary}
-      />
-    </View>
+    <Box className="w-full">
+      <View className="bg-background-50 border border-outline-100 rounded-lg flex-row items-center px-3 py-2">
+        <Search size={10} className="text-typography-500 mr-2" />
+        <TextInput
+          placeholder={placeholder}
+          value={value}
+          onChangeText={onChangeText}
+          onSubmitEditing={onSubmitEditing}
+          className="text-typography-900 text-md flex-1"
+          placeholderTextColor="#a3a3a3" // Adjust this to match your typography-400 color
+        />
+      </View>
+    </Box>
   );
 };
 

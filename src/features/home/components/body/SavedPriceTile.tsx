@@ -1,11 +1,10 @@
 // src/features/home/components/body/SavedPriceTile.tsx
 import React from 'react';
-import { Pressable } from 'react-native';
-import { VStack } from '../../../../components/ui/organization';
-import { Box } from '../../../../components/ui/organization';
-import { Typography } from '../../../../components/ui/typography';
+import { Pressable } from "@/components/ui/pressable";
+import { VStack } from '@/components/ui/vstack';
+import { Box } from '@/components/ui/box';
+import { Text } from '@/components/ui/text';
 import { TrendTicker } from '../../../../components/ui/data';
-import { useTheme } from '../../../../theme/providers/ThemeProvider';
 
 interface SavedPriceTileProps {
   title: string;
@@ -22,35 +21,24 @@ const SavedPriceTile: React.FC<SavedPriceTileProps> = ({
   trendValue,
   onPress,
 }) => {
-  const { theme } = useTheme();
-  
   return (
     <Pressable onPress={onPress}>
       <Box
-        className="w-140 h-120"
-        style={{
-          backgroundColor: theme.colors.secondary.default,
-          // borderRadius: theme.borderRadii.lg,
-          padding: theme.spacing.spacing.md,
-          marginRight: theme.spacing.spacing.md,
-          ...theme.componentShadows.card,
-        }}
+        className="w-[140px] h-[120px] bg-secondary-500 p-md mr-md rounded-lg shadow-md"
       >
         <VStack className="flex-1 justify-between">
-          <Typography
-            variant="body2Medium"
-            color={theme.colors.neutral.white}
+          <Text
+            className="text-white font-medium text-sm"
           >
             {title}
-          </Typography>
+          </Text>
           
-          <VStack space="xs">
-            <Typography
-              variant="headline4"
-              color={theme.colors.neutral.white}
+          <VStack className="space-y-xs">
+            <Text
+              className="text-white font-bold text-xl"
             >
               {price}
-            </Typography>
+            </Text>
             
             <TrendTicker value={trendValue} trend={trend} />
           </VStack>

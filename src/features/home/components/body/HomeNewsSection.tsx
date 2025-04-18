@@ -1,11 +1,10 @@
 // src/features/home/components/body/HomeNewsSection.tsx
 import React, { useState, useEffect } from 'react';
-import { VStack } from '../../../../components/ui/organization';
-import { Box } from '../../../../components/ui/organization';
-import { Heading } from '../../../../components/ui/typography';
+import { VStack } from '@/components/ui/vstack';
+import { Box } from '@/components/ui/box';
+import { Heading } from '@/components/ui/heading';
 import { NewsBulletTransition } from '../../../../components/animations';
 import NewsBullet from './NewsBullet';
-import { useTheme } from '../../../../theme/providers/ThemeProvider';
 
 interface NewsItem {
   id: string;
@@ -19,7 +18,6 @@ interface HomeNewsSectionProps {
 const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
   news,
 }) => {
-  const { theme } = useTheme();
   const [activeNewsIndex, setActiveNewsIndex] = useState(0);
   
   // Rotate through news items
@@ -33,22 +31,17 @@ const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
   
   return (
     <VStack
-      className="w-full"
-      space="md"
-      style={{
-        paddingHorizontal: theme.spacing.screenSpacing.screenMarginHorizontal,
-        marginBottom: theme.spacing.spacing.xl
-      }}
+      className="w-full space-y-md px-4 mb-xl"
     >
       <Heading
-        variant="headline4"
-        color={theme.colors.text.primary}
+        size="xl"
+        className="text-typography-900"
       >
         Noticias
       </Heading>
       
-      <Box className="h-150">
-        <VStack space="md">
+      <Box className="h-[150px]">
+        <VStack className="space-y-md">
           {news.map((item, index) => (
             <NewsBulletTransition
               key={item.id}

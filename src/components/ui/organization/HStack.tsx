@@ -1,68 +1,39 @@
 // src/components/ui/organization/HStack.tsx
 import React from 'react';
-import { View, ViewProps, StyleSheet } from 'react-native';
-import { useTheme } from '../../../theme/providers/ThemeProvider';
+import { HStack as GluestackHStack } from "@/components/ui/hstack";
 
-interface HStackProps extends ViewProps {
+interface HStackProps {
   className?: string;
   children?: React.ReactNode;
   space?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  style?: any;
 }
 
 const HStack: React.FC<HStackProps> = ({ 
-  style, 
-  children, 
   className, 
+  children, 
   space,
+  style,
   ...props 
 }) => {
-  const { theme } = useTheme();
-  
-  // Get spacing value based on the theme
-  const getSpacing = () => {
-    if (!space) return 0;
+  // Map space values to Gluestack spacing
+  const getSpaceClass = () => {
+    if (!space) return '';
     
-    switch (space) {
-      case 'xs': return theme.spacing.spacing.xs;
-      case 'sm': return theme.spacing.spacing.sm;
-      case 'md': return theme.spacing.spacing.md;
-      case 'lg': return theme.spacing.spacing.lg;
-      case 'xl': return theme.spacing.spacing.xl;
-      case 'xxl': return theme.spacing.spacing.xxl;
-      default: return theme.spacing.spacing.md;
-    }
+    // This will be combined with the provided className
+    return `space-x-${space}`;
   };
   
-  // Parse className for basic flexbox styling
-  const getClassNameStyles = (className?: string) => {
-    if (!className) return {};
-    
-    const styles: any = {};
-    
-    if (className.includes('w-full')) styles.width = '100%';
-    if (className.includes('flex-1')) styles.flex = 1;
-    if (className.includes('justify-center')) styles.justifyContent = 'center';
-    if (className.includes('justify-end')) styles.justifyContent = 'flex-end';
-    if (className.includes('justify-between')) styles.justifyContent = 'space-between';
-    if (className.includes('items-center')) styles.alignItems = 'center';
-    
-    return styles;
-  };
-
-  const dynamicStyles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      gap: getSpacing(),
-    },
-  });
-
+  const combinedClass = `${getSpaceClass()} ${className || ''}`.trim();
+  
   return (
-    <View 
-      style={[dynamicStyles.container, getClassNameStyles(className), style]} 
+    <GluestackHStack 
+      className={combinedClass}
+      style={style}
       {...props}
     >
       {children}
-    </View>
+    </GluestackHStack>
   );
 };
 
