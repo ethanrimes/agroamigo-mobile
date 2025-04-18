@@ -1,63 +1,63 @@
+// d3.ts
+
 // Adapter for D3.js to provide consistent theming for data visualizations
 import { colors, typography, spacing } from '../base';
 
 // Create a D3 theme adapter with color schemes and visualization settings
-export const createD3Theme = (isDark: boolean = false) => {
-  const themeColors = isDark ? colors.dark : colors.light;
-  
+export const createD3Theme = () => {
   // Define color scales and palettes for different chart types
   return {
     // Base colors for the theme
     colors: {
       // Primary chart colors (for main data series)
       primary: [
-        themeColors.primary.default,
-        themeColors.primary.light,
-        themeColors.primary.dark,
-        themeColors.shades.shade3,
-        themeColors.shades.shade4,
+        colors.primary.default,
+        colors.primary.light,
+        colors.primary.dark,
+        colors.shades.shade3,
+        colors.shades.shade4,
       ],
       
       // Secondary color scheme (for secondary data series)
       secondary: [
-        themeColors.secondary.default,
-        themeColors.secondary.light,
-        themeColors.secondary.dark,
+        colors.secondary.default,
+        colors.secondary.light,
+        colors.secondary.dark,
       ],
       
       // Accent colors (for highlighting specific data points)
       accent: [
-        themeColors.info.default,
-        themeColors.info.light,
-        themeColors.info.dark,
+        colors.info.default,
+        colors.info.light,
+        colors.info.dark,
       ],
       
       // Categorical colors (for nominal data categories)
       categorical: [
-        themeColors.primary.default,
-        themeColors.info.default,
-        themeColors.action.success,
-        themeColors.action.warning,
-        themeColors.action.error,
-        themeColors.secondary.default,
-        themeColors.shades.shade1,
-        themeColors.tints.tint2,
+        colors.primary.default,
+        colors.info.default,
+        colors.action.success,
+        colors.action.warning,
+        colors.action.error,
+        colors.secondary.default,
+        colors.shades.shade1,
+        colors.tints.tint2,
       ],
       
       // Sequential color schemes (for continuous data)
       sequential: {
         // Green sequential scale
         green: [
-          themeColors.tints.tint5,
-          themeColors.tints.tint4,
-          themeColors.tints.tint3,
-          themeColors.tints.tint2,
-          themeColors.tints.tint1,
-          themeColors.primary.default,
-          themeColors.primary.light,
-          themeColors.primary.dark,
-          themeColors.shades.shade4,
-          themeColors.shades.shade5,
+          colors.tints.tint5,
+          colors.tints.tint4,
+          colors.tints.tint3,
+          colors.tints.tint2,
+          colors.tints.tint1,
+          colors.primary.default,
+          colors.primary.light,
+          colors.primary.dark,
+          colors.shades.shade4,
+          colors.shades.shade5,
         ],
         
         // Blue sequential scale
@@ -67,7 +67,7 @@ export const createD3Theme = (isDark: boolean = false) => {
           '#90CAF9',
           '#64B5F6',
           '#42A5F5',
-          themeColors.info.default,
+          colors.info.default,
           '#1E88E5',
           '#1976D2',
           '#1565C0',
@@ -84,7 +84,7 @@ export const createD3Theme = (isDark: boolean = false) => {
           '#F44336',
           '#EF5350',
           '#FFCDD2',
-          isDark ? '#424242' : '#EEEEEE',
+          '#EEEEEE',
           '#C8E6C9',
           '#81C784',
           '#4CAF50',
@@ -99,7 +99,7 @@ export const createD3Theme = (isDark: boolean = false) => {
           '#42A5F5',
           '#90CAF9',
           '#BBDEFB',
-          isDark ? '#424242' : '#EEEEEE',
+          '#EEEEEE',
           '#FFE0B2',
           '#FFCC80',
           '#FFA726',
@@ -123,10 +123,10 @@ export const createD3Theme = (isDark: boolean = false) => {
       ],
       
       // Background, text and grid colors
-      background: themeColors.background.primary,
-      text: themeColors.text.primary,
-      grid: isDark ? themeColors.border.light : themeColors.border.default,
-      axis: isDark ? themeColors.text.tertiary : themeColors.text.secondary,
+      background: colors.background.primary,
+      text: colors.text.primary,
+      grid: colors.border.default,
+      axis: colors.text.secondary,
     },
     
     // Chart margin configurations
@@ -157,37 +157,37 @@ export const createD3Theme = (isDark: boolean = false) => {
       title: {
         fontSize: typography.fontSizes.headline4,
         fontWeight: typography.fontWeights.semiBold,
-        color: themeColors.text.primary,
+        color: colors.text.primary,
       },
       subtitle: {
         fontSize: typography.fontSizes.body1,
         fontWeight: typography.fontWeights.medium,
-        color: themeColors.text.secondary,
+        color: colors.text.secondary,
       },
       axisLabel: {
         fontSize: typography.fontSizes.body2,
         fontWeight: typography.fontWeights.medium,
-        color: themeColors.text.secondary,
+        color: colors.text.secondary,
       },
       axisTickLabel: {
         fontSize: typography.fontSizes.body3,
         fontWeight: typography.fontWeights.regular,
-        color: themeColors.text.tertiary,
+        color: colors.text.tertiary,
       },
       legend: {
         fontSize: typography.fontSizes.body3,
         fontWeight: typography.fontWeights.regular,
-        color: themeColors.text.secondary,
+        color: colors.text.secondary,
       },
       tooltip: {
         fontSize: typography.fontSizes.body3,
         fontWeight: typography.fontWeights.medium,
-        color: themeColors.text.primary,
+        color: colors.text.primary,
       },
       annotation: {
         fontSize: typography.fontSizes.body4,
         fontWeight: typography.fontWeights.medium,
-        color: themeColors.text.secondary,
+        color: colors.text.secondary,
       },
     },
     
@@ -262,8 +262,8 @@ export const createD3Theme = (isDark: boolean = false) => {
       
       // Tooltip settings
       tooltip: {
-        background: isDark ? themeColors.background.secondary : themeColors.neutral.white,
-        borderColor: themeColors.border.default,
+        background: colors.neutral.white,
+        borderColor: colors.border.default,
         borderWidth: 1,
         borderRadius: 4,
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -273,47 +273,42 @@ export const createD3Theme = (isDark: boolean = false) => {
   };
 };
 
-// Export themes for light and dark mode
-export const d3LightTheme = createD3Theme(false);
-export const d3DarkTheme = createD3Theme(true);
+// Export theme
+export const d3Theme = createD3Theme();
 
 // Helper functions for D3
 export const d3Helpers = {
   // Function to get categorical color scale
-  getCategoricalColorScale: (isDark = false, domain: any[] = []) => {
-    const theme = isDark ? d3DarkTheme : d3LightTheme;
+  getCategoricalColorScale: (domain: any[] = []) => {
     return {
       domain,
-      range: theme.colors.categorical,
+      range: d3Theme.colors.categorical,
     };
   },
   
   // Function to create a sequential color scale
-  getSequentialColorScale: (isDark = false, type = 'green', domainMin = 0, domainMax = 100) => {
-    const theme = isDark ? d3DarkTheme : d3LightTheme;
+  getSequentialColorScale: (type = 'green', domainMin = 0, domainMax = 100) => {
     return {
       domain: [domainMin, domainMax],
-      range: theme.colors.sequential[type as keyof typeof theme.colors.sequential],
+      range: d3Theme.colors.sequential[type as keyof typeof d3Theme.colors.sequential],
     };
   },
   
   // Function to create a diverging color scale
-  getDivergingColorScale: (isDark = false, type = 'redToGreen', domainMin = -100, domainMid = 0, domainMax = 100) => {
-    const theme = isDark ? d3DarkTheme : d3LightTheme;
+  getDivergingColorScale: (type = 'redToGreen', domainMin = -100, domainMid = 0, domainMax = 100) => {
     return {
       domain: [domainMin, domainMid, domainMax],
-      range: theme.colors.diverging[type as keyof typeof theme.colors.diverging],
+      range: d3Theme.colors.diverging[type as keyof typeof d3Theme.colors.diverging],
     };
   },
   
   // Function to apply theme typography to chart elements
-  applyChartTypography: (selection: any, type: string, isDark = false) => {
-    const theme = isDark ? d3DarkTheme : d3LightTheme;
-    const typo = theme.typography[type as keyof typeof theme.typography];
+  applyChartTypography: (selection: any, type: string) => {
+    const typo = d3Theme.typography[type as keyof typeof d3Theme.typography];
     
     if (selection && typo) {
       selection
-        .style('font-family', theme.typography.fontFamily);
+        .style('font-family', d3Theme.typography.fontFamily);
       
       // Check if typo has the expected properties before accessing them
       if (typeof typo === 'object' && 'fontSize' in typo) {
@@ -333,14 +328,12 @@ export const d3Helpers = {
   },
   
   // Function to get chart margins
-  getChartMargins: (size = 'medium', isDark = false) => {
-    const theme = isDark ? d3DarkTheme : d3LightTheme;
-    return theme.margins[size as keyof typeof theme.margins];
+  getChartMargins: (size = 'medium') => {
+    return d3Theme.margins[size as keyof typeof d3Theme.margins];
   },
 };
 
 export default {
-  light: d3LightTheme,
-  dark: d3DarkTheme,
+  d3Theme,
   helpers: d3Helpers,
 };

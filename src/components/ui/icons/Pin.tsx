@@ -23,9 +23,9 @@ export const Pin: React.FC<PinProps> = ({
   return (
     <MapPin 
       size={size} 
-    //   strokeWidth={2}
-    //   stroke={iconColor}
-    //   style={style}
+      strokeWidth={2}
+      color={iconColor}
+      style={style}
     />
   );
 };

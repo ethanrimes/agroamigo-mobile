@@ -1,9 +1,8 @@
 // src/components/ui/navigation/TabNavigator.tsx
 import React from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, Text } from 'react-native';
 import { Home, Leaf, ShoppingBag, Globe } from 'lucide-react-native';
 import { useRouter, usePathname } from 'expo-router';
-import { Typography } from '../typography';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
 
 interface TabIconProps {
@@ -76,6 +75,11 @@ export const TabNavigator: React.FC = () => {
     tabButton: {
       alignItems: 'center',
       padding: 4,
+    },
+    tabLabel: {
+      fontSize: 12,
+      marginTop: 2,
+      fontWeight: '500',
     }
   });
 
@@ -99,16 +103,18 @@ export const TabNavigator: React.FC = () => {
                   : theme.colors.text.tertiary
               }
             />
-            <Typography
-              variant="body4"
-              color={
-                active
-                  ? theme.colors.primary.default
-                  : theme.colors.text.tertiary
-              }
+            <Text
+              style={[
+                styles.tabLabel,
+                { 
+                  color: active
+                    ? theme.colors.primary.default
+                    : theme.colors.text.tertiary
+                }
+              ]}
             >
               {tab.label}
-            </Typography>
+            </Text>
           </Pressable>
         );
       })}

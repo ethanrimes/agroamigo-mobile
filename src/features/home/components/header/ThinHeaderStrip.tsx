@@ -7,7 +7,7 @@ import { Logo } from '../../../../components/ui/icons';
 const ThinHeaderStrip: React.FC = () => {
   return (
     <Box
-      className="w-full bg-secondary-500 px-4 py-xs"
+      className="w-full bg-green-shade6 px-4 py-xs"
     >
       <HStack className="w-full justify-end">
         <Logo size="small" />

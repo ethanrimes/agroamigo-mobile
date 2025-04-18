@@ -1,8 +1,7 @@
 // src/components/ui/data/TrendTicker.tsx
 import React from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { ChevronUp, ChevronDown } from 'lucide-react-native';
-import { Typography } from '../typography';
 import { useTheme } from '../../../theme/providers/ThemeProvider';
 
 interface TrendTickerProps {
@@ -52,12 +51,15 @@ export const TrendTicker: React.FC<TrendTickerProps> = ({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
       {getTrendIcon()}
-      <Typography
-        variant="body3Medium"
-        color={getTrendColor()}
+      <Text
+        style={{
+          color: getTrendColor(),
+          fontSize: 14,
+          fontWeight: '500'
+        }}
       >
         {getPrefix()}{value}
-      </Typography>
+      </Text>
     </View>
   );
 };

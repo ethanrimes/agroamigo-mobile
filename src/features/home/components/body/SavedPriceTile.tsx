@@ -24,7 +24,7 @@ const SavedPriceTile: React.FC<SavedPriceTileProps> = ({
   return (
     <Pressable onPress={onPress}>
       <Box
-        className="w-[140px] h-[120px] bg-secondary-500 p-md mr-md rounded-lg shadow-md"
+        className="w-[140px] h-[120px] bg-secondary-default p-md mr-md rounded-lg shadow-md"
       >
         <VStack className="flex-1 justify-between">
           <Text

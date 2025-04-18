@@ -1,23 +1,27 @@
 // app/(tabs)/_layout.tsx
 import React from 'react';
-import { View } from 'react-native';
-import { Tabs } from 'expo-router';
-import { TabNavigator } from '../../src/components/ui/navigation';
+import { View, StyleSheet } from 'react-native';
+import { Slot } from 'expo-router';
+import TabNavigator from '@/src/components/ui/navigation/TabNavigator';
 
 export default function TabsLayout() {
   return (
-    <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-        }}
-        tabBar={() => <TabNavigator />}
-      >
-        <Tabs.Screen name="index" />
-        <Tabs.Screen name="(productos)" />
-        <Tabs.Screen name="(mercados)" />
-        <Tabs.Screen name="(insumos)" />
-      </Tabs>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Slot />
+      </View>
+      <TabNavigator />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  content: {
+    flex: 1,
+  }
+});

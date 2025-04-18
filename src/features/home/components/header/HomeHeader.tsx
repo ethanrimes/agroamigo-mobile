@@ -1,5 +1,5 @@
-// src/features/home/components/header/HomeHeader.tsx
 import React from 'react';
+import { Text } from 'react-native';
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import { Heading } from "@/components/ui/heading";
@@ -21,18 +21,24 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     >
       <ThinHeaderStrip />
       <VStack
-        className="w-full p-4 space-y-md"
+        className="w-full p-6 space-y-8"
       >
-        <Heading
-          size="2xl"
-          className="text-white text-center"
-        >
-          Bienvenido
-        </Heading>
-        <SearchLocationContainer
-          location={location}
-          onSearchPress={onSearchPress}
-        />
+        {/* Make sure Heading properly wraps text */}
+        <Box className="items-center justify-center pt-6 pb-2">
+          <Heading
+            size="2xl"
+            className="text-white text-center"
+          >
+            Bienvenido
+          </Heading>
+        </Box>
+        
+        <Box className="pt-4">
+          <SearchLocationContainer
+            location={location}
+            onSearchPress={onSearchPress}
+          />
+        </Box>
       </VStack>
     </Box>
   );

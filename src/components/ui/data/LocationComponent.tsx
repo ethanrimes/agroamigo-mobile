@@ -1,29 +1,23 @@
 // src/components/ui/data/LocationComponent.tsx
 import React from 'react';
-import { View } from 'react-native';
-import { Pin } from '../icons';
-import { Typography } from '../typography';
-import { useTheme } from '../../../theme/providers/ThemeProvider';
+import { View, Text } from 'react-native';
+import { HStack } from '@/components/ui/hstack';
+import { MapPin } from 'lucide-react-native';
 
 interface LocationComponentProps {
   location: string;
 }
 
-export const LocationComponent: React.FC<LocationComponentProps> = ({
-  location
+export const LocationComponent: React.FC<LocationComponentProps> = ({ 
+  location 
 }) => {
-  const { theme } = useTheme();
-  
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      <Pin size={20} color={theme.colors.primary.default} />
-      <Typography 
-        variant="body2" 
-        color={theme.colors.text.secondary}
-      >
+    <HStack className="items-center justify-center space-x-2 py-1">
+      <MapPin size={18} color="#FFFFFF" />
+      <Text className="text-white text-base">
         {location}
-      </Typography>
-    </View>
+      </Text>
+    </HStack>
   );
 };
 
