@@ -32,7 +32,7 @@ const CurrentPriceDetail: React.FC<CurrentPriceDetailProps> = ({ data, type }) =
         {/* Product/Input Icon */}
         <View className="w-12 h-12 justify-center items-center rounded-full bg-white">
           <Image 
-            source={data.icon || require('@/src/assets/icons/default.png')} 
+            source={data.icon} 
             style={{ width: 32, height: 32 }}
           />
         </View>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Slot } from 'expo-router';
-import TabNavigator from '@/src/components/ui/navigation/TabNavigator';
+import TabNavigator from '@/src/components/navigation/TabNavigator';
 
 export default function TabsLayout() {
   return (

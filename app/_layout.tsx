@@ -3,8 +3,8 @@ import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ThemeProvider } from '../src/theme/providers/ThemeProvider';
-import { Navigator } from '../src/components/ui/navigation/Navigator';
+import { ThemeProvider } from '@/src/theme/providers/ThemeProvider';
+import { Navigator } from '@/src/components/navigation/Navigator';
 
 export default function RootLayout() {
   return (

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useRouter, usePathname } from 'expo-router';
-import { useNavigationContext } from '../../components/ui/navigation/Navigator';
+import { useNavigationContext } from '../../components/navigation/Navigator';
 
 /**
  * NavigationService provides methods for navigating between screens
