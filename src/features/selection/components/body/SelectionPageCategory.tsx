@@ -6,6 +6,7 @@ import CategoryHeader from './CategoryHeader';
 import SubCategoryHeader from './SubCategoryHeader';
 import SelectionListItem from './SelectionListItem';
 import CategoryIcon, { CategoryIconName } from '@/src/components/ui/icons/CategoryIcon';
+
 interface SubCategory {
   id: string;
   title: string;

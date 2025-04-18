@@ -9,8 +9,8 @@ interface SelectionListItemProps {
   title: string;
   subtitle?: string;
   price: string;
-  trend: 'up' | 'down' | 'neutral'; // Changed to match TrendTicker's expected values
-  trendValue?: string; // Added new prop for the trend value
+  trend: 'up' | 'down' | 'stable'; // Matches what's used in your data model
+  trendValue?: string;
   onPress?: () => void;
 }
 
@@ -22,24 +22,23 @@ const SelectionListItem: React.FC<SelectionListItemProps> = ({
   trendValue = "", // Default empty string if not provided
   onPress,
 }) => {
+  // Convert trend to the format expected by TrendTicker
+  const trendForTicker = trend === 'stable' ? 'neutral' : trend;
+
   return (
     <Pressable onPress={onPress}>
-      <Box className="w-full border-b border-neutral-silver py-3 px-4">
+      <Box className="p-4 border-b border-neutral-silver">
         <HStack className="justify-between items-center">
           <Box className="flex-1">
             <Text className="text-base font-medium text-neutral-black">{title}</Text>
             {subtitle && (
-              <Text className="text-sm text-neutral-grey">
-                {subtitle}
-              </Text>
+              <Text className="text-sm text-neutral-darkGrey mt-1">{subtitle}</Text>
             )}
           </Box>
           
-          <HStack className="items-center space-x-2">
-            <Text className="text-base font-medium text-neutral-black">
-              {price}
-            </Text>
-            <TrendTicker value={trendValue} trend={trend} />
+          <HStack className="space-x-4 items-center">
+            <Text className="text-base font-medium text-neutral-black">{price}</Text>
+            <TrendTicker trend={trendForTicker} value={trendValue} />
           </HStack>
         </HStack>
       </Box>
