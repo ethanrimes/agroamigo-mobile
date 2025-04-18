@@ -9,8 +9,9 @@ import {
   shadows 
 } from '../base';
 
-// Import other theme adapters (keep these)
-import { rneTheme, d3Theme } from '../adapters';
+// Import other theme adapters
+import { rneTheme } from '../adapters';
+import { svgTheme } from '../adapters/react-native-svg';
 import { ThemeProvider as RNEThemeProvider } from '@rneui/themed';
 
 // Define Theme interface
@@ -31,8 +32,8 @@ interface ThemeContextType {
   theme: Theme;
   // Library-specific themes
   rne: typeof rneTheme;
-  d3: typeof d3Theme;
-  d3Helpers: typeof d3Theme.helpers;
+  svg: typeof svgTheme;
+  svgHelpers: typeof svgTheme.helpers;
   // Base theme elements for direct access
   colors: typeof colors;
   typography: typeof typography;
@@ -65,8 +66,8 @@ const baseTheme: Theme = {
 const ThemeContext = createContext<ThemeContextType>({
   theme: baseTheme,
   rne: rneTheme,
-  d3: d3Theme,
-  d3Helpers: d3Theme.helpers,
+  svg: svgTheme,
+  svgHelpers: svgTheme.helpers,
   colors,
   typography,
   spacing,
@@ -101,8 +102,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const contextValue: ThemeContextType = {
     theme: baseTheme,
     rne: rneTheme,
-    d3: d3Theme,
-    d3Helpers: d3Theme.helpers,
+    svg: svgTheme,
+    svgHelpers: svgTheme.helpers,
     // Add direct access to base theme elements
     colors,
     typography,

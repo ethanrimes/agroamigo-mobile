@@ -1,15 +1,13 @@
-// Export all theme adapters from a single entry point
+// theme/adapters/index.ts
 import rneTheme from './react-native-elements';
-import d3Theme from './d3';
+import svgTheme from './react-native-svg';
 
-// Export individual theme adapters
-export { 
+export {
   rneTheme,
-  d3Theme,
+  svgTheme
 };
 
-// Export combined adapters object
 export default {
-  rne: rneTheme,
-  d3: d3Theme,
+  rneTheme,
+  svgTheme
 };
