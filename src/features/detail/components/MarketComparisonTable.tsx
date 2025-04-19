@@ -57,7 +57,7 @@ const MarketComparisonTable: React.FC<MarketComparisonTableProps> = ({
 
   return (
     <View className="flex-1 bg-background-primary">
-      <View style={{ paddingHorizontal: spacing.md }}>
+      <View style={{ paddingHorizontal: spacing.spacing.sm }}>
         {/* Table Column Headers */}
         <MarketComparisonTableColumnTitles 
           marketNames={[marketData.name, marketData.priceComparison.referenceMarket]} 

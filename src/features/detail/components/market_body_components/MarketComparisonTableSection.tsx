@@ -1,8 +1,9 @@
 // src/features/detail/components/market_body_components/MarketComparisonTableSection.tsx
 import React, { useState, useMemo } from 'react';
 import { View } from 'react-native';
-import MarketComparisonMajorCategoryHeader from '@/src/features/detail/components/market_body_components/MarketComparisonMajorcategoryHeader';
-import MarketComparisonSubcategoryHeader from '@/src/features/detail/components/market_body_components/MarketCo';
+// Fix the import to have consistent casing
+import MarketTableMajorCategoryHeader from './MarketTableMajorCategoryHeader';
+import MarketComparisonSubcategoryHeader from './MarketComparisonSubcategoryHeader';
 import MarketComparisonTableEntry from './MarketComparisonTableEntry';
 import TableVerMas from './TableVerMas';
 import TableExpanding from '@/src/components/animations/TableExpanding';
@@ -58,7 +59,7 @@ const MarketComparisonTableSection: React.FC<MarketComparisonTableSectionProps> 
   return (
     <View className="mb-4">
       {/* Major Category Header */}
-      <MarketComparisonMajorCategoryHeader 
+      <MarketTableMajorCategoryHeader 
         title={categoryName} 
         diffPercentage={calculateTotalDifference} 
       />

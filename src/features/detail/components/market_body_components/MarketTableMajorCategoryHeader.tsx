@@ -1,15 +1,15 @@
-// src/features/detail/components/market_body_components/MarketComparisonMajorCategoryHeader.tsx
+// src/features/detail/components/market_body_components/MarketTableMajorCategoryHeader.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import HStack from '@/src/components/ui/organization/HStack';
 
-interface MarketComparisonMajorCategoryHeaderProps {
+interface MarketTableMajorCategoryHeaderProps {
   title: string;
   diffPercentage: string;
 }
 
-const MarketComparisonMajorCategoryHeader: React.FC<MarketComparisonMajorCategoryHeaderProps> = ({
+const MarketTableMajorCategoryHeader: React.FC<MarketTableMajorCategoryHeaderProps> = ({
   title,
   diffPercentage
 }) => {
@@ -51,4 +51,4 @@ const MarketComparisonMajorCategoryHeader: React.FC<MarketComparisonMajorCategor
   );
 };
 
-export default MarketComparisonMajorCategoryHeader;
+export default MarketTableMajorCategoryHeader;

@@ -49,7 +49,7 @@ const MarketComparisonTableColumnTitles: React.FC<MarketComparisonTableColumnTit
         {/* Difference Column */}
         <View style={{ flex: 1 }} className="items-center">
           <Text 
-            style={typography.textStyles.body3Medium}
+            // style={typography.textStyles.body3Medium}
             className="text-text-primary"
           >
             Diferencia

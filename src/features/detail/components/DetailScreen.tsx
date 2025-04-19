@@ -6,7 +6,7 @@ import { useDetailProductoInsumoData } from '../hooks/useDetailProductoInsumoDat
 import { useMarketData } from '../hooks/useMarketData';
 import DetailPageHeader from './header/DetailPageHeader';
 import ProductoInsumoContent from './ProductoInsumoContent';
-import MarketComparisonTable from './MarketComparisonTable';
+import MarketComparisonTable from './MarketComparisonTable'; // Import MarketComparisonTable
 
 interface DetailScreenProps {
   id: string;
@@ -42,15 +42,23 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ id, type }) => {
       
       {/* Body Content */}
       <ScrollView className="flex-1">
-        {isMarket ? (
-          // Market comparison table
-          <MarketComparisonTable marketData={marketData} />
-        ) : (
+        {isMarket && marketData ? (
+          // Market specific content - only render if marketData exists
+          <View className="flex-1 p-4">
+            <MarketComparisonTable marketData={marketData} />
+          </View>
+        ) : !isMarket ? (
           // Producto or Insumo content
           <ProductoInsumoContent 
             data={data}
             type={type}
           />
+        ) : (
+          // Fallback if marketData is null but isMarket is true
+          // This should not happen due to the earlier check but TypeScript needs it
+          <View className="flex-1 justify-center items-center">
+            <Text>Error loading market data</Text>
+          </View>
         )}
       </ScrollView>
     </View>
