@@ -1,11 +1,12 @@
 // src/features/detail/components/DetailScreen.tsx
 import React from 'react';
-import { View, ScrollView, Text } from 'react-native'; // Added Text import
+import { View, ScrollView, Text } from 'react-native';
 import { useRouterNavigation } from '@/src/hooks';
 import { useDetailProductoInsumoData } from '../hooks/useDetailProductoInsumoData';
 import { useMarketData } from '../hooks/useMarketData';
 import DetailPageHeader from './header/DetailPageHeader';
 import ProductoInsumoContent from './ProductoInsumoContent';
+import MarketComparisonTable from './MarketComparisonTable';
 
 interface DetailScreenProps {
   id: string;
@@ -42,10 +43,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ id, type }) => {
       {/* Body Content */}
       <ScrollView className="flex-1">
         {isMarket ? (
-          // Market specific content will be implemented later
-          <View className="flex-1 p-4">
-            {/* Market comparison table will go here */}
-          </View>
+          // Market comparison table
+          <MarketComparisonTable marketData={marketData} />
         ) : (
           // Producto or Insumo content
           <ProductoInsumoContent 
