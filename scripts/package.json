@@ -1,0 +1,26 @@
+{
+    "name": "agro-amigo-db-scripts",
+    "version": "1.0.0",
+    "description": "Database setup scripts for Agro Amigo application",
+    "main": "index.js",
+    "scripts": {
+      "build": "tsc",
+      "create-tables": "ts-node setup-db/createTables.ts",
+      "import-data": "ts-node setup-db/importData.ts",
+      "setup-db": "ts-node setup-db/index.ts",
+      "setup-db:drop": "ts-node setup-db/index.ts --drop",
+      "create-tables:drop": "ts-node setup-db/createTables.ts --drop"
+    },
+    "dependencies": {
+      "@supabase/supabase-js": "^2.39.3",
+      "csv-parse": "^5.5.3",
+      "dotenv": "^16.4.1",
+      "fs": "^0.0.1-security",
+      "path": "^0.12.7"
+    },
+    "devDependencies": {
+      "@types/node": "^20.11.16",
+      "ts-node": "^10.9.2",
+      "typescript": "^5.3.3"
+    }
+  }
