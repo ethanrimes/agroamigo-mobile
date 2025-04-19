@@ -1,7 +1,7 @@
 // src/components/ui/search/SearchBar.tsx
 import React from 'react';
 import { View, TextInput } from "react-native";
-import Box from "@/src/components/ui/organization/Box";
+import Box from "@/src/components/ui/layout/Box";
 import { Search } from "lucide-react-native";
 
 interface SearchBarProps {

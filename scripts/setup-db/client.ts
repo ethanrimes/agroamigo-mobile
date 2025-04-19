@@ -9,7 +9,30 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
 // Load environment variables from .env file
-dotenv.config();
+// Load environment variables from .env file in project root
+// In client.ts, modify the dotenv config:
+import path from 'path';
+
+// Get the directory structure
+const scriptDir = __dirname;
+const projectRoot = path.resolve(scriptDir, '..');
+
+// Load environment variables from different possible locations
+console.log('Trying to load environment variables from:', path.join(projectRoot, '.env'));
+dotenv.config({ path: path.join(projectRoot, '.env') });
+
+// If still undefined, try other locations
+if (!process.env.SUPABASE_URL) {
+  console.log('Trying root directory...');
+  dotenv.config({ path: path.join(__dirname, '../../.env') });
+}
+
+// If still undefined, try the scripts directory itself
+if (!process.env.SUPABASE_URL) {
+  console.log('Trying scripts directory...');
+  dotenv.config();
+}
+
 
 // Try to get the Supabase URL and key from environment variables
 const supabaseUrl = process.env.SUPABASE_URL;

@@ -1,6 +1,6 @@
 // app/(tabs)/index.tsx
 import React from 'react';
-import { HomeScreen } from '../../src/features/home';
+import { HomeScreen } from '../../src/features/home/screens';
 import { SafeAreaView } from 'react-native';
 import { useTheme } from '../../src/theme/providers/ThemeProvider';
 

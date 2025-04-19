@@ -1,8 +1,8 @@
 // src/features/selection/components/body/CategoryHeader.tsx
 import React from 'react';
 import { Text, View } from 'react-native';
-import HStack from '@/src/components/ui/organization/HStack';
-import Box from '@/src/components/ui/organization/Box';
+import HStack from '@/src/components/ui/layout/HStack';
+import Box from '@/src/components/ui/layout/Box';
 import CategoryIcon, { CategoryIconName } from '@/src/components/ui/icons/CategoryIcon';
 
 interface CategoryHeaderProps {

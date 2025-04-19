@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { AlignJustify } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import Box from '@/src/components/ui/organization/Box';
+import Box from '@/src/components/ui/layout/Box';
 
 interface CitySelectorProps {
   currentCity: string;

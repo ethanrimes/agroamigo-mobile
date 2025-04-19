@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import HStack from '@/src/components/ui/organization/HStack';
+import HStack from '@/src/components/ui/layout/HStack';
 import BackButtonWrapper from '@/src/features/selection/components/drawer/BackButtonWrapper';
 import Divider from '@/src/components/ui/layout/Separator';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';

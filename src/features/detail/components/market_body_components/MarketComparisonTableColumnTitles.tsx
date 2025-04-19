@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import HStack from '@/src/components/ui/organization/HStack';
+import HStack from '@/src/components/ui/layout/HStack';
 
 interface MarketComparisonTableColumnTitlesProps {
   marketNames: string[];

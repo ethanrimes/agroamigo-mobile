@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, Pressable } from 'react-native';
 import { FilterElement } from './index';
 import { useSelectionFilters } from '../../hooks/useSelectionFilters';
-import VStack from '@/src/components/ui/organization/VStack';
-import HStack from '@/src/components/ui/organization/HStack';
+import VStack from '@/src/components/ui/layout/VStack';
+import HStack from '@/src/components/ui/layout/HStack';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { FilterOption } from '@/src/components/ui/filter';
 

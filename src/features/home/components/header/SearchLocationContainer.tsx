@@ -1,8 +1,8 @@
 // src/features/home/components/header/SearchLocationContainer.tsx
 import React from 'react';
 import { View } from 'react-native';
-import VStack from '@/src/components/ui/organization/VStack';
-import Box from '@/src/components/ui/organization/Box';
+import VStack from '@/src/components/ui/layout/VStack';
+import Box from '@/src/components/ui/layout/Box';
 import { SearchBar } from '@/src/components/ui/search';
 import { LocationComponent } from '@/src/components/ui/data';
 

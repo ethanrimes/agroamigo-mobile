@@ -1,5 +1,5 @@
 import { TableSchema, TableStatus } from './types';
-import { supabase, createTable, dropTable } from './utils';
+import { supabase, createTable, dropTable, initializeClient } from './utils';
 
 // Define all table schemas
 const tableSchemas: TableSchema[] = [
@@ -228,9 +228,22 @@ const tableSchemas: TableSchema[] = [
  * Create all tables
  */
 export const createAllTables = async (dropExisting: boolean = false): Promise<TableStatus[]> => {
-  console.log('Creating tables...');
-  
-  const results: TableStatus[] = [];
+    console.log('Creating tables...');
+    
+    // Initialize the client first
+    console.log('Initializing Supabase client...');
+    const initialized = await initializeClient();
+    
+    if (!initialized) {
+      console.error('Failed to initialize Supabase client. Aborting.');
+      return tableSchemas.map(schema => ({
+        name: schema.name,
+        created: false,
+        error: 'Failed to initialize Supabase client'
+      }));
+    }
+    
+    const results: TableStatus[] = [];
   
   // Create tables in order (respecting dependencies)
   for (const schema of tableSchemas) {

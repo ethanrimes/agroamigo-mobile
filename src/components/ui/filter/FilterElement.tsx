@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { ChevronDown, ChevronUp, Check } from 'lucide-react-native';
-import VStack from '@/src/components/ui/organization/VStack';
-import HStack from '@/src/components/ui/organization/HStack';
+import VStack from '@/src/components/ui/layout/VStack';
+import HStack from '@/src/components/ui/layout/HStack';
 import Divider from '@/src/components/ui/layout/Separator';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 

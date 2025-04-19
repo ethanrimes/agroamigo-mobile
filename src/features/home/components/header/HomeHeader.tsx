@@ -1,48 +1,70 @@
 // src/features/home/components/header/HomeHeader.tsx
-import React from 'react';
-import { Text } from 'react-native';
-import Box from '@/src/components/ui/organization/Box';
-import VStack from '@/src/components/ui/organization/VStack';
-import { Heading } from "@/components/ui/heading";
-import ThinHeaderStrip from './ThinHeaderStrip';
-import SearchLocationContainer from './SearchLocationContainer';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '@/src/theme/providers/ThemeProvider';
+import SearchBar from '@/src/components/ui/search/SearchBar';
+import VStack from '@/src/components/ui/layout/VStack';
 
-interface HomeHeaderProps {
-  location: string;
-  onSearchPress?: () => void;
-}
-
-const HomeHeader: React.FC<HomeHeaderProps> = ({
-  location,
-  onSearchPress,
-}) => {
+const HomeHeader: React.FC = () => {
+  const { theme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+  };
+  
+  const handleSubmitSearch = () => {
+    // Handle search submission logic here
+    console.log('Search submitted:', searchQuery);
+  };
+  
   return (
-    <Box
-      className="w-full bg-green-shade5 shadow-lg"
-    >
-      <ThinHeaderStrip />
-      <VStack
-        className="w-full p-6 space-y-8"
-      >
-        {/* Make sure Heading properly wraps text */}
-        <Box className="items-center justify-center pt-6 pb-2">
-          <Heading
-            size="2xl"
-            className="text-white text-center"
-          >
+    <View style={styles.container}>
+      <VStack className="space-y-4">
+        <View style={styles.welcomeContainer}>
+          <Text style={[
+            styles.welcomeTitle, 
+            { color: theme.colors.text.primary, textAlign: 'center' }
+          ]}>
             Bienvenido
-          </Heading>
-        </Box>
+          </Text>
+          <Text style={[
+            styles.welcomeSubtitle, 
+            { color: theme.colors.text.secondary, textAlign: 'center' }
+          ]}>
+            Los precios al día a la mano
+          </Text>
+        </View>
         
-        <Box className="pt-4">
-          <SearchLocationContainer
-            location={location}
-            onSearchPress={onSearchPress}
-          />
-        </Box>
+        <SearchBar 
+          placeholder="Buscar ..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+          onSubmitEditing={handleSubmitSearch}
+        />
       </VStack>
-    </Box>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  welcomeContainer: {
+    marginBottom: 16,
+    alignItems: 'center', // Center the content horizontally
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+  },
+});
 
 export default HomeHeader;

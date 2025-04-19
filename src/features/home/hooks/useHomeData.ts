@@ -1,156 +1,168 @@
 // src/features/home/hooks/useHomeData.ts
 import { useState, useEffect } from 'react';
-import { useQuery } from '../../../hooks';
 
-// Types
-interface PriceItem {
-  id: string;
-  title: string;
-  price: string;
+// Define types for our data models
+interface PriceObservation {
+  dailyPriceObsId: number;
+  minPrice: number;
+  maxPrice: number;
+  artiId: number;
+  SubcategoryId: number;
+  MajorCategoryId: number;
+  fuenId: number;
+  CodMunicipio: number;
+  CodDepartamento: number;
+  PresentationId: number;
+  UnitsId: number;
+}
+
+interface Product {
+  artiId: number;
+  artiNombre: string;
+  keystring: string;
+  MajorCategoryId: number;
+  SubcategoryId: number;
+  icon: string;
+}
+
+// Combined type for the UI
+interface SavedPriceItem {
+  artiId: number;
+  artiNombre: string;
+  minPrice: number;
+  maxPrice: number;
+  icon: string;
   trend: 'up' | 'down' | 'neutral';
   trendValue: string;
+  origin?: string;
 }
 
-interface NewsItem {
-  id: string;
-  text: string;
-}
+export const useHomeData = () => {
+  const [savedPrices, setSavedPrices] = useState<SavedPriceItem[]>([]);
+  const [featuredPriceData, setFeaturedPriceData] = useState<SavedPriceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-interface HomeData {
-  prices: PriceItem[];
-  news: NewsItem[];
-  location: string;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-// Mock data (replace with actual API calls)
-const MOCK_PRICES: PriceItem[] = [
-  {
-    id: '1',
-    title: 'Café',
-    price: '$4.25',
-    trend: 'down',
-    trendValue: 'XX',
-  },
-  {
-    id: '2',
-    title: 'Manzana',
-    price: '$2.10',
-    trend: 'up',
-    trendValue: 'XX',
-  },
-  {
-    id: '3',
-    title: 'Banano',
-    price: '$1.50',
-    trend: 'down',
-    trendValue: 'XX',
-  },
-  {
-    id: '4',
-    title: 'Tomate',
-    price: '$2.80',
-    trend: 'up',
-    trendValue: 'XX',
-  },
-  {
-    id: '5',
-    title: 'Naranja',
-    price: '$1.75',
-    trend: 'neutral',
-    trendValue: 'XX',
-  },
-];
-
-// Expanded news items to 9 entries
-const MOCK_NEWS: NewsItem[] = [
-  {
-    id: '1',
-    text: 'Evento 1: Feria agrícola en el parque central',
-  },
-  {
-    id: '2',
-    text: 'Evento 2: Nuevos subsidios para agricultores',
-  },
-  {
-    id: '3',
-    text: 'Evento 3: Exportaciones de café aumentan un 15%',
-  },
-  {
-    id: '4',
-    text: 'Evento 4: Capacitación gratuita en técnicas de cultivo',
-  },
-  {
-    id: '5',
-    text: 'Evento 5: Mercado campesino este fin de semana',
-  },
-  {
-    id: '6',
-    text: 'Evento 6: Pronóstico de lluvias favorece cosechas',
-  },
-  {
-    id: '7',
-    text: 'Evento 7: Nueva tecnología para el monitoreo de cultivos',
-  },
-  {
-    id: '8',
-    text: 'Evento 8: Precios del maíz se estabilizan',
-  },
-  {
-    id: '9',
-    text: 'Evento 9: Inauguración del centro de distribución agrícola',
-  },
-];
-
-export const useHomeData = (): HomeData => {
-  const [location, setLocation] = useState('Medellín, Antioquia');
-  
-  // Fetch saved prices from API
-  const { 
-    data: pricesData,
-    isLoading: isPricesLoading,
-    error: pricesError
-  } = useQuery('savedPrices', async () => {
-    // Simulate API call
-    return new Promise<PriceItem[]>((resolve) => {
-      setTimeout(() => {
-        resolve(MOCK_PRICES);
-      }, 500);
-    });
-  });
-  
-  // Fetch news from API
-  const {
-    data: newsData,
-    isLoading: isNewsLoading,
-    error: newsError
-  } = useQuery('news', async () => {
-    // Simulate API call
-    return new Promise<NewsItem[]>((resolve) => {
-      setTimeout(() => {
-        resolve(MOCK_NEWS);
-      }, 700);
-    });
-  });
-  
-  // Fetch user location
   useEffect(() => {
-    // Simulate getting location from device or user preferences
-    const fetchLocation = async () => {
-      // In a real app, this would use geolocation or user settings
-      setLocation('Medellín, Antioquia');
+    // In a real app, this would be an API call
+    // For now, we'll use dummy data
+    const fetchHomeData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Mock data for saved prices
+        const mockSavedPrices: SavedPriceItem[] = [
+          {
+            artiId: 1,
+            artiNombre: 'Tomate',
+            minPrice: 2500,
+            maxPrice: 3500,
+            icon: 'cherry',
+            trend: 'down',
+            trendValue: '10%',
+          },
+          {
+            artiId: 2,
+            artiNombre: 'Cebolla',
+            minPrice: 1800,
+            maxPrice: 2200,
+            icon: 'potato',
+            trend: 'up',
+            trendValue: '5%',
+          },
+          {
+            artiId: 3,
+            artiNombre: 'Zanahoria',
+            minPrice: 1200,
+            maxPrice: 1500,
+            icon: 'carrot',
+            trend: 'down',
+            trendValue: '3%',
+          },
+          {
+            artiId: 4,
+            artiNombre: 'Papa',
+            minPrice: 1000,
+            maxPrice: 1300,
+            icon: 'potato',
+            trend: 'up',
+            trendValue: '8%',
+          },
+          {
+            artiId: 5,
+            artiNombre: 'Manzana',
+            minPrice: 3000,
+            maxPrice: 4500,
+            icon: 'apple',
+            trend: 'down',
+            trendValue: '15%',
+            origin: 'Importada',
+          },
+          {
+            artiId: 6,
+            artiNombre: 'Pescado',
+            minPrice: 12000,
+            maxPrice: 15000,
+            icon: 'fish',
+            trend: 'neutral',
+            trendValue: '0%',
+          },
+        ];
+        
+        // Mock data for featured prices
+        const mockFeaturedPrices: SavedPriceItem[] = [
+          {
+            artiId: 5,
+            artiNombre: 'Manzana',
+            minPrice: 3000,
+            maxPrice: 4500,
+            icon: 'apple',
+            trend: 'down',
+            trendValue: '15%',
+            origin: 'Importada',
+          },
+          {
+            artiId: 7,
+            artiNombre: 'Banana',
+            minPrice: 2000,
+            maxPrice: 2800,
+            icon: 'banana',
+            trend: 'up',
+            trendValue: '7%',
+            origin: 'Importada',
+          },
+          {
+            artiId: 8,
+            artiNombre: 'Carne',
+            minPrice: 18000,
+            maxPrice: 25000,
+            icon: 'beef',
+            trend: 'down',
+            trendValue: '3%',
+          },
+        ];
+        
+        setSavedPrices(mockSavedPrices);
+        setFeaturedPriceData(mockFeaturedPrices);
+        setIsLoading(false);
+      } catch (err) {
+        setError('Error fetching home data');
+        setIsLoading(false);
+        console.error('Error fetching home data:', err);
+      }
     };
     
-    fetchLocation();
+    fetchHomeData();
   }, []);
   
   return {
-    prices: pricesData || [],
-    news: newsData || [],
-    location,
-    isLoading: isPricesLoading || isNewsLoading,
-    error: pricesError || newsError,
+    savedPrices,
+    featuredPriceData,
+    isLoading,
+    error,
   };
 };
 

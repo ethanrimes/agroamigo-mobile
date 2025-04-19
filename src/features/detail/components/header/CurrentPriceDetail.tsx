@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import HStack from '@/src/components/ui/organization/HStack';
+import HStack from '@/src/components/ui/layout/HStack';
 
 interface CurrentPriceDetailProps {
   data: any;

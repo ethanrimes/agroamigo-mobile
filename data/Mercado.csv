@@ -1,0 +1,141 @@
+﻿Departamento,CodDepartamento,Municipio,CodMunicipio,fuenId,Mercado
+Antioquia,5,El Carmen de Viboral,5148,59,El Carmen de Viboral
+Antioquia,5,El Santuario,5697,67,El Santuario
+Antioquia,5,La Ceja,5376,60,La Ceja
+Antioquia,5,La Unión,5400,61,La Unión
+Antioquia,5,Marinilla,5440,62,Marinilla
+Antioquia,5,Medellín,5001,56,Central Mayorista de Antioquia (CMA)
+Antioquia,5,Medellín,5001,57,"Plaza Minorista ""José María Villa"""
+Antioquia,5,Peñol,5541,63,Peñol
+Antioquia,5,Rionegro,5615,64,Rionegro
+Antioquia,5,San Vicente,5674,65,San Vicente
+Antioquia,5,Santa Bárbara,5679,66,Santa Bárbara
+Antioquia,5,Sonsón,5756,68,Sonsón
+Antioquia,5,Yolombó,5890,1694,Yolombó
+Arauca,81,Arauca,81001,1989,Arauca
+Atlántico,8,Barranquilla,8001,71,Barranquillita
+Atlántico,8,Barranquilla,8001,70,Granabastos
+Atlántico,8,Barranquilla,8001,1722,Inversiones Lache
+Atlántico,8,Barranquilla,8001,1720,Molino El Litoral
+Atlántico,8,Malambo,8433,1753,Carnes y Carnes
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,7209,Carnes Barrio María Paz
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,6,Frigorífico Ble Ltda.
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,5,Frigorífico Guadalupe
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,2,Paloquemao
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,3,Plaza España
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,4,Plaza Las Flores
+"Bogotá, D. C.",11,"Bogotá, D. C.",11001,1,Corabastos
+Bolívar,13,Cartagena,13001,7,Bazurto
+Bolívar,13,Magangué,13430,1279,Arrocera Cauca
+Bolívar,13,Magangué,13430,910,Arrocera La Candelaria de los Rios
+Bolívar,13,Magangué,13430,1278,Arrocera Magdalena
+Bolívar,13,Magangué,13430,911,Comercializadora el Sur Ltda.
+Bolívar,13,Magangué,13430,912,Molino Serviagro
+Boyacá,15,Chiquinquirá,15176,10,Chiquinquirá
+Boyacá,15,Duitama,15238,11,Mercaplaza
+Boyacá,15,Moniquirá,15469,105,Moniquirá
+Boyacá,15,Santana,15686,106,Santana
+Boyacá,15,Tibasosa,15806,12,Coomproriente
+Boyacá,15,Tunja,15001,9,Complejo de Servicios del Sur
+Caldas,17,Manizales,17001,13,Centro Galerías
+Caquetá,18,Florencia,18001,1990,Florencia
+Casanare,85,Acacías,50006,892,Sociedad Arrocera Ltda.
+Casanare,85,Aguazul,85010,1913,Agroindustrial Molino Sonora AP S.A.S
+Casanare,85,Aguazul,85010,882,Arrocera la Esmeralda S.A.S.
+Casanare,85,Aguazul,85010,881,Grandelca S.A.
+Casanare,85,Villanueva,85440,885,Organización Roa Flor Huila S.A
+Casanare,85,Yopal,85001,1695,Yopal (Otro)
+Casanare,85,Yopal,85001,886,Arroz Barichara S.A.S.
+Casanare,85,Yopal,85001,887,Diana Corporación S.A.S
+Casanare,85,Yopal,85001,4199,Granos y Cereales de Colombia S. A.
+Casanare,85,Yopal,85001,888,Molinos Casanare Ltda.
+Casanare,85,Yopal,85001,889,Molinos El Yopal Ltda.
+Cauca,19,Popayán,19001,15,Plaza de Mercado del Barrio Bolívar
+Cesar,20,Valledupar,20001,913,Arrocera de Victor Guerra y Compañía
+Cesar,20,Valledupar,20001,6785,Industria Molinera del Oriente
+Cesar,20,Valledupar,20001,915,La Malena
+Cesar,20,Valledupar,20001,16,Mercabastos
+Cesar,20,Valledupar,20001,17,Mercado Nuevo
+Córdoba,23,Montería,23001,5728,Arrocera El Pilon
+Córdoba,23,Montería,23001,19,Mercado del Sur
+Córdoba,23,Montería,23001,940,Molino Nutibara
+Córdoba,23,Planeta Rica,23555,942,Maragro Ltda.
+Córdoba,23,Sahagún,23660,943,Arrocera Sahagun
+Córdoba,23,Sahagún,23660,944,Industria Arrocera Arropalmira
+Córdoba,23,San Bernardo del Viento,23675,945,Arrocera El Niño
+Córdoba,23,San Bernardo del Viento,23675,947,Arrocera San Jose
+Córdoba,23,San Bernardo del Viento,23675,948,Arrocera Tres Estrellas
+Cundinamarca,25,Caparrapí,25148,107,Caparrapí
+Cundinamarca,25,Nocaima,25491,108,Nocaima
+Cundinamarca,25,Villeta,25875,109,Villeta
+Huila,41,Campoalegre,41132,918,Molino Flor Huila S.A.
+Huila,41,Campoalegre,41132,917,Molino San Isidro del Huila Ltda.
+Huila,41,Neiva,41001,920,Molino Roa S.A.
+Huila,41,Neiva,41001,22,Surabastos
+Huila,41,Rivera,41615,921,Diana Corporación S.A.S
+Magdalena,47,Santa Marta,47001,1836,Santa Marta
+Meta,50,Granada,50313,953,Organización Roa Flor Huila S.A.
+Meta,50,San Martín,50689,894,Diana Corporación S.A.S
+Meta,50,San Martín,50689,895,Molino San Martin S.A.
+Meta,50,Villavicencio,50001,896,Agrocom Ltda.
+Meta,50,Villavicencio,50001,23,Central de Abastos de Villavicencio (CAV)
+Meta,50,Villavicencio,50001,898,Indupaddy S.A.
+Meta,50,Villavicencio,50001,6309,Molino Pacandé
+Meta,50,Villavicencio,50001,901,Organización Roa Flor Huila S.A.
+Nariño,52,Ancuya,52036,1455,Ancuya
+Nariño,52,Consacá,52207,1486,Consacá
+Nariño,52,Ipiales,52356,1693,Centro de Acopio
+Nariño,52,Ipiales,52356,25,Ipiales Somos Todos
+Nariño,52,La Unión,5400,248,La Unión
+Nariño,52,Pasto,52001,24,El Potrerillo
+Nariño,52,Sandoná,52683,1748,Sandoná
+Nariño,52,Túquerres,52838,784,Túquerres
+Norte de Santander,54,Cúcuta,54001,7004,Arrocera Agua Clara
+Norte de Santander,54,Cúcuta,54001,905,Arrocera Gelvez
+Norte de Santander,54,Cúcuta,54001,906,Arrocera San Valentín
+Norte de Santander,54,Cúcuta,54001,26,Cenabastos
+Norte de Santander,54,Cúcuta,54001,908,Cooagronorte Ltda.
+Norte de Santander,54,Cúcuta,54001,907,Inveragro San Andres S.A.S
+Norte de Santander,54,Cúcuta,54001,1274,La Nueva Sexta
+Norte de Santander,54,Pamplona,54518,27,Pamplona
+Quindío,63,Armenia,63001,29,Mercar
+Quindío,63,Armenia,63001,30,Retiro
+Risaralda,66,Pereira,66001,33,La 41
+Risaralda,66,Pereira,66001,32,Mercasa
+Santander,68,Bucaramanga,68001,949,Arrocera El Dorado
+Santander,68,Bucaramanga,68001,950,Arrocera El Libertador y Molino Comun
+Santander,68,Bucaramanga,68001,36,Centroabastos
+Santander,68,Bucaramanga,68001,38,Frigoríficos
+Santander,68,Bucaramanga,68001,37,Mercados del centro
+Santander,68,Charalá,68167,110,Charalá
+Santander,68,Güepsa,68327,115,Güepsa
+Santander,68,San Gil,68679,39,San Gil
+Santander,68,San Gil,68679,112,Panela
+Santander,68,Socorro,68755,40,Socorro
+Santander,68,Vélez,68861,114,Vélez
+Sucre,70,San Marcos,70708,916,Arrocera Formosa
+Sucre,70,Sincelejo,70001,41,Nuevo Mercado
+Tolima,73,Alvarado,73026,922,La Guaira
+Tolima,73,Espinal,73268,1277,Diana Corporación S.A.S
+Tolima,73,Espinal,73268,7224,Fedearroz
+Tolima,73,Espinal,73268,924,Inversiones Molino Pacande S.A.S.
+Tolima,73,Espinal,73268,1545,Organización Roa Florhuila S.A.
+Tolima,73,Espinal,73268,926,Unión de Arroceros
+Tolima,73,Ibagué,73001,931,Inversiones Molino Pacande S.A.S.
+Tolima,73,Ibagué,73001,930,Molino Federal
+Tolima,73,Ibagué,73001,1660,Organización Roa Florhuila S.A.
+Tolima,73,Ibagué,73001,43,Plaza La 21
+Tolima,73,Ibagué,73001,928,Proarroz
+Tolima,73,Ibagué,73001,929,Union de Arroceros
+Tolima,73,Purificación,73585,933,Agroindustrial Molino Sonora S.A.S.
+Tolima,73,Mariquita,73443,6307,Mariquita
+Tolima,73,Venadillo,73861,935,Arrocera Boluga Ltda.
+Valle del Cauca,76,Buenaventura,76109,52,Buenaventura
+Valle del Cauca,76,Cali,76001,47,Cavasa
+Valle del Cauca,76,Cali,76001,51,Galería Alameda
+Valle del Cauca,76,Cali,76001,49,La Floresta
+Valle del Cauca,76,Cali,76001,48,Santa Elena
+Valle del Cauca,76,Cali,76001,50,Siloé
+Valle del Cauca,76,Cartago,76147,53,Cartago
+Valle del Cauca,76,Palmira,76520,54,Palmira
+Valle del Cauca,76,Tuluá,76834,55,Tuluá

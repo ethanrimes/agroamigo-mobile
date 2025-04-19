@@ -5,9 +5,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { TableSchema } from './types';
 
 // Import the supabase client from your existing project
-import { supabase } from '../../src/services/supabase/db';
+import { supabase, initializeClient } from './client';
 
-export { supabase };
+// Initialize the Supabase client
+export { supabase, initializeClient };
 
 /**
  * Read data from a CSV file

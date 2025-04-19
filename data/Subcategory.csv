@@ -1,0 +1,25 @@
+﻿Subcategory,SubcategoryId,MajorCategoryId
+Hortalizas,1,1
+Cebollas,2,1
+Leguminosas,3,1
+Tomates,4,1
+Zanahorias,5,1
+Otras hortalizas y verduras,6,1
+Cítricos,7,2
+Otras frutas,8,2
+Papa,9,3
+Plátano,10,3
+Yuca,11,3
+Otros tuberculos,12,3
+Cereales,13,4
+Granos,14,4
+Otros procesados,15,5
+Lácteos,16,6
+Huevos,17,6
+Carne de res,18,7
+Carne de cerdo,19,7
+Carne de pollo,20,7
+Frescos y congelados,21,8
+Panela,22,5
+Aceites y grasas,23,5
+Azúcar,24,5

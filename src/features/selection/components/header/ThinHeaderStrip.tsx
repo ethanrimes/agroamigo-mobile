@@ -1,7 +1,7 @@
 // src/features/selection/components/header/ThinHeaderStrip.tsx
 import React from 'react';
-import HStack from '@/src/components/ui/organization/HStack';
-import Box from '@/src/components/ui/organization/Box';
+import HStack from '@/src/components/ui/layout/HStack';
+import Box from '@/src/components/ui/layout/Box';
 import { Logo } from '@/src/components/ui/icons';
 import FilterButton from './FilterButton';
 

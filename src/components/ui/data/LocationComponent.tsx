@@ -1,7 +1,7 @@
 // src/components/ui/data/LocationComponent.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
-import HStack from '@/src/components/ui/organization/HStack';
+import HStack from '@/src/components/ui/layout/HStack';
 import { MapPin } from 'lucide-react-native';
 
 interface LocationComponentProps {
