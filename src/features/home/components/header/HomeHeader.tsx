@@ -1,21 +1,26 @@
 // src/features/home/components/header/HomeHeader.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import SearchBar from '@/src/components/ui/search/SearchBar';
 import VStack from '@/src/components/ui/layout/VStack';
+import SearchableDropdown from '@/src/features/shared/searchableDropdown';
 
 const HomeHeader: React.FC = () => {
   const { theme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
   
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-  };
-  
-  const handleSubmitSearch = () => {
-    // Handle search submission logic here
-    console.log('Search submitted:', searchQuery);
+  // Handle selection from the search dropdown
+  const handleSearchItemSelect = (item: any, type: string) => {
+    // Example implementation - can be customized based on requirements
+    const itemName = type === 'producto' 
+      ? item.artiNombre 
+      : type === 'mercado' 
+        ? item.Mercado 
+        : 'Selected item';
+    
+    Alert.alert('Item Selected', `You selected ${itemName} (${type})`);
+    
+    // Here you would typically navigate to a details screen
+    // or perform some other action based on the selected item
   };
   
   return (
@@ -36,12 +41,14 @@ const HomeHeader: React.FC = () => {
           </Text>
         </View>
         
-        <SearchBar 
-          placeholder="Buscar ..."
-          value={searchQuery}
-          onChangeText={handleSearch}
-          onSubmitEditing={handleSubmitSearch}
-        />
+        {/* Replace SearchBar with SearchableDropdown */}
+        <View style={styles.searchContainer}>
+          <SearchableDropdown 
+            placeholder="Buscar productos, mercados..."
+            onItemSelect={handleSearchItemSelect}
+            dataTypeOrder="producto-mercado"
+          />
+        </View>
       </VStack>
     </View>
   );
@@ -64,6 +71,10 @@ const styles = StyleSheet.create({
   },
   welcomeSubtitle: {
     fontSize: 16,
+  },
+  searchContainer: {
+    width: '100%',
+    zIndex: 1000, // Ensure dropdown appears above other elements
   },
 });
 
