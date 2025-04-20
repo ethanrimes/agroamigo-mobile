@@ -16,7 +16,7 @@ interface SearchableSelectedDisplayProps {
   initialSelectedType?: string;
   buttonVariant?: 'solid' | 'outline' | 'link';
   buttonSize?: 'xs' | 'sm' | 'md' | 'lg';
-  enableSnapshotModal?: boolean; // Added this prop
+  enableSnapshotModal?: boolean;
 }
 
 const SearchableSelectedDisplay: React.FC<SearchableSelectedDisplayProps> = ({
@@ -26,8 +26,8 @@ const SearchableSelectedDisplay: React.FC<SearchableSelectedDisplayProps> = ({
   initialSelectedItem = null,
   initialSelectedType = '',
   buttonVariant = 'outline',
-  buttonSize = 'md',
-  enableSnapshotModal = false, // Added with default value
+  buttonSize = 'sm', // Changed from 'md' to 'sm' to reduce size
+  enableSnapshotModal = false,
 }) => {
   const { theme, colors, spacing, borders } = useTheme();
   const dropdownRef = useRef<View>(null);
@@ -93,7 +93,7 @@ const SearchableSelectedDisplay: React.FC<SearchableSelectedDisplayProps> = ({
         >
           <ButtonText>{getDisplayText()}</ButtonText>
           <View style={styles.buttonIconContainer}>
-            <ButtonIcon as={Feather}  /> 
+            <ButtonIcon as={Feather} />
             {selectedItem && (
               <TouchableWithoutFeedback onPress={(e) => {
                 e.stopPropagation();
@@ -101,8 +101,7 @@ const SearchableSelectedDisplay: React.FC<SearchableSelectedDisplayProps> = ({
               }}>
                 <View style={styles.clearButtonContainer}>
                   <ButtonIcon 
-                    as={Feather} 
-                    // name="x" 
+                    as={Feather}
                     size="sm" 
                   />
                 </View>
@@ -120,7 +119,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   container: {
     position: 'relative',
     zIndex: 1000,
-    width: '100%',
+    width: '90%', // Reduced from 100% to 90%
+    alignSelf: 'center',
   },
   overlay: {
     position: 'absolute',
@@ -139,13 +139,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     borderColor: theme.colors.border.light,
     backgroundColor: theme.colors.background.primary,
+    paddingVertical: 8, // Added to make button slightly smaller
   },
   buttonIconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   clearButtonContainer: {
-    marginLeft: theme.spacing.sm,
+    marginLeft: theme.spacing.xs,
     padding: theme.spacing.xs,
     borderRadius: theme.borders.borderRadii.round,
     backgroundColor: theme.colors.background.muted,

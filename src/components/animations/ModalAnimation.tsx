@@ -30,8 +30,8 @@ const ModalAnimation: React.FC<ModalAnimationProps> = ({
   visible,
   onClose,
   children,
-  width = '75%' as `${number}%`,
-  height = '75%' as `${number}%`,
+  width = '80%' as `${number}%`,  // Increased from 75% to 80%
+  height = '80%' as `${number}%`, // Increased from 75% to 80%
   backdropOpacity = 0.5,
 }) => {
   const { colors, spacing, borders, shadows } = useTheme();

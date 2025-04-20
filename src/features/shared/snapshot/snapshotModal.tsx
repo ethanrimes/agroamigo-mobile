@@ -1,12 +1,11 @@
 // src/features/shared/snapshot/snapshotModal.tsx
 import React, { useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, StyleSheet } from 'react-native';
 import ModalAnimation from '@/src/components/animations/ModalAnimation';
 import { useSnapshotStore } from '@/src/store/snapshotStore';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
-// Import specific snapshot modals
+// Import specific snapshot modals - using the updated ProductoSnapshot
 import ProductoSnapshot from './modals/productoSnapshot';
 import MercadoSnapshot from './modals/mercadoSnapshot';
 // import InsumoSnapshot from './modals/insumoSnapshot';
@@ -58,11 +57,10 @@ const SnapshotModal: React.FC = () => {
       <ModalAnimation
         visible={isVisible}
         onClose={closeModal}
-        width="75%"
-        height="75%"
+        width="80%" // Increased from 75% to 80%
+        height="80%" // Increased from 75% to 80%
       >
         <View style={styles.modalContent}>
-          {/* The close button is now handled inside each component */}
           {renderContent()}
         </View>
       </ModalAnimation>

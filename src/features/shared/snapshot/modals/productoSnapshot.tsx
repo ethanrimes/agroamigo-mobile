@@ -59,7 +59,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   
   // Format price display - Fixed by adding type for price parameter
   const formatPrice = (price: number) => {
-    return `$${price.toLocaleString('es-CO')}`;
+    return `${price.toLocaleString('es-CO')}`;
   };
   
   // Handlers for button actions
@@ -85,7 +85,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
         <View style={styles.titleContainer}>
           <Feather 
             name={productData.iconName as any || "shopping-bag"} 
-            size={36} 
+            size={32} 
             color={colors.text.primary} 
           />
           <Text style={styles.title}>{productData.name}</Text>
@@ -111,32 +111,25 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
       
       {/* Graph showing price trend - simplified height */}
       <View style={styles.graphContainer}>
-        <Text style={styles.graphTitle}>Precios de Mayorista - Productos Primera Calidad</Text>
+        <Text style={styles.graphTitle}>Tendencia Mes</Text>
         <TrendGraph 
           data={memoizedGraphData}
           title="" // Remove title as we have one above
+          showAxis={true} // Remove axes and tick marks
         />
       </View>
       
-      {/* Price information */}
-      <View style={styles.dataContainer}>
-        {/* Maximum price row without trend ticker */}
-        <View style={styles.priceRow}>
-          <Text style={styles.priceLabelText}>Máximo:</Text>
-          <Text style={styles.priceValue}>{formatPrice(productData.maxPrice)}</Text>
-        </View>
-        
-        {/* Minimum price row */}
-        <View style={styles.priceRow}>
-          <Text style={styles.priceLabelText}>Mínimo:</Text>
-          <Text style={styles.priceValue}>{formatPrice(productData.minPrice)}</Text>
-        </View>
-        
-        {/* Additional info (unit, date) - stacked vertically */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.unitText}>/ bulto {productData.unit}</Text>
-          <Text style={styles.dateText}>{productData.date}</Text>
-        </View>
+      {/* Consolidated price display */}
+      <View style={styles.priceContainer}>
+        <Text style={styles.priceValue}>
+          {formatPrice(productData.minPrice)} - {formatPrice(productData.maxPrice)}
+        </Text>
+      </View>
+      
+      {/* Additional info (unit, date) - stacked vertically and centered */}
+      <View style={styles.infoContainer}>
+        <Text style={styles.unitText}>/ bulto {productData.unit}</Text>
+        <Text style={styles.dateText}>{productData.date}</Text>
       </View>
       
       {/* Action buttons */}
@@ -206,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: 'bold',
     marginLeft: 12,
   },
@@ -238,38 +231,35 @@ const styles = StyleSheet.create({
   },
   graphContainer: {
     paddingHorizontal: 20,
-    height: 160, // Reduced height
+    height: 160, 
     marginBottom: 16,
   },
   graphTitle: {
-    fontSize: 15,
-    color: '#666',
-    textAlign: 'center',
+    fontSize: 13,
+    color: '#999',
+    textAlign: 'left',
     marginBottom: 6,
-    fontWeight: '500',
+    fontWeight: '400',
+    paddingLeft: 4,
+  },
+  priceContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  priceValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   dataContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  priceLabelText: {
-    fontSize: 18,
-    fontWeight: '500',
-  },
-  priceValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
   infoContainer: {
     flexDirection: 'column',
-    alignItems: 'flex-end',
-    marginTop: 12,
+    alignItems: 'center',
+    marginBottom: 20,
   },
   unitText: {
     fontSize: 14,

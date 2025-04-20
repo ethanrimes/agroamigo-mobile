@@ -9,12 +9,14 @@ import { useTrendGraphData } from '../hooks/useTrendGraphData';
 interface TrendGraphProps {
   data: LineGraphDataPoint[];
   title?: string;
+  showAxis?: boolean;
 }
 
 // Using React.memo to prevent unnecessary re-renders
 const TrendGraph: React.FC<TrendGraphProps> = memo(({
     data,
     title,
+    showAxis = true,
   }) => {
     const { colors, typography, spacing } = useTheme();
     
@@ -26,8 +28,8 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
     const margin = {
       top: 10,
       right: 10,
-      bottom: 20,
-      left: 30,
+      bottom: showAxis ? 20 : 5,
+      left: showAxis ? 30 : 5,
     };
     
     // Format functions - simplified
@@ -62,12 +64,12 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
           color={colors.info.default} // Blue color from theme
           showPoints={true}
           showGrid={false} // Hide grid to simplify
-          showAxis={true}
+          showAxis={showAxis} // Can be disabled from props
           smoothCurve={true}
           formatDate={formatDate}
           formatValue={formatValue}
-          yAxisTickCount={3} // Fewer ticks
-          xAxisTickCount={3} // Fewer ticks
+          yAxisTickCount={showAxis ? 3 : 0} // No ticks when axis is hidden
+          xAxisTickCount={showAxis ? 3 : 0} // No ticks when axis is hidden
           title={title}
         />
       </View>
