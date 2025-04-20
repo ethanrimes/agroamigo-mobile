@@ -1,4 +1,6 @@
 import supabase from '../client';
+import cacheService from '../../cache';
+import { getTTLForEntity } from '../../cache/utils/expiration';
 
 export type Product = {
   artiId: number;
@@ -9,16 +11,61 @@ export type Product = {
   icon: string;
 };
 
-export const getProducts = async () => {
+/**
+ * Get all products, with cache support
+ */
+export const getProducts = async (): Promise<Product[]> => {
+  // Try to get from cache first
+  const cachedData = await cacheService.getCollection<Product>('Producto');
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // If not in cache, fetch from API
   const { data, error } = await supabase
     .from('Producto')
     .select('*');
   
   if (error) throw error;
-  return data as Product[];
+  
+  // Store in cache before returning
+  const products = data as Product[];
+  await cacheService.setCollection('Producto', products, getTTLForEntity('Producto'));
+  
+  return products;
 };
 
-export const getProductById = async (artiId: number) => {
+/**
+ * Get product by ID, with cache support
+ */
+export const getProductById = async (artiId: number): Promise<Product> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'Producto',
+    method: 'getById',
+    params: { artiId }
+  };
+  
+  const cachedData = await cacheService.get<Product>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // Check if we have the full collection cached
+  const cachedCollection = await cacheService.getCollection<Product>('Producto');
+  
+  if (cachedCollection) {
+    const product = cachedCollection.find(p => p.artiId === artiId);
+    if (product) {
+      // Cache the individual result as well
+      await cacheService.set(cacheParams, product);
+      return product;
+    }
+  }
+  
+  // If not in cache, fetch from API
   const { data, error } = await supabase
     .from('Producto')
     .select('*')
@@ -26,25 +73,94 @@ export const getProductById = async (artiId: number) => {
     .single();
   
   if (error) throw error;
-  return data as Product;
+  
+  // Store in cache before returning
+  const product = data as Product;
+  await cacheService.set(cacheParams, product);
+  
+  return product;
 };
 
-export const getProductsBySubcategory = async (subcategoryId: number) => {
+/**
+ * Get products by subcategory, with cache support
+ */
+export const getProductsBySubcategory = async (subcategoryId: number): Promise<Product[]> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'Producto',
+    method: 'getBySubcategory',
+    params: { subcategoryId }
+  };
+  
+  const cachedData = await cacheService.get<Product[]>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // Check if we have the full collection cached
+  const cachedCollection = await cacheService.getCollection<Product>('Producto');
+  
+  if (cachedCollection) {
+    const products = cachedCollection.filter(p => p.SubcategoryId === subcategoryId);
+    // Cache the filtered results
+    await cacheService.set(cacheParams, products);
+    return products;
+  }
+  
+  // If not in cache, fetch from API
   const { data, error } = await supabase
     .from('Producto')
     .select('*')
     .eq('SubcategoryId', subcategoryId);
   
   if (error) throw error;
-  return data as Product[];
+  
+  // Store in cache before returning
+  const products = data as Product[];
+  await cacheService.set(cacheParams, products);
+  
+  return products;
 };
 
-export const getProductsByMajorCategory = async (majorCategoryId: number) => {
+/**
+ * Get products by major category, with cache support
+ */
+export const getProductsByMajorCategory = async (majorCategoryId: number): Promise<Product[]> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'Producto',
+    method: 'getByMajorCategory',
+    params: { majorCategoryId }
+  };
+  
+  const cachedData = await cacheService.get<Product[]>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // Check if we have the full collection cached
+  const cachedCollection = await cacheService.getCollection<Product>('Producto');
+  
+  if (cachedCollection) {
+    const products = cachedCollection.filter(p => p.MajorCategoryId === majorCategoryId);
+    // Cache the filtered results
+    await cacheService.set(cacheParams, products);
+    return products;
+  }
+  
+  // If not in cache, fetch from API
   const { data, error } = await supabase
     .from('Producto')
     .select('*')
     .eq('MajorCategoryId', majorCategoryId);
   
   if (error) throw error;
-  return data as Product[];
+  
+  // Store in cache before returning
+  const products = data as Product[];
+  await cacheService.set(cacheParams, products);
+  
+  return products;
 };
