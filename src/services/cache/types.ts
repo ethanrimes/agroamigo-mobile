@@ -21,8 +21,8 @@ export interface CacheOptions {
   // Default TTL in seconds (0 means no expiration)
   defaultTTL?: number;
   
-  // Selected strategy: 'memory' (session storage), 'async' (persistent storage), or 'secure' (encrypted persistent storage)
-  strategy?: 'memory' | 'async' | 'secure';
+  // Selected strategy: 'memory' (session storage) or 'secure' (encrypted persistent storage)
+  strategy?: 'memory' | 'secure';
 }
 
 // Cache key params for generating consistent keys

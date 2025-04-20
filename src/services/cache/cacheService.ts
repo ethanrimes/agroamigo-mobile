@@ -1,6 +1,5 @@
 import { CacheStrategy, CacheOptions, CacheKeyParams } from './types';
-import memoryStrategy from './strategies/memoryStrategy';
-import asyncStorageStrategy from './strategies/asyncStorageStrategy';
+import { memoryStrategy, secureStorageStrategy } from './strategies';
 import { generateCacheKey, generateCollectionKey } from './utils/keyGenerator';
 import { DEFAULT_TTL, getTTLForEntity } from './utils/expiration';
 
@@ -15,8 +14,18 @@ class CacheService {
     const { strategy = 'memory', defaultTTL = DEFAULT_TTL.DYNAMIC } = options;
     
     // Select strategy based on options
-    this.strategy = strategy === 'async' ? asyncStorageStrategy : memoryStrategy;
+    this.strategy = this.getStrategyInstance(strategy);
     this.defaultTTL = defaultTTL;
+  }
+
+  private getStrategyInstance(strategy: string): CacheStrategy {
+    switch (strategy) {
+      case 'secure':
+        return secureStorageStrategy;
+      case 'memory':
+      default:
+        return memoryStrategy;
+    }
   }
 
   /**
@@ -112,8 +121,8 @@ class CacheService {
   /**
    * Switch to a different strategy
    */
-  setStrategy(strategy: 'memory' | 'async'): void {
-    this.strategy = strategy === 'async' ? asyncStorageStrategy : memoryStrategy;
+  setStrategy(strategy: 'memory' | 'secure'): void {
+    this.strategy = this.getStrategyInstance(strategy);
   }
 }
 
