@@ -70,48 +70,22 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   
   // Handle item selection
   const handleItemSelect = (item: any, type: string) => {
-    console.log('[SearchableDropdown] Item selected:', { item, type });
+    console.log('[SearchableDropdown] Item selection detected:', { 
+      type,
+      itemId: item?.artiId || 'No ID',
+      itemName: item?.artiNombre || item?.Mercado || 'Unknown',
+      timestamp: new Date().toISOString()
+    });
     
     if (onItemSelect) {
-      console.log('[SearchableDropdown] Calling onItemSelect callback');
-      onItemSelect(item, type);
-    }
-    
-    // Open snapshot modal if enabled
-    if (enableSnapshotModal) {
-      console.log('[SearchableDropdown] enableSnapshotModal is true, attempting to open modal');
-      
-      // Map the type to the snapshot type
-      let snapshotType: SnapshotType | null = null;
-      switch(type) {
-        case 'producto':
-          snapshotType = 'producto';
-          break;
-        case 'mercado':
-          snapshotType = 'mercado';
-          break;
-        case 'insumo':
-          snapshotType = 'insumo';
-          break;
-        default:
-          snapshotType = null;
-      }
-      
-      console.log('[SearchableDropdown] Mapped type:', { originalType: type, snapshotType });
-      
-      // Open the modal if we have a valid type and ID
-      if (snapshotType && item.artiId) {
-        console.log('[SearchableDropdown] Opening modal with:', { snapshotType, itemId: item.artiId });
-        openModal(snapshotType, item.artiId);
+      if (typeof onItemSelect === 'function') {
+        console.log('[SearchableDropdown] Calling onItemSelect callback');
+        onItemSelect(item, type);
       } else {
-        console.log('[SearchableDropdown] Cannot open modal - missing data:', { 
-          snapshotType, 
-          itemId: item?.artiId,
-          item: JSON.stringify(item)
-        });
+        console.error('[SearchableDropdown] onItemSelect exists but is not a function:', typeof onItemSelect);
       }
     } else {
-      console.log('[SearchableDropdown] enableSnapshotModal is false, not opening modal');
+      console.log('[SearchableDropdown] No onItemSelect callback provided');
     }
     
     // Close dropdown and clear search after selection

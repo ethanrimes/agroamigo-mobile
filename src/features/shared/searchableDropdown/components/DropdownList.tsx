@@ -1,6 +1,6 @@
 // src/features/shared/searchableDropdown/components/DropdownList.tsx
 import React from 'react';
-import { ScrollView, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
+import { ScrollView, Text, StyleSheet, ActivityIndicator, View, TouchableWithoutFeedback } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import DataTypeHeader from './DataTypeHeader';
 import MajorCategoryHeader from './MajorCategoryHeader';
@@ -27,6 +27,13 @@ const DropdownList: React.FC<DropdownListProps> = ({
   useEffect(() => {
     console.log('[DropdownList] Component mounted');
     console.log('[DropdownList] onItemSelect function exists:', !!onItemSelect);
+    console.log('[DropdownList] onItemSelect type:', typeof onItemSelect);
+    
+    // Validate the onItemSelect function
+    if (typeof onItemSelect !== 'function') {
+      console.error('[DropdownList] onItemSelect is not a valid function:', onItemSelect);
+    }
+    
     console.log('[DropdownList] dataTypeOrder:', dataTypeOrder);
     
     // Check if we have data
@@ -55,6 +62,23 @@ const DropdownList: React.FC<DropdownListProps> = ({
     }
   }, []);
   
+  // Debug function to test touch events
+  const testTouchArea = () => {
+    console.log('[DropdownList] Background touch detected - touch areas working');
+  };
+  
+  // Function to verify and call onItemSelect
+  const safeItemSelect = (item: any, type: string) => {
+    console.log('[DropdownList] safeItemSelect called for:', { type, item: JSON.stringify(item).substring(0, 100) + '...' });
+    
+    if (typeof onItemSelect === 'function') {
+      console.log('[DropdownList] Calling parent onItemSelect function');
+      onItemSelect(item, type);
+    } else {
+      console.error('[DropdownList] Cannot call onItemSelect - not a function:', onItemSelect);
+    }
+  };
+  
   // Get ordered data types based on the dataTypeOrder prop
   const getOrderedDataTypes = () => {
     // Extract all data types from the data object
@@ -80,23 +104,27 @@ const DropdownList: React.FC<DropdownListProps> = ({
   // Render loading indicator
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={theme.colors.primary.default} />
-        <Text style={[styles.loadingText, { color: theme.colors.text.secondary }]}>
-          Cargando...
-        </Text>
-      </View>
+      <TouchableWithoutFeedback onPress={testTouchArea}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={theme.colors.primary.default} />
+          <Text style={[styles.loadingText, { color: theme.colors.text.secondary }]}>
+            Cargando...
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
     );
   }
   
   // Render no results message
   if (!data || Object.keys(data).length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
-          No se encontraron resultados
-        </Text>
-      </View>
+      <TouchableWithoutFeedback onPress={testTouchArea}>
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
+            No se encontraron resultados
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
     );
   }
   
@@ -108,29 +136,42 @@ const DropdownList: React.FC<DropdownListProps> = ({
       style={styles.container}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={styles.scrollContent}
+      onScrollBeginDrag={() => console.log('[DropdownList] Scroll detected - touch is working')}
     >
       {orderedDataTypes.map(type => (
         <View key={type}>
           {/* Data Type Header (Producto, Mercado, etc.) */}
-          <DataTypeHeader type={type} />
+          <TouchableWithoutFeedback onPress={testTouchArea}>
+            <View>
+              <DataTypeHeader type={type} />
+            </View>
+          </TouchableWithoutFeedback>
           
           {/* Major Categories with their Subcategories and Items */}
           {data[type]?.map((majorCategory: any, majorIndex: number) => (
             <View key={`${type}-major-${majorIndex}`}>
               {/* Major Category Header */}
-              <MajorCategoryHeader 
-                category={majorCategory} 
-                type={type} 
-              />
+              <TouchableWithoutFeedback onPress={testTouchArea}>
+                <View>
+                  <MajorCategoryHeader 
+                    category={majorCategory} 
+                    type={type} 
+                  />
+                </View>
+              </TouchableWithoutFeedback>
               
               {/* Subcategories with their Items */}
               {majorCategory.subcategories?.map((subcategory: any, subIndex: number) => (
                 <View key={`${type}-major-${majorIndex}-sub-${subIndex}`}>
                   {/* Subcategory Header */}
-                  <SubcategoryHeader 
-                    subcategory={subcategory} 
-                    type={type} 
-                  />
+                  <TouchableWithoutFeedback onPress={testTouchArea}>
+                    <View>
+                      <SubcategoryHeader 
+                        subcategory={subcategory} 
+                        type={type} 
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
                   
                   {/* Item List */}
                   {subcategory.items?.map((item: any, itemIndex: number) => (
@@ -138,7 +179,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
                       key={`${type}-major-${majorIndex}-sub-${subIndex}-item-${itemIndex}`}
                       item={item}
                       type={type}
-                      onSelect={onItemSelect}
+                      onSelect={safeItemSelect}
                     />
                   ))}
                 </View>
@@ -163,6 +204,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    minHeight: 100,
   },
   loadingText: {
     marginLeft: 8,
@@ -172,6 +214,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 100,
   },
   emptyText: {
     fontSize: 14,
