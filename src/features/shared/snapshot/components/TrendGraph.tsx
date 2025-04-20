@@ -1,6 +1,6 @@
 // src/features/shared/snapshot/components/TrendGraph.tsx
-import React from 'react';
-import { View, StyleSheet, Dimensions, ActivityIndicator, Text } from 'react-native';
+import React, { memo } from 'react';
+import { View, StyleSheet, Dimensions, Text } from 'react-native';
 import BaseD3LineGraph from '@/src/components/charts/BaseD3LineGraph';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { LineGraphDataPoint } from '@/src/hooks/useD3';
@@ -11,7 +11,8 @@ interface TrendGraphProps {
   title?: string;
 }
 
-const TrendGraph: React.FC<TrendGraphProps> = ({
+// Using React.memo to prevent unnecessary re-renders
+const TrendGraph: React.FC<TrendGraphProps> = memo(({
   data,
   title,
 }) => {
@@ -29,15 +30,6 @@ const TrendGraph: React.FC<TrendGraphProps> = ({
     left: 40,
   };
   
-  // Use our custom hook to process the data for the graph
-  const trendData = useTrendGraphData(data, {
-    width: graphWidth,
-    height: graphHeight,
-    margin,
-    smoothCurve: true,
-    lineColor: colors.info.default,
-  });
-  
   // Format functions
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('es-CO', {
@@ -54,7 +46,7 @@ const TrendGraph: React.FC<TrendGraphProps> = ({
   if (!data || data.length === 0) {
     return (
       <View style={[styles.container, styles.emptyContainer]}>
-        <Text style={[styles.emptyText, ]}>
+        <Text style={[styles.emptyText]}>
           No hay datos disponibles
         </Text>
       </View>
@@ -81,7 +73,7 @@ const TrendGraph: React.FC<TrendGraphProps> = ({
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -18,7 +18,7 @@ const HomeHeader: React.FC = () => {
         ? item.Mercado 
         : 'Selected item';
     
-    Alert.alert('Item Selected', `You selected ${itemName} (${type})`);
+    // Alert.alert('Item Selected', `You selected ${itemName} (${type})`);
     
     // Here you would typically navigate to a details screen
     // or perform some other action based on the selected item

@@ -1,5 +1,5 @@
 // src/features/shared/snapshot/modals/productoSnapshot.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { useProductModalData } from '../hooks/useProductModalData';
@@ -29,6 +29,12 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   
   // Fetch product data with useProductModalData hook
   const { productData, loading, error, trendData } = useProductModalData(productId);
+  
+  // Memoize graph data to prevent unnecessary re-renders
+  const memoizedGraphData = useMemo(() => 
+    productData?.graphData || [], 
+    [productData?.id]
+  );
   
   // Handle loading state
   if (loading) {
@@ -86,7 +92,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
       
       {/* Graph showing price trend */}
       <TrendGraph 
-        data={productData.graphData}
+        data={memoizedGraphData}
         title="Precio histórico"
       />
       

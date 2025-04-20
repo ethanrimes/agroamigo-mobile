@@ -51,18 +51,38 @@ export const useTrendGraphData = (
 ): TrendGraphData | null => {
   const { svg } = useTheme();
   
-  // Default options
-  const {
-    width = Dimensions.get('window').width * 0.65,
-    height = 180,
-    margin = { top: 20, right: 20, bottom: 30, left: 40 },
-    smoothCurve = true,
-    lineColor = svg.colors.stroke.primary,
-    pointRadius = 3,
-  } = options;
+  // Default options - capture in refs or memoize to prevent regeneration
+  const graphOptions = useMemo(() => ({
+    width: options.width || Dimensions.get('window').width * 0.65,
+    height: options.height || 180,
+    margin: options.margin || { top: 20, right: 20, bottom: 30, left: 40 },
+    smoothCurve: options.smoothCurve !== undefined ? options.smoothCurve : true,
+    lineColor: options.lineColor || svg.colors.stroke.primary,
+    pointRadius: options.pointRadius || 3,
+  }), [
+    options.width, 
+    options.height, 
+    options.margin?.top, 
+    options.margin?.right, 
+    options.margin?.bottom, 
+    options.margin?.left,
+    options.smoothCurve,
+    options.lineColor,
+    options.pointRadius,
+    svg.colors.stroke.primary
+  ]);
   
   // Derived state for graph calculations
   const [graphData, setGraphData] = useState<TrendGraphData | null>(null);
+  
+  // Make sure data is stable by stringifying for comparison
+  const dataKey = useMemo(() => {
+    if (!data || data.length === 0) return 'empty';
+    return JSON.stringify(data.map(d => ({
+      date: d.date.getTime(),
+      value: d.value
+    })));
+  }, [data]);
   
   // Calculate graph data when input data changes
   useEffect(() => {
@@ -83,8 +103,8 @@ export const useTrendGraphData = (
       const padding = (yMax - yMin) * 0.1; // Add 10% padding to y-axis
       
       // Calculate graph dimensions
-      const innerWidth = width - margin.left - margin.right;
-      const innerHeight = height - margin.top - margin.bottom;
+      const innerWidth = graphOptions.width - graphOptions.margin.left - graphOptions.margin.right;
+      const innerHeight = graphOptions.height - graphOptions.margin.top - graphOptions.margin.bottom;
       
       // Create scales
       const xScale = d3
@@ -98,7 +118,7 @@ export const useTrendGraphData = (
         .range([innerHeight, 0]);
       
       // Create line generator
-      const line = smoothCurve
+      const line = graphOptions.smoothCurve
         ? d3
             .line<LineGraphDataPoint>()
             .x(d => xScale(d.date))
@@ -117,7 +137,7 @@ export const useTrendGraphData = (
       const points = sortedData.map(d => ({
         cx: xScale(d.date),
         cy: yScale(d.value),
-        r: pointRadius,
+        r: graphOptions.pointRadius,
         value: d.value,
         date: d.date,
       }));
@@ -176,16 +196,7 @@ export const useTrendGraphData = (
       console.error('Error calculating trend graph data:', error);
       setGraphData(null);
     }
-  }, [
-    data,
-    width,
-    height,
-    margin,
-    smoothCurve,
-    lineColor,
-    pointRadius,
-    svg.colors.stroke.primary,
-  ]);
+  }, [dataKey, graphOptions]); // Only depend on dataKey and memoized options
   
   return graphData;
 };

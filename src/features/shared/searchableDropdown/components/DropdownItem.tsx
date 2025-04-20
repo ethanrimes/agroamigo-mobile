@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { Text, StyleSheet, View, Platform } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { TapGestureHandler, State, HandlerStateChangeEvent, TapGestureHandlerEventPayload } from 'react-native-gesture-handler';
+import { useSnapshotStore, SnapshotType } from '@/src/store/snapshotStore';
 
 interface DropdownItemProps {
   item: any;
@@ -17,6 +18,8 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
 }) => {
   const { theme } = useTheme();
   const tapRef = useRef<TapGestureHandler>(null);
+  // Import openModal from the store
+  const { openModal } = useSnapshotStore();
 
   // Get the display name based on the data type
   const getDisplayName = () => {
@@ -38,26 +41,40 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
     }
   };
 
+  // Get the correct ID based on the type
+  const getItemId = () => {
+    switch (type) {
+      case 'producto':
+        return item.artiId;
+      case 'mercado':
+        // Adjust this based on your actual market ID property
+        return item.id || item.mercadoId || item.MercadoId;
+      default:
+        return null;
+    }
+  };
+
   // Handler for tap gesture state changes
   const handleGestureEvent = (event: HandlerStateChangeEvent<TapGestureHandlerEventPayload>) => {
     const { state } = event.nativeEvent;
 
-    if (state === State.BEGAN) {
-      console.log('[DropdownItem] TAP BEGAN for:', getDisplayName());
-    } else if (state === State.ACTIVE) {
-      console.log('[DropdownItem] TAP ACTIVE for:', getDisplayName());
-    } else if (state === State.END) {
+    if (state === State.END) {
       console.log('[DropdownItem] TAP END for:', getDisplayName());
+      
+      // Call the parent onSelect function if provided
       if (typeof onSelect === 'function') {
         console.log('[DropdownItem] Calling onSelect function');
         onSelect(item, type);
-      } else {
-        console.error('[DropdownItem] onSelect is not a valid function:', onSelect);
       }
-    } else if (state === State.FAILED) {
-      console.log('[DropdownItem] TAP FAILED for:', getDisplayName());
-    } else if (state === State.CANCELLED) {
-      console.log('[DropdownItem] TAP CANCELLED for:', getDisplayName());
+      
+      // IMPORTANT: Open the modal if the type is supported
+      const itemId = getItemId();
+      if ((type === 'producto' || type === 'mercado') && itemId !== null && typeof itemId === 'number') {
+        console.log(`[DropdownItem] Opening snapshot modal with type=${type}, id=${itemId}`);
+        openModal(type as SnapshotType, itemId);
+      } else {
+        console.log(`[DropdownItem] Not opening modal for type=${type}, id=${itemId}`);
+      }
     }
   };
 
@@ -79,12 +96,6 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
         // Add pointer events logging for debugging
         onTouchStart={() =>
           console.log('[DropdownItem] onTouchStart for:', getDisplayName())
-        }
-        onTouchEnd={() =>
-          console.log('[DropdownItem] onTouchEnd for:', getDisplayName())
-        }
-        onTouchCancel={() =>
-          console.log('[DropdownItem] onTouchCancel for:', getDisplayName())
         }
       >
         <View style={styles.contentContainer}>
