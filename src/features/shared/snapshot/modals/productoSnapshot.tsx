@@ -1,23 +1,21 @@
-// src/features/shared/snapshot/modals/productoSnapshot.tsx
+// src/features/shared/snapshot/modals/ProductoSnapshot.tsx
 import React, { useEffect, useMemo } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { useProductModalData } from '../hooks/useProductModalData';
-
-// Import components
-import SnapshotHeader from '../components/SnapshotHeader';
-import SnapshotData from '../components/SnapshotData';
+import { Feather } from '@expo/vector-icons';
 import TrendGraph from '../components/TrendGraph';
-import SnapshotButtons from '../components/SnapshotButtons';
 
 interface ProductoSnapshotProps {
   productId: number;
+  onClose?: () => void;
 }
 
 const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   productId,
+  onClose,
 }) => {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography, spacing, borders } = useTheme();
   
   // Add logging for mount/unmount debugging
   useEffect(() => {
@@ -59,11 +57,9 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
     );
   }
   
-  // Get the appropriate icon
-  const getIconSource = () => {
-    // In a real app, you would likely have a mapping of icon names to images
-    // For now, we'll use a placeholder apple icon
-    return require('@/src/assets/images/temp_logo.png');
+  // Format price display - Fixed by adding type for price parameter
+  const formatPrice = (price: number) => {
+    return `$${price.toLocaleString('es-CO')}`;
   };
   
   // Handlers for button actions
@@ -85,33 +81,110 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   return (
     <View style={styles.container}>
       {/* Header with product name and icon */}
-      <SnapshotHeader 
-        title={productData.name}
-        iconSource={getIconSource()}
-      />
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <Feather 
+            name={productData.iconName as any || "shopping-bag"} 
+            size={36} 
+            color={colors.text.primary} 
+          />
+          <Text style={styles.title}>{productData.name}</Text>
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.closeButton} 
+          onPress={onClose}
+        >
+          <Text style={styles.closeText}>X</Text>
+        </TouchableOpacity>
+      </View>
       
-      {/* Graph showing price trend */}
-      <TrendGraph 
-        data={memoizedGraphData}
-        title="Precio histórico"
-      />
+      {/* Location selector */}
+      <TouchableOpacity style={[styles.locationSelector, { paddingHorizontal: spacing.spacing.md, paddingVertical: spacing.spacing.sm }]}>
+        <Text style={styles.locationText}>Medellín, Antioquia - CMA</Text>
+        <Feather 
+          name="chevron-down" 
+          size={18} 
+          color={colors.text.secondary} 
+        />
+      </TouchableOpacity>
+      
+      {/* Graph showing price trend - simplified height */}
+      <View style={styles.graphContainer}>
+        <Text style={styles.graphTitle}>Precios de Mayorista - Productos Primera Calidad</Text>
+        <TrendGraph 
+          data={memoizedGraphData}
+          title="" // Remove title as we have one above
+        />
+      </View>
       
       {/* Price information */}
-      <SnapshotData
-        maxPrice={productData.maxPrice}
-        minPrice={productData.minPrice}
-        unit={productData.unit}
-        date={productData.date}
-        trend={productData.trend}
-        trendPercentage={trendData?.trendPercentage || productData.trendPercentage}
-      />
+      <View style={styles.dataContainer}>
+        {/* Maximum price row without trend ticker */}
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabelText}>Máximo:</Text>
+          <Text style={styles.priceValue}>{formatPrice(productData.maxPrice)}</Text>
+        </View>
+        
+        {/* Minimum price row */}
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabelText}>Mínimo:</Text>
+          <Text style={styles.priceValue}>{formatPrice(productData.minPrice)}</Text>
+        </View>
+        
+        {/* Additional info (unit, date) - stacked vertically */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.unitText}>/ bulto {productData.unit}</Text>
+          <Text style={styles.dateText}>{productData.date}</Text>
+        </View>
+      </View>
       
       {/* Action buttons */}
-      <SnapshotButtons
-        onCompare={handleCompare}
-        onAddFavorite={handleAddFavorite}
-        onViewAnalysis={handleViewAnalysis}
-      />
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonRow}>
+          {/* Compare button */}
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              { 
+                borderColor: colors.border.light,
+                borderRadius: borders.borderRadii.md,
+              }
+            ]}
+            onPress={handleCompare}
+          >
+            <Text style={styles.buttonText}>Comparar mercados</Text>
+          </TouchableOpacity>
+          
+          {/* Add to favorites button */}
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              { 
+                borderColor: colors.border.light,
+                borderRadius: borders.borderRadii.md,
+              }
+            ]}
+            onPress={handleAddFavorite}
+          >
+            <Text style={styles.buttonText}>Agregar a favoritos</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* View analysis button (full width) */}
+        <TouchableOpacity 
+          style={[
+            styles.fullWidthButton, 
+            { 
+              borderColor: colors.border.light,
+              borderRadius: borders.borderRadii.md,
+            }
+          ]}
+          onPress={handleViewAnalysis}
+        >
+          <Text style={styles.buttonText}>Ver análisis</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -120,6 +193,92 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    marginLeft: 12,
+  },
+  closeButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  locationSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f7',
+    marginHorizontal: 20,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  locationText: {
+    fontSize: 15,
+    marginRight: 8,
+  },
+  graphContainer: {
+    paddingHorizontal: 20,
+    height: 160, // Reduced height
+    marginBottom: 16,
+  },
+  graphTitle: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 6,
+    fontWeight: '500',
+  },
+  dataContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  priceLabelText: {
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  priceValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  infoContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    marginTop: 12,
+  },
+  unitText: {
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  dateText: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#666',
   },
   loadingContainer: {
     flex: 1,
@@ -139,6 +298,30 @@ const styles = StyleSheet.create({
   },
   errorText: {
     textAlign: 'center',
+  },
+  buttonsContainer: {
+    padding: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  button: {
+    width: '48%',
+    borderWidth: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  fullWidthButton: {
+    width: '100%',
+    borderWidth: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });
 

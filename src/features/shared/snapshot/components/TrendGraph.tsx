@@ -13,83 +13,82 @@ interface TrendGraphProps {
 
 // Using React.memo to prevent unnecessary re-renders
 const TrendGraph: React.FC<TrendGraphProps> = memo(({
-  data,
-  title,
-}) => {
-  const { colors, typography, spacing } = useTheme();
-  
-  // Calculate dimensions for the graph
-  const graphWidth = Dimensions.get('window').width * 0.65; // 65% of modal width (which is 75% of screen)
-  const graphHeight = 180;
-  
-  // Define margins for the graph
-  const margin = {
-    top: 20,
-    right: 20,
-    bottom: 30,
-    left: 40,
-  };
-  
-  // Format functions
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('es-CO', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-  
-  const formatValue = (value: number) => {
-    return `$${value.toLocaleString('es-CO')}`;
-  };
-  
-  // Handle loading or no data state
-  if (!data || data.length === 0) {
+    data,
+    title,
+  }) => {
+    const { colors, typography, spacing } = useTheme();
+    
+    // Calculate dimensions for the graph - smaller than original
+    const graphWidth = Dimensions.get('window').width * 0.65; 
+    const graphHeight = 120; // Reduced height
+    
+    // Define margins for the graph - reduced to make chart larger
+    const margin = {
+      top: 10,
+      right: 10,
+      bottom: 20,
+      left: 30,
+    };
+    
+    // Format functions - simplified
+    const formatDate = (date: Date) => {
+      // Only showing the day of month
+      return date.getDate().toString();
+    };
+    
+    const formatValue = (value: number) => {
+      // Simplified display
+      return `$${Math.round(value / 1000)}k`;
+    };
+    
+    // Handle loading or no data state
+    if (!data || data.length === 0) {
+      return (
+        <View style={[styles.container, styles.emptyContainer]}>
+          <Text style={[styles.emptyText]}>
+            No hay datos disponibles
+          </Text>
+        </View>
+      );
+    }
+    
     return (
-      <View style={[styles.container, styles.emptyContainer]}>
-        <Text style={[styles.emptyText]}>
-          No hay datos disponibles
-        </Text>
+      <View style={styles.container}>
+        <BaseD3LineGraph
+          data={data}
+          width={graphWidth}
+          height={graphHeight}
+          margin={margin}
+          color={colors.info.default} // Blue color from theme
+          showPoints={true}
+          showGrid={false} // Hide grid to simplify
+          showAxis={true}
+          smoothCurve={true}
+          formatDate={formatDate}
+          formatValue={formatValue}
+          yAxisTickCount={3} // Fewer ticks
+          xAxisTickCount={3} // Fewer ticks
+          title={title}
+        />
       </View>
     );
-  }
+  });
   
-  return (
-    <View style={styles.container}>
-      <BaseD3LineGraph
-        data={data}
-        width={graphWidth}
-        height={graphHeight}
-        margin={margin}
-        color={colors.info.default} // Blue color from theme
-        showPoints={true}
-        showGrid={true}
-        showAxis={true}
-        smoothCurve={true}
-        formatDate={formatDate}
-        formatValue={formatValue}
-        yAxisTickCount={5}
-        xAxisTickCount={5}
-        title={title}
-      />
-    </View>
-  );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 16,
-  },
-  emptyContainer: {
-    height: 180,
-    width: '100%',
-    backgroundColor: '#F5F7FA',
-    borderRadius: 8,
-  },
-  emptyText: {
-    textAlign: 'center',
-  },
+  const styles = StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginVertical: 8, // Reduced margin
+    },
+    emptyContainer: {
+      height: 120, // Match graph height
+      width: '100%',
+      backgroundColor: '#F5F7FA',
+      borderRadius: 8,
+    },
+    emptyText: {
+      textAlign: 'center',
+    },
 });
 
 export default TrendGraph;

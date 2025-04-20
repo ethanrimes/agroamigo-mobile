@@ -2,21 +2,27 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { 
   View, 
-  Animated, 
   Dimensions, 
   StyleSheet, 
   TouchableWithoutFeedback,
   BackHandler,
   Platform
 } from 'react-native';
+import Animated, { 
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  runOnJS
+} from 'react-native-reanimated';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
 interface ModalAnimationProps {
   visible: boolean;
   onClose: () => void;
   children: ReactNode;
-  width?: number | string;
-  height?: number | string;
+  width?: number | `${number}%`;
+  height?: number | `${number}%`;
   backdropOpacity?: number;
 }
 
@@ -24,64 +30,39 @@ const ModalAnimation: React.FC<ModalAnimationProps> = ({
   visible,
   onClose,
   children,
-  width = '75%',
-  height = '75%',
+  width = '75%' as `${number}%`,
+  height = '75%' as `${number}%`,
   backdropOpacity = 0.5,
 }) => {
   const { colors, spacing, borders, shadows } = useTheme();
   const [modalVisible, setModalVisible] = useState(visible);
   
-  // Animation values
-  const backdropOpacityAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(0.8);
-  const opacityAnim = new Animated.Value(0);
+  // Shared animation values
+  const backdropOpacityValue = useSharedValue(0);
+  const scaleValue = useSharedValue(0.8);
+  const opacityValue = useSharedValue(0);
   
   // Screen dimensions for centering
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  
+  // Handler to hide the modal
+  const hideModal = () => {
+    backdropOpacityValue.value = withTiming(0, { duration: 250 });
+    scaleValue.value = withSpring(0.8, { damping: 14, stiffness: 120 });
+    opacityValue.value = withTiming(0, { duration: 200 }, () => {
+      runOnJS(setModalVisible)(false);
+    });
+  };
   
   // Handle visibility changes
   useEffect(() => {
     if (visible) {
       setModalVisible(true);
-      Animated.parallel([
-        Animated.timing(backdropOpacityAnim, {
-          toValue: backdropOpacity,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 65,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      backdropOpacityValue.value = withTiming(backdropOpacity, { duration: 300 });
+      scaleValue.value = withSpring(1, { damping: 14, stiffness: 120 });
+      opacityValue.value = withTiming(1, { duration: 250 });
     } else {
-      Animated.parallel([
-        Animated.timing(backdropOpacityAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 0.8,
-          tension: 65,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setModalVisible(false);
-      });
+      hideModal();
     }
   }, [visible, backdropOpacity]);
   
@@ -102,6 +83,20 @@ const ModalAnimation: React.FC<ModalAnimationProps> = ({
     };
   }, [modalVisible, onClose]);
   
+  // Animated styles
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: backdropOpacityValue.value,
+    };
+  });
+  
+  const modalAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleValue.value }],
+      opacity: opacityValue.value,
+    };
+  });
+  
   // If not visible, don't render anything
   if (!modalVisible) {
     return null;
@@ -114,10 +109,8 @@ const ModalAnimation: React.FC<ModalAnimationProps> = ({
         <Animated.View 
           style={[
             styles.backdrop, 
-            { 
-              backgroundColor: colors.neutral.black,
-              opacity: backdropOpacityAnim 
-            }
+            { backgroundColor: colors.neutral.black },
+            backdropAnimatedStyle
           ]} 
         />
       </TouchableWithoutFeedback>
@@ -126,15 +119,14 @@ const ModalAnimation: React.FC<ModalAnimationProps> = ({
       <Animated.View 
         style={[
           styles.modalContainer,
-        //   {
-        //     width: typeof width === 'string' ? width : width,
-        //     height: typeof height === 'string' ? height : height,
-        //     backgroundColor: colors.background.primary,
-        //     borderRadius: borders.borderRadii.lg,
-        //     transform: [{ scale: scaleAnim }],
-        //     opacity: opacityAnim,
-        //     ...shadows.componentShadows.modal
-        //   }
+          {
+            width,
+            height,
+            backgroundColor: colors.background.primary,
+            borderRadius: borders.borderRadii.lg,
+            ...shadows.componentShadows.modal
+          },
+          modalAnimatedStyle
         ]}
       >
         {children}
