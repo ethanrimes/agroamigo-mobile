@@ -2,27 +2,34 @@
 import React from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { SelectionHeader } from './header';
-import { SelectionPageContentSpace, SelectionItem } from './body';
+import { SelectionPageContentSpace, SelectionItem, Category } from './body';
 import SlidingSideDrawer from './SlidingSideDrawer';
-import { useSelectionData } from '../hooks/useSelectionData';
 import { useSelectionFilters } from '../hooks/useSelectionFilters';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { useRouterNavigation } from '@/src/hooks/useRouterNavigation';
 
+export type SelectionScreenType = 'products' | 'markets' | 'insumos';
+
 interface SelectionScreenProps {
-  type: 'products' | 'markets' | 'insumos';
+  type: SelectionScreenType;
   title: string;
   location: string;
+  // Data state passed from parent component
+  data: Category[];
+  loading: boolean;
+  error: string | null;
 }
 
 const SelectionScreen: React.FC<SelectionScreenProps> = ({
   type,
   title,
   location,
+  data,
+  loading,
+  error,
 }) => {
   const { navigate } = useRouterNavigation();
   const { colors } = useTheme();
-  const { data, loading, error } = useSelectionData(type);
   const { isFilterPaneVisible, openFilters, closeFilters } = useSelectionFilters();
 
   const handleItemPress = (item: SelectionItem) => {
