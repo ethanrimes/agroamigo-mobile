@@ -35,7 +35,7 @@ def main():
             return
             
         # Ensure expected columns exist
-        required_cols = ['artiId', 'minimoKg', 'maximoKg', 'fuenId']
+        required_cols = ['artiId', 'minimoKg', 'maximoKg', 'fuenId', 'fechaIni']
         if not all(col in df.columns for col in required_cols):
             missing_cols = [col for col in required_cols if col not in df.columns]
             print(f"Source file missing required columns: {missing_cols}. Exiting.")
@@ -66,10 +66,12 @@ def main():
             'CodMunicipio', 
             'CodDepartamento', 
             'PresentationId', 
-            'UnitsId'
+            'UnitsId',
+            'fechaIni'
         ]].rename(columns={
             'minimoKg': 'minPrice',
-            'maximoKg': 'maxPrice'
+            'maximoKg': 'maxPrice',
+            'fechaIni': 'date'
         })
         
         # Handle potential missing values in the joined columns
@@ -79,9 +81,11 @@ def main():
                 # Fill missing values with -1 or appropriate default
                 result_df[col] = result_df[col].fillna(-1).astype(int)
                 
-        # Ensure all columns are integers
+        # Ensure all columns are integers except for date
         for col in result_df.columns:
-            if col in ['minPrice', 'maxPrice']:
+            if col == 'date':
+                continue  # Skip date column from numeric conversion
+            elif col in ['minPrice', 'maxPrice']:
                 # These might be floats, so convert carefully
                 result_df[col] = result_df[col].fillna(0).astype(float).astype(int)
             else:

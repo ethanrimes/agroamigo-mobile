@@ -28,7 +28,7 @@ export const useProductModalData = (productId: number | null) => {
   // Use ref to prevent infinite update loops
   const isUpdatingRef = useRef(false);
   
-  // Get price data from the new hook
+  // Get price data from the hook
   const { 
     filteredObservations, 
     unitsPresentationName, 
@@ -54,12 +54,17 @@ export const useProductModalData = (productId: number | null) => {
         isUpdatingRef.current = true;
         setLoading(true);
         
+        console.log(`[useProductModalData] Fetching product data for ID: ${productId}`);
+        
         // 1. Fetch the product information
         const product: Product = await getProductById(productId);
         setProductInfo(product);
         
+        console.log(`[useProductModalData] Product fetched: ${product.artiNombre}`);
+        
         // 2. Wait until price data is loaded
         if (priceLoading) {
+          console.log('[useProductModalData] Price data still loading, waiting...');
           return;
         }
         
@@ -82,9 +87,12 @@ export const useProductModalData = (productId: number | null) => {
           minPrice = recentObs.minPrice;
           maxPrice = recentObs.maxPrice;
           
+          console.log(`[useProductModalData] Latest price observation: Min=${minPrice}, Max=${maxPrice}`);
+          
           if (recentObs.date) {
             mostRecentDate = new Date(recentObs.date);
             observationDate = formatDate(mostRecentDate);
+            console.log(`[useProductModalData] Observation date: ${observationDate}`);
           }
         } else if (graphData && graphData.length > 0) {
           // Fallback to graph data if no filtered observations
@@ -92,25 +100,31 @@ export const useProductModalData = (productId: number | null) => {
           minPrice = Math.min(...prices) * 0.9; // Approximate
           maxPrice = Math.max(...prices) * 1.1; // Approximate
           observationDate = formatDate(new Date());
+          
+          console.log(`[useProductModalData] Using graph data for prices: Min=${minPrice}, Max=${maxPrice}`);
         } else {
           // Default values if no data
           minPrice = 5000;
           maxPrice = 8000;
           observationDate = formatDate(new Date());
+          
+          console.log('[useProductModalData] No price data available, using defaults');
         }
         
         // 4. Get trend information from trend data
         const trendDirection = trendData?.trendDirection || 'stable';
         const trendPercentage = trendData?.trendPercentage || 0;
         
+        console.log(`[useProductModalData] Trend: ${trendDirection} (${trendPercentage.toFixed(2)}%)`);
+        
         // 5. Create complete product data object
         const data: ProductData = {
           id: product.artiId,
           name: product.artiNombre,
-          iconName: product.Icon,
+          iconName: product.Icon || undefined,
           maxPrice: maxPrice, 
           minPrice: minPrice,
-          unit: unitsPresentationName || '4 kg', // Use the units presentation name from price data
+          unit: unitsPresentationName || 'unidad', // Use the units presentation name from price data
           date: observationDate, // Use the most recent observation date
           trend: trendDirection,
           trendPercentage: trendPercentage,
@@ -120,6 +134,8 @@ export const useProductModalData = (productId: number | null) => {
         // 6. Set the product data state
         setProductData(data);
         setError(null);
+        
+        console.log('[useProductModalData] Product data successfully assembled');
       } catch (err) {
         console.error('[useProductModalData] Error fetching product data:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
@@ -135,6 +151,7 @@ export const useProductModalData = (productId: number | null) => {
   // Handle price loading/error
   useEffect(() => {
     if (priceError) {
+      console.error('[useProductModalData] Price error detected:', priceError);
       setError(priceError);
     }
   }, [priceError]);

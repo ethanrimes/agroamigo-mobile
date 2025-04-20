@@ -53,7 +53,7 @@ export const useTrendGraphData = (
   
   // Default options - capture in refs or memoize to prevent regeneration
   const graphOptions = useMemo(() => ({
-    width: options.width || Dimensions.get('window').width * 0.65,
+    width: options.width || Dimensions.get('window').width * 0.80,
     height: options.height || 180,
     margin: options.margin || { top: 20, right: 20, bottom: 30, left: 40 },
     smoothCurve: options.smoothCurve !== undefined ? options.smoothCurve : true,
@@ -78,7 +78,15 @@ export const useTrendGraphData = (
   // Make sure data is stable by stringifying for comparison
   const dataKey = useMemo(() => {
     if (!data || data.length === 0) return 'empty';
-    return JSON.stringify(data.map(d => ({
+    
+    // Filter valid data points first
+    const validData = data.filter(
+      d => d.date instanceof Date && !isNaN(d.date.getTime())
+    );
+    
+    if (validData.length === 0) return 'invalid';
+    
+    return JSON.stringify(validData.map(d => ({
       date: d.date.getTime(),
       value: d.value
     })));
@@ -87,19 +95,21 @@ export const useTrendGraphData = (
   // Calculate graph data when input data changes
   useEffect(() => {
     if (!data || data.length === 0) {
+      console.log('[useTrendGraphData] No data provided');
       setGraphData(null);
       return;
     }
     
     try {
-      // Sort data by date
-      const sortedData = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
+      // Filter and sort data by date
+      const validData = data
+        .filter(d => d.date instanceof Date && !isNaN(d.date.getTime()))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
       
-      // Make sure we have valid dates
-      const validData = sortedData.filter(d => d.date instanceof Date && !isNaN(d.date.getTime()));
+      console.log(`[useTrendGraphData] Processing ${validData.length} valid data points`);
       
       if (validData.length < 2) {
-        console.warn('Not enough valid data points for trend graph');
+        console.warn('[useTrendGraphData] Not enough valid data points (need at least 2)');
         setGraphData(null);
         return;
       }
@@ -107,9 +117,23 @@ export const useTrendGraphData = (
       // Calculate min and max values for scales
       const xMin = validData[0].date;
       const xMax = validData[validData.length - 1].date;
-      const yMin = Math.min(...validData.map(d => d.value));
-      const yMax = Math.max(...validData.map(d => d.value));
-      const padding = (yMax - yMin) * 0.1; // Add 10% padding to y-axis
+      
+      // Ensure we have a proper date range
+      if (xMin.getTime() === xMax.getTime()) {
+        console.warn('[useTrendGraphData] Invalid date range - same start and end date');
+        // Add a day to xMax to create a range
+        xMax.setDate(xMax.getDate() + 1);
+      }
+      
+      const yValues = validData.map(d => d.value);
+      const yMin = Math.min(...yValues);
+      const yMax = Math.max(...yValues);
+      const padding = (yMax - yMin) * 0.1 || yMin * 0.1 || 100; // Handle edge cases
+      
+      console.log('[useTrendGraphData] Data ranges:', {
+        xRange: [xMin.toISOString(), xMax.toISOString()],
+        yRange: [yMin, yMax]
+      });
       
       // Calculate graph dimensions
       const innerWidth = graphOptions.width - graphOptions.margin.left - graphOptions.margin.right;
@@ -141,6 +165,12 @@ export const useTrendGraphData = (
       
       // Generate line path
       const linePath = line(validData) || '';
+      
+      if (!linePath) {
+        console.warn('[useTrendGraphData] Failed to generate line path');
+      } else {
+        console.log('[useTrendGraphData] Successfully generated line path');
+      }
       
       // Generate data points
       const points = validData.map(d => ({
@@ -201,8 +231,10 @@ export const useTrendGraphData = (
         trendPercentage,
         trendDirection,
       });
+      
+      console.log('[useTrendGraphData] Graph data calculated successfully');
     } catch (error) {
-      console.error('Error calculating trend graph data:', error);
+      console.error('[useTrendGraphData] Error calculating trend graph data:', error);
       setGraphData(null);
     }
   }, [dataKey, graphOptions]); // Only depend on dataKey and memoized options
@@ -219,7 +251,7 @@ const formatDate = (date: Date): string => {
 };
 
 const formatValue = (value: number): string => {
-  return `$${value.toLocaleString('es-CO')}`;
+  return `${value.toLocaleString('es-CO')}`;
 };
 
 export default useTrendGraphData;

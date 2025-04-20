@@ -45,13 +45,19 @@ const SnapshotModal: React.FC = () => {
         // case 'mercado':
         //   console.log('[SnapshotModal] Rendering MercadoSnapshot with ID:', itemId);
         //   return <MercadoSnapshot marketId={itemId} onClose={closeModal} />;
-      //   case 'insumo':
-      //     return <InsumoSnapshot insumoId={itemId} onClose={closeModal} />;
+        // case 'insumo':
+        //   console.log('[SnapshotModal] Rendering InsumoSnapshot with ID:', itemId);
+        //   return <InsumoSnapshot insumoId={itemId} onClose={closeModal} />;
         default:
           console.log('[SnapshotModal] Unknown snapshot type:', snapshotType);
           return null;
       }
     };
+    
+    // Don't render anything if modal is not visible
+    if (!isVisible) {
+      return null;
+    }
     
     return (
       <ModalAnimation
@@ -75,6 +81,7 @@ const SnapshotModal: React.FC = () => {
       position: 'relative',
       borderRadius: 8,
       overflow: 'hidden',
+      backgroundColor: '#FFFFFF',
     },
   });
 

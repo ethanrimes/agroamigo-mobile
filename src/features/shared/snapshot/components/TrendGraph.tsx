@@ -1,5 +1,5 @@
 // src/features/shared/snapshot/components/TrendGraph.tsx
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { View, StyleSheet, Dimensions, Text } from 'react-native';
 import BaseD3LineGraph from '@/src/components/charts/BaseD3LineGraph';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
@@ -9,7 +9,7 @@ interface TrendGraphProps {
   data: LineGraphDataPoint[];
   title?: string;
   showAxis?: boolean;
-  showPoints?: boolean; // Added prop to control points display
+  showPoints?: boolean;
 }
 
 // Using React.memo to prevent unnecessary re-renders
@@ -17,30 +17,48 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
   data,
   title,
   showAxis = true,
-  showPoints = false, // Default to false to show just the line
+  showPoints = false,
 }) => {
   const { colors, typography, spacing } = useTheme();
   
-  // Calculate dimensions for the graph - smaller than original
-  const graphWidth = Dimensions.get('window').width * 0.65; 
-  const graphHeight = 120; // Reduced height
+  // Log received data for debugging
+  useEffect(() => {
+    console.log('[TrendGraph] Received data points:', data?.length || 0);
+    if (data && data.length > 0) {
+      console.log('[TrendGraph] First and last data points:', {
+        first: {
+          date: data[0].date?.toISOString(),
+          value: data[0].value
+        },
+        last: {
+          date: data[data.length - 1].date?.toISOString(),
+          value: data[data.length - 1].value
+        }
+      });
+    }
+  }, [data]);
   
-  // Define margins for the graph - reduced to make chart larger
+  // Calculate dimensions for the graph
+  const graphWidth = Dimensions.get('window').width * 0.85; 
+  const graphHeight = 180;
+  
+  // Define margins for the graph
   const margin = {
-    top: 10,
-    right: 10,
-    bottom: showAxis ? 20 : 5,
-    left: showAxis ? 30 : 5,
+    top: 20,
+    right: 20,
+    bottom: showAxis ? 30 : 10,
+    left: showAxis ? 50 : 10,
   };
   
-  // Format functions - simplified
+  // Format functions
   const formatDate = (date: Date) => {
-    // Only showing the day of month
-    return date.getDate().toString();
+    return date.toLocaleDateString('es-CO', {
+      day: 'numeric',
+      month: 'short'
+    });
   };
   
   const formatValue = (value: number) => {
-    // Simplified display
     return `$${Math.round(value / 1000)}k`;
   };
   
@@ -61,11 +79,14 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
     !isNaN(d.date.getTime())
   );
 
+  // Log valid data
+  console.log(`[TrendGraph] Valid data points: ${validData.length} of ${data.length}`);
+
   if (validData.length < 2) {
     return (
       <View style={[styles.container, styles.emptyContainer]}>
         <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-          Datos insuficientes para mostrar gráfico
+          Datos insuficientes para mostrar gráfico (necesita al menos 2 puntos)
         </Text>
       </View>
     );
@@ -73,21 +94,25 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
   
   return (
     <View style={styles.container}>
+      {title && (
+        <Text style={[styles.title, { color: colors.text.primary }]}>
+          {title}
+        </Text>
+      )}
       <BaseD3LineGraph
         data={validData}
         width={graphWidth}
         height={graphHeight}
         margin={margin}
-        color={colors.info.default} // Blue color from theme
+        color={colors.info.default}
         showPoints={showPoints}
-        showGrid={false} // Hide grid to simplify
-        showAxis={showAxis} // Can be disabled from props
+        showGrid={false}
+        showAxis={showAxis}
         smoothCurve={true}
         formatDate={formatDate}
         formatValue={formatValue}
-        yAxisTickCount={showAxis ? 3 : 0} // No ticks when axis is hidden
-        xAxisTickCount={showAxis ? 3 : 0} // No ticks when axis is hidden
-        title={title}
+        yAxisTickCount={showAxis ? 4 : 0}
+        xAxisTickCount={showAxis ? 5 : 0}
       />
     </View>
   );
@@ -95,20 +120,28 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 8, // Reduced margin
+    marginVertical: 12,
   },
   emptyContainer: {
-    height: 120, // Match graph height
-    width: '100%',
+    height: 180,
     backgroundColor: '#F5F7FA',
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 14,
+    padding: 16,
   },
+  title: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+  }
 });
 
 export default TrendGraph;
