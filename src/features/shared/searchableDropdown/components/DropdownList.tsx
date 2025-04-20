@@ -7,6 +7,7 @@ import MajorCategoryHeader from './MajorCategoryHeader';
 import SubcategoryHeader from './SubcategoryHeader';
 import DropdownItem from './DropdownItem';
 import { DataTypeOrder } from '../SearchableDropdown';
+import { useEffect } from 'react';
 
 interface DropdownListProps {
   data: any;
@@ -22,6 +23,37 @@ const DropdownList: React.FC<DropdownListProps> = ({
   dataTypeOrder
 }) => {
   const { theme } = useTheme();
+
+  useEffect(() => {
+    console.log('[DropdownList] Component mounted');
+    console.log('[DropdownList] onItemSelect function exists:', !!onItemSelect);
+    console.log('[DropdownList] dataTypeOrder:', dataTypeOrder);
+    
+    // Check if we have data
+    if (data) {
+      console.log('[DropdownList] Data received:', Object.keys(data));
+      
+      // Count total items for debugging
+      let totalItems = 0;
+      Object.keys(data).forEach(type => {
+        if (data[type] && Array.isArray(data[type])) {
+          data[type].forEach((majorCategory: any) => {
+            if (majorCategory.subcategories && Array.isArray(majorCategory.subcategories)) {
+              majorCategory.subcategories.forEach((subcategory: any) => {
+                if (subcategory.items && Array.isArray(subcategory.items)) {
+                  totalItems += subcategory.items.length;
+                }
+              });
+            }
+          });
+        }
+      });
+      
+      console.log('[DropdownList] Total items count:', totalItems);
+    } else {
+      console.log('[DropdownList] No data received');
+    }
+  }, []);
   
   // Get ordered data types based on the dataTypeOrder prop
   const getOrderedDataTypes = () => {

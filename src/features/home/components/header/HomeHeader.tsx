@@ -10,6 +10,7 @@ const HomeHeader: React.FC = () => {
   
   // Handle selection from the search dropdown
   const handleSearchItemSelect = (item: any, type: string) => {
+    console.log('HOME HEADER - Item selected:', item, type);
     // Example implementation - can be customized based on requirements
     const itemName = type === 'producto' 
       ? item.artiNombre 
@@ -41,12 +42,13 @@ const HomeHeader: React.FC = () => {
           </Text>
         </View>
         
-        {/* Replace SearchBar with SearchableDropdown */}
+        {/* Pass enableSnapshotModal={true} to SearchableDropdown */}
         <View style={styles.searchContainer}>
           <SearchableDropdown 
             placeholder="Buscar productos, mercados..."
             onItemSelect={handleSearchItemSelect}
             dataTypeOrder="producto-mercado"
+            enableSnapshotModal={true}
           />
         </View>
       </VStack>

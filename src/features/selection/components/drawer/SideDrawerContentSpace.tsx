@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, Pressable } from 'react-native';
-import { FilterElement } from './index';
+import FilterElement from './FilterElement';
 import { useSelectionFilters } from '../../hooks/useSelectionFilters';
 import VStack from '@/src/components/ui/layout/VStack';
 import HStack from '@/src/components/ui/layout/HStack';

@@ -7,9 +7,12 @@ import { ThemeProvider } from '@/src/theme/providers/ThemeProvider';
 import { Navigator } from '@/src/components/navigation/Navigator';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SecureStore from 'expo-secure-store'; // Import to ensure module is loaded
+import SnapshotModal from '@/src/features/shared/snapshot/snapshotModal'; // Import the SnapshotModal component
+// import { setPointerEventsDebugMode } from 'react-native';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+// setPointerEventsDebugMode(true);  // This will highlight views capturing touches
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -61,6 +64,9 @@ export default function RootLayout() {
                 }}
               />
             </Stack>
+            
+            {/* Add the SnapshotModal here so it's accessible globally */}
+            <SnapshotModal />
           </Navigator>
         </ThemeProvider>
       </GestureHandlerRootView>

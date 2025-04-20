@@ -36,13 +36,25 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
     }
   };
   
+  // Handle item selection with debug logging
+  const handleItemSelect = () => {
+    console.log('[DropdownItem] Item selected:', {
+      name: getDisplayName(),
+      type,
+      itemId: type === 'producto' ? item.artiId : (item.id || 'No ID'),
+      item: JSON.stringify(item)
+    });
+    
+    onSelect(item, type);
+  };
+  
   return (
     <TouchableOpacity
       style={[
         styles.container,
         { backgroundColor: theme.colors.background.primary }
       ]}
-      onPress={() => onSelect(item, type)}
+      onPress={handleItemSelect}
       activeOpacity={0.7}
     >
       <View style={styles.contentContainer}>
