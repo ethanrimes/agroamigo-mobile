@@ -66,9 +66,7 @@ export {
   export {
     type DailyPriceObservation,
     getDailyPriceObservations,
-    getDailyPriceObservationById,
     getDailyPriceObservationsByProduct,
     getDailyPriceObservationsByMarket,
-    getDailyPriceObservationsByLocation,
-    getDailyPriceObservationsForProductInLocation
+  
   } from './precio';

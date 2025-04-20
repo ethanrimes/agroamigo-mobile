@@ -1,10 +1,11 @@
-// src/features/shared/snapshot/modals/ProductoSnapshot.tsx
+// src/features/shared/snapshot/modals/productoSnapshot.tsx
 import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import { useProductModalData } from '../hooks/useProductModalData';
 import { Feather } from '@expo/vector-icons';
 import TrendGraph from '../components/TrendGraph';
+import { useLocationStore } from '@/src/store/locationStore';
 
 interface ProductoSnapshotProps {
   productId: number;
@@ -16,6 +17,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   onClose,
 }) => {
   const { colors, typography, spacing, borders } = useTheme();
+  const { currentLocationId, locationName, municipalityName, departmentName } = useLocationStore();
   
   // Add logging for mount/unmount debugging
   useEffect(() => {
@@ -26,7 +28,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
   }, [productId]);
   
   // Fetch product data with useProductModalData hook
-  const { productData, loading, error, trendData } = useProductModalData(productId);
+  const { productData, loading, error } = useProductModalData(productId);
   
   // Memoize graph data to prevent unnecessary re-renders
   const memoizedGraphData = useMemo(() => 
@@ -53,11 +55,22 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
         <Text style={[styles.errorText]}>
           Error al cargar los datos. Por favor, inténtelo de nuevo.
         </Text>
+        <Text style={[styles.errorDetailText]}>
+          {error?.message || 'Datos no disponibles'}
+        </Text>
       </View>
     );
   }
   
-  // Format price display - Fixed by adding type for price parameter
+  // Format location display
+  const getLocationDisplay = () => {
+    if (municipalityName && departmentName) {
+      return `${municipalityName}, ${departmentName} - ${locationName}`;
+    }
+    return locationName || 'Ubicación no especificada';
+  };
+  
+  // Format price display
   const formatPrice = (price: number) => {
     return `${price.toLocaleString('es-CO')}`;
   };
@@ -100,8 +113,16 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
       </View>
       
       {/* Location selector */}
-      <TouchableOpacity style={[styles.locationSelector, { paddingHorizontal: spacing.spacing.md, paddingVertical: spacing.spacing.sm }]}>
-        <Text style={styles.locationText}>Medellín, Antioquia - CMA</Text>
+      <TouchableOpacity 
+        style={[
+          styles.locationSelector, 
+          { 
+            backgroundColor: colors.background.secondary || '#f5f5f7',
+            borderRadius: borders.borderRadii.md || 8
+          }
+        ]}
+      >
+        <Text style={styles.locationText}>{getLocationDisplay()}</Text>
         <Feather 
           name="chevron-down" 
           size={18} 
@@ -111,7 +132,9 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
       
       {/* Graph showing price trend - simplified height */}
       <View style={styles.graphContainer}>
-        <Text style={styles.graphTitle}>Tendencia Mes</Text>
+        <Text style={[styles.graphTitle, { color: colors.text.tertiary || '#999' }]}>
+          Tendencia Mes
+        </Text>
         <TrendGraph 
           data={memoizedGraphData}
           title="" // Remove title as we have one above
@@ -121,15 +144,19 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
       
       {/* Consolidated price display */}
       <View style={styles.priceContainer}>
-        <Text style={styles.priceValue}>
+        <Text style={[styles.priceValue, { color: colors.text.primary }]}>
           ${formatPrice(productData.minPrice)} - ${formatPrice(productData.maxPrice)}
         </Text>
       </View>
       
       {/* Additional info (unit, date) - stacked vertically and right-aligned */}
       <View style={styles.infoContainer}>
-        <Text style={styles.unitText}>/ bulto {productData.unit}</Text>
-        <Text style={styles.dateText}>{productData.date}</Text>
+        <Text style={[styles.unitText, { color: colors.text.primary }]}>
+          / {productData.unit}
+        </Text>
+        <Text style={[styles.dateText, { color: colors.text.secondary }]}>
+          {productData.date}
+        </Text>
       </View>
       
       {/* Action buttons */}
@@ -141,12 +168,17 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
               styles.button, 
               { 
                 borderColor: colors.border.light,
-                borderRadius: borders.borderRadii.md,
+                borderRadius: borders.borderRadii.md || 8,
               }
             ]}
             onPress={handleCompare}
           >
-            <Text style={styles.buttonText}>Comparar mercados</Text>
+            <Text style={[styles.buttonText, { 
+              color: colors.text.primary,
+              textDecorationLine: 'underline'
+            }]}>
+              Comparar mercados
+            </Text>
           </TouchableOpacity>
           
           {/* Add to favorites button */}
@@ -155,12 +187,14 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
               styles.button, 
               { 
                 borderColor: colors.border.light,
-                borderRadius: borders.borderRadii.md,
+                borderRadius: borders.borderRadii.md || 8,
               }
             ]}
             onPress={handleAddFavorite}
           >
-            <Text style={styles.buttonText}>Agregar a favoritos</Text>
+            <Text style={[styles.buttonText, { color: colors.text.primary }]}>
+              Agregar a favoritos
+            </Text>
           </TouchableOpacity>
         </View>
         
@@ -170,12 +204,17 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
             styles.fullWidthButton, 
             { 
               borderColor: colors.border.light,
-              borderRadius: borders.borderRadii.md,
+              borderRadius: borders.borderRadii.md || 8,
             }
           ]}
           onPress={handleViewAnalysis}
         >
-          <Text style={styles.buttonText}>Ver análisis</Text>
+          <Text style={[styles.buttonText, { 
+            color: colors.text.primary,
+            textDecorationLine: 'underline'
+          }]}>
+            Ver análisis
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -193,13 +232,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     marginLeft: 12,
   },
@@ -219,10 +260,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f7',
     marginHorizontal: 20,
     padding: 12,
     borderRadius: 8,
+    marginTop: 16,
     marginBottom: 16,
   },
   locationText: {
@@ -236,7 +277,6 @@ const styles = StyleSheet.create({
   },
   graphTitle: {
     fontSize: 13,
-    color: '#999',
     textAlign: 'left',
     marginBottom: 6,
     fontWeight: '400',
@@ -252,10 +292,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
   },
-  dataContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
   infoContainer: {
     flexDirection: 'column',
     alignItems: 'flex-end',
@@ -266,12 +302,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 6,
     textAlign: 'right',
+    textDecorationLine: 'underline',
   },
   dateText: {
     fontSize: 14,
     fontStyle: 'italic',
-    color: '#666',
     textAlign: 'right',
+    textDecorationLine: 'underline',
   },
   loadingContainer: {
     flex: 1,
@@ -291,9 +328,17 @@ const styles = StyleSheet.create({
   },
   errorText: {
     textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  errorDetailText: {
+    textAlign: 'center',
+    color: '#666',
   },
   buttonsContainer: {
     padding: 16,
+    paddingTop: 0,
   },
   buttonRow: {
     flexDirection: 'row',

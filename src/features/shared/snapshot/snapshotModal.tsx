@@ -4,14 +4,16 @@ import { View, StyleSheet } from 'react-native';
 import ModalAnimation from '@/src/components/animations/ModalAnimation';
 import { useSnapshotStore } from '@/src/store/snapshotStore';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
+import { useLocationStore } from '@/src/store/locationStore';
 
-// Import specific snapshot modals - using the updated ProductoSnapshot
+// Import specific snapshot modals
 import ProductoSnapshot from './modals/productoSnapshot';
 import MercadoSnapshot from './modals/mercadoSnapshot';
 // import InsumoSnapshot from './modals/insumoSnapshot';
 
 const SnapshotModal: React.FC = () => {
     const { colors, spacing } = useTheme();
+    const { currentLocationId } = useLocationStore();
     
     // Get modal state from store
     const { 
@@ -22,12 +24,10 @@ const SnapshotModal: React.FC = () => {
     } = useSnapshotStore();
     
     // Add debug logging when the component renders
-    console.log('[SnapshotModal] Rendered with state:', { isVisible, snapshotType, itemId });
-    
-    // Add effect to log when visibility changes
     useEffect(() => {
-      console.log('[SnapshotModal] Visibility changed:', { isVisible, snapshotType, itemId });
-    }, [isVisible, snapshotType, itemId]);
+      console.log('[SnapshotModal] Rendered with state:', { isVisible, snapshotType, itemId });
+      console.log('[SnapshotModal] Current location ID:', currentLocationId);
+    }, [isVisible, snapshotType, itemId, currentLocationId]);
     
     // Render the appropriate modal content based on type
     const renderContent = () => {
@@ -42,11 +42,11 @@ const SnapshotModal: React.FC = () => {
         case 'producto':
           console.log('[SnapshotModal] Rendering ProductoSnapshot with ID:', itemId);
           return <ProductoSnapshot productId={itemId} onClose={closeModal} />;
-        case 'mercado':
-          console.log('[SnapshotModal] Rendering MercadoSnapshot with ID:', itemId);
-          return <MercadoSnapshot marketId={itemId} />;
+        // case 'mercado':
+        //   console.log('[SnapshotModal] Rendering MercadoSnapshot with ID:', itemId);
+        //   return <MercadoSnapshot marketId={itemId} onClose={closeModal} />;
       //   case 'insumo':
-      //     return <InsumoSnapshot insumoId={itemId} />;
+      //     return <InsumoSnapshot insumoId={itemId} onClose={closeModal} />;
         default:
           console.log('[SnapshotModal] Unknown snapshot type:', snapshotType);
           return null;
@@ -57,8 +57,8 @@ const SnapshotModal: React.FC = () => {
       <ModalAnimation
         visible={isVisible}
         onClose={closeModal}
-        width="80%" // Increased from 75% to 80%
-        height="80%" // Increased from 75% to 80%
+        width="85%" // Adjusted for better viewing experience
+        height="85%" // Adjusted for better viewing experience
       >
         <View style={styles.modalContent}>
           {renderContent()}
@@ -73,6 +73,8 @@ const SnapshotModal: React.FC = () => {
       width: '100%',
       height: '100%',
       position: 'relative',
+      borderRadius: 8,
+      overflow: 'hidden',
     },
   });
 

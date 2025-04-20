@@ -1,35 +1,26 @@
+// src/services/supabase/entities/prices.ts
 import supabase from '../client';
 import cacheService from '../../cache';
 import { getTTLForEntity } from '../../cache/utils/expiration';
 
 export type DailyPriceObservation = {
-  dailyPriceObsId: number;
+  id: number;
+  date: string | null;
+  artiId: number;
+  fuenId: number;
   minPrice: number;
   maxPrice: number;
-  artiId: number;
-  SubcategoryId: number;
-  MajorCategoryId: number;
-  fuenId: number;
-  CodMunicipio: number;
-  CodDepartamento: number;
-  PresentationId: number;
-  UnitsId: number;
-  date?: string; // Assuming there might be a date field
+  unitsPresentationId?: number;
+  unitsId?: number;
+  presentationId?: number;
 };
 
 /**
- * Get all daily price observations
- * Note: This does NOT load into cache on initialization due to potentially large volume
+ * Get all daily price observations, with cache support
  */
 export const getDailyPriceObservations = async (): Promise<DailyPriceObservation[]> => {
-  // Try to get from cache first, but with very short TTL due to high volume
-  const cacheParams = {
-    entity: 'DailyProductPriceObservation',
-    method: 'getAll',
-    params: {}
-  };
-  
-  const cachedData = await cacheService.get<DailyPriceObservation[]>(cacheParams);
+  // Try to get from cache first
+  const cachedData = await cacheService.getCollection<DailyPriceObservation>('DailyProductPriceObservation');
   
   if (cachedData) {
     return cachedData;
@@ -42,44 +33,11 @@ export const getDailyPriceObservations = async (): Promise<DailyPriceObservation
   
   if (error) throw error;
   
-  // Store in cache before returning, with shorter TTL
+  // Store in cache before returning
   const observations = data as DailyPriceObservation[];
-  await cacheService.set(cacheParams, observations);
+  await cacheService.setCollection('DailyProductPriceObservation', observations, getTTLForEntity('DailyProductPriceObservation'));
   
   return observations;
-};
-
-/**
- * Get daily price observation by ID, with cache support
- */
-export const getDailyPriceObservationById = async (dailyPriceObsId: number): Promise<DailyPriceObservation> => {
-  // Try to get from cache first
-  const cacheParams = {
-    entity: 'DailyProductPriceObservation',
-    method: 'getById',
-    params: { dailyPriceObsId }
-  };
-  
-  const cachedData = await cacheService.get<DailyPriceObservation>(cacheParams);
-  
-  if (cachedData) {
-    return cachedData;
-  }
-  
-  // If not in cache, fetch from API
-  const { data, error } = await supabase
-    .from('DailyProductPriceObservation')
-    .select('*')
-    .eq('dailyPriceObsId', dailyPriceObsId)
-    .single();
-  
-  if (error) throw error;
-  
-  // Store in cache before returning
-  const observation = data as DailyPriceObservation;
-  await cacheService.set(cacheParams, observation);
-  
-  return observation;
 };
 
 /**
@@ -103,7 +61,8 @@ export const getDailyPriceObservationsByProduct = async (artiId: number): Promis
   const { data, error } = await supabase
     .from('DailyProductPriceObservation')
     .select('*')
-    .eq('artiId', artiId);
+    .eq('artiId', artiId)
+    .order('date', { ascending: false });
   
   if (error) throw error;
   
@@ -135,7 +94,8 @@ export const getDailyPriceObservationsByMarket = async (fuenId: number): Promise
   const { data, error } = await supabase
     .from('DailyProductPriceObservation')
     .select('*')
-    .eq('fuenId', fuenId);
+    .eq('fuenId', fuenId)
+    .order('date', { ascending: false });
   
   if (error) throw error;
   
@@ -147,78 +107,54 @@ export const getDailyPriceObservationsByMarket = async (fuenId: number): Promise
 };
 
 /**
- * Get daily price observations by location, with cache support
+ * Get daily price observations by product and market, with cache support
+ * and optional date range filtering
  */
-export const getDailyPriceObservationsByLocation = async (
-  codDepartamento: number,
-  codMunicipio?: number
-): Promise<DailyPriceObservation[]> => {
-  // Try to get from cache first
-  const cacheParams = {
-    entity: 'DailyProductPriceObservation',
-    method: 'getByLocation',
-    params: { codDepartamento, codMunicipio }
-  };
-  
-  const cachedData = await cacheService.get<DailyPriceObservation[]>(cacheParams);
-  
-  if (cachedData) {
-    return cachedData;
-  }
-  
-  // If not in cache, fetch from API
-  let query = supabase
-    .from('DailyProductPriceObservation')
-    .select('*')
-    .eq('CodDepartamento', codDepartamento);
-  
-  if (codMunicipio) {
-    query = query.eq('CodMunicipio', codMunicipio);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) throw error;
-  
-  // Store in cache before returning
-  const observations = data as DailyPriceObservation[];
-  await cacheService.set(cacheParams, observations);
-  
-  return observations;
-};
-
-/**
- * Get daily price observations for a product in a specific location, with cache support
- */
-export const getDailyPriceObservationsForProductInLocation = async (
+export const getDailyPriceObservationsByProductAndMarket = async (
   artiId: number,
-  codDepartamento: number,
-  codMunicipio?: number
+  fuenId: number,
+  startDate?: Date,
+  endDate?: Date
 ): Promise<DailyPriceObservation[]> => {
-  // Try to get from cache first
+  // Prepare cache parameters
   const cacheParams = {
     entity: 'DailyProductPriceObservation',
-    method: 'getForProductInLocation',
-    params: { artiId, codDepartamento, codMunicipio }
+    method: 'getByProductAndMarket',
+    params: { 
+      artiId,
+      fuenId,
+      startDate: startDate ? startDate.toISOString() : undefined,
+      endDate: endDate ? endDate.toISOString() : undefined
+    }
   };
   
+  // Try to get from cache first
   const cachedData = await cacheService.get<DailyPriceObservation[]>(cacheParams);
   
   if (cachedData) {
     return cachedData;
   }
   
-  // If not in cache, fetch from API
+  // Start query
   let query = supabase
     .from('DailyProductPriceObservation')
     .select('*')
     .eq('artiId', artiId)
-    .eq('CodDepartamento', codDepartamento);
+    .eq('fuenId', fuenId);
   
-  if (codMunicipio) {
-    query = query.eq('CodMunicipio', codMunicipio);
+  // Add date filters if provided
+  if (startDate) {
+    query = query.gte('date', startDate.toISOString().split('T')[0]);
   }
   
+  if (endDate) {
+    query = query.lte('date', endDate.toISOString().split('T')[0]);
+  }
+  
+  // Order by date
+  query = query.order('date', { ascending: true });
+  
+  // Execute query
   const { data, error } = await query;
   
   if (error) throw error;
@@ -228,4 +164,47 @@ export const getDailyPriceObservationsForProductInLocation = async (
   await cacheService.set(cacheParams, observations);
   
   return observations;
+};
+
+/**
+ * Get the latest daily price observation for a product and market, with cache support
+ */
+export const getLatestPriceObservation = async (
+  artiId: number,
+  fuenId: number
+): Promise<DailyPriceObservation | null> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'DailyProductPriceObservation',
+    method: 'getLatestByProductAndMarket',
+    params: { artiId, fuenId }
+  };
+  
+  const cachedData = await cacheService.get<DailyPriceObservation>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // If not in cache, fetch from API
+  const { data, error } = await supabase
+    .from('DailyProductPriceObservation')
+    .select('*')
+    .eq('artiId', artiId)
+    .eq('fuenId', fuenId)
+    .order('date', { ascending: false })
+    .limit(1);
+  
+  if (error) throw error;
+  
+  // If no results, return null
+  if (!data || data.length === 0) {
+    return null;
+  }
+  
+  // Store in cache before returning
+  const observation = data[0] as DailyPriceObservation;
+  await cacheService.set(cacheParams, observation);
+  
+  return observation;
 };

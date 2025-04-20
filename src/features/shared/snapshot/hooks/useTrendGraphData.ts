@@ -49,7 +49,7 @@ export const useTrendGraphData = (
   data: LineGraphDataPoint[] | null,
   options: TrendGraphOptions = {}
 ): TrendGraphData | null => {
-  const { svg } = useTheme();
+  const { colors } = useTheme();
   
   // Default options - capture in refs or memoize to prevent regeneration
   const graphOptions = useMemo(() => ({
@@ -57,7 +57,7 @@ export const useTrendGraphData = (
     height: options.height || 180,
     margin: options.margin || { top: 20, right: 20, bottom: 30, left: 40 },
     smoothCurve: options.smoothCurve !== undefined ? options.smoothCurve : true,
-    lineColor: options.lineColor || svg.colors.stroke.primary,
+    lineColor: options.lineColor || colors.info.default,
     pointRadius: options.pointRadius || 3,
   }), [
     options.width, 
@@ -69,7 +69,7 @@ export const useTrendGraphData = (
     options.smoothCurve,
     options.lineColor,
     options.pointRadius,
-    svg.colors.stroke.primary
+    colors.info.default
   ]);
   
   // Derived state for graph calculations
@@ -95,11 +95,20 @@ export const useTrendGraphData = (
       // Sort data by date
       const sortedData = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
       
+      // Make sure we have valid dates
+      const validData = sortedData.filter(d => d.date instanceof Date && !isNaN(d.date.getTime()));
+      
+      if (validData.length < 2) {
+        console.warn('Not enough valid data points for trend graph');
+        setGraphData(null);
+        return;
+      }
+      
       // Calculate min and max values for scales
-      const xMin = sortedData[0].date;
-      const xMax = sortedData[sortedData.length - 1].date;
-      const yMin = Math.min(...sortedData.map(d => d.value));
-      const yMax = Math.max(...sortedData.map(d => d.value));
+      const xMin = validData[0].date;
+      const xMax = validData[validData.length - 1].date;
+      const yMin = Math.min(...validData.map(d => d.value));
+      const yMax = Math.max(...validData.map(d => d.value));
       const padding = (yMax - yMin) * 0.1; // Add 10% padding to y-axis
       
       // Calculate graph dimensions
@@ -131,10 +140,10 @@ export const useTrendGraphData = (
             .curve(d3.curveLinear); // Straight lines
       
       // Generate line path
-      const linePath = line(sortedData) || '';
+      const linePath = line(validData) || '';
       
       // Generate data points
-      const points = sortedData.map(d => ({
+      const points = validData.map(d => ({
         cx: xScale(d.date),
         cy: yScale(d.value),
         r: graphOptions.pointRadius,
@@ -162,11 +171,11 @@ export const useTrendGraphData = (
       const minPrice = yMin;
       const maxPrice = yMax;
       const averagePrice = 
-        sortedData.reduce((sum, item) => sum + item.value, 0) / sortedData.length;
+        validData.reduce((sum, item) => sum + item.value, 0) / validData.length;
       
       // Calculate trend percentage and direction
-      const firstValue = sortedData[0].value;
-      const lastValue = sortedData[sortedData.length - 1].value;
+      const firstValue = validData[0].value;
+      const lastValue = validData[validData.length - 1].value;
       const change = lastValue - firstValue;
       
       const trendPercentage = Math.abs(

@@ -44,25 +44,40 @@ const SnapshotData: React.FC<SnapshotDataProps> = ({
               value={formatTrendPercentage(trendPercentage)} 
               trend={trend as any} // Cast to match the expected prop type
             />
-            <Text style={[styles.priceLabel, ]}>
+            <Text style={[
+              styles.priceLabel, 
+              { color: colors.text.secondary || '#666' }
+            ]}>
               Máximo:
             </Text>
           </View>
           {/* Max price value */}
-          <Text style={[styles.priceValue, ]}>
+          <Text style={[
+            styles.priceValue, 
+            { color: colors.text.primary || '#000' }
+          ]}>
             {formatPrice(maxPrice)}
           </Text>
         </View>
         
-        <View style={styles.priceSeparator} />
+        <View style={[
+          styles.priceSeparator, 
+          { backgroundColor: colors.border.light || '#E0E0E0' }
+        ]} />
         
         <View style={styles.priceSection}>
           {/* Min price label */}
-          <Text style={[styles.priceLabel, ]}>
+          <Text style={[
+            styles.priceLabel, 
+            { color: colors.text.secondary || '#666' }
+          ]}>
             Mínimo:
           </Text>
           {/* Min price value */}
-          <Text style={[styles.priceValue,]}>
+          <Text style={[
+            styles.priceValue,
+            { color: colors.text.primary || '#000' }
+          ]}>
             {formatPrice(minPrice)}
           </Text>
         </View>
@@ -71,13 +86,25 @@ const SnapshotData: React.FC<SnapshotDataProps> = ({
       {/* Additional Info Section */}
       <View style={styles.infoContainer}>
         {unit && (
-          <Text style={[styles.infoText, ]}>
-            / bulto {unit}
+          <Text style={[
+            styles.infoText, 
+            { 
+              color: colors.text.primary || '#000',
+              textDecorationLine: 'underline'
+            }
+          ]}>
+            / {unit}
           </Text>
         )}
         
         {date && (
-          <Text style={[styles.dateText, ]}>
+          <Text style={[
+            styles.dateText, 
+            { 
+              color: colors.text.secondary || '#666',
+              textDecorationLine: 'underline'
+            }
+          ]}>
             {date}
           </Text>
         )}
@@ -106,14 +133,15 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     marginLeft: 8,
+    fontSize: 14,
   },
   priceValue: {
     fontWeight: 'bold',
+    fontSize: 16,
   },
   priceSeparator: {
     width: 1,
     height: 40,
-    backgroundColor: '#E0E0E0',
     marginHorizontal: 16,
   },
   infoContainer: {
@@ -123,9 +151,12 @@ const styles = StyleSheet.create({
   },
   infoText: {
     textDecorationLine: 'underline',
+    fontSize: 14,
   },
   dateText: {
     textDecorationLine: 'underline',
+    fontSize: 14,
+    fontStyle: 'italic',
   },
 });
 
