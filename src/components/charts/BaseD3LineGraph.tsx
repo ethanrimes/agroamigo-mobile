@@ -30,7 +30,7 @@ const BaseD3LineGraph: React.FC<LineGraphProps> = ({
   margin,
   color,
   showGrid = true,
-  showPoints = true,
+  showPoints = false, // Changed default from true to false
   showAxis = true,
   smoothCurve = true,
   formatDate = (date) => date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),

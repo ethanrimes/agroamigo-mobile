@@ -10,6 +10,7 @@ interface TrendGraphProps {
   data: LineGraphDataPoint[];
   title?: string;
   showAxis?: boolean;
+  showPoints?: boolean; // Added prop to control points display
 }
 
 // Using React.memo to prevent unnecessary re-renders
@@ -17,6 +18,7 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
     data,
     title,
     showAxis = true,
+    showPoints = false, // Default to false to show just the line
   }) => {
     const { colors, typography, spacing } = useTheme();
     
@@ -62,7 +64,7 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
           height={graphHeight}
           margin={margin}
           color={colors.info.default} // Blue color from theme
-          showPoints={true}
+          showPoints={showPoints} // Using the prop value instead of hardcoded true
           showGrid={false} // Hide grid to simplify
           showAxis={showAxis} // Can be disabled from props
           smoothCurve={true}

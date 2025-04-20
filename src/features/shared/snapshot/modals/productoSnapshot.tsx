@@ -115,18 +115,18 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({
         <TrendGraph 
           data={memoizedGraphData}
           title="" // Remove title as we have one above
-          showAxis={true} // Remove axes and tick marks
+          showAxis={false} // Remove axes and tick marks
         />
       </View>
       
       {/* Consolidated price display */}
       <View style={styles.priceContainer}>
         <Text style={styles.priceValue}>
-          {formatPrice(productData.minPrice)} - {formatPrice(productData.maxPrice)}
+          ${formatPrice(productData.minPrice)} - ${formatPrice(productData.maxPrice)}
         </Text>
       </View>
       
-      {/* Additional info (unit, date) - stacked vertically and centered */}
+      {/* Additional info (unit, date) - stacked vertically and right-aligned */}
       <View style={styles.infoContainer}>
         <Text style={styles.unitText}>/ bulto {productData.unit}</Text>
         <Text style={styles.dateText}>{productData.date}</Text>
@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   priceContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: 20,
     marginBottom: 12,
   },
   priceValue: {
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'right',
   },
   dataContainer: {
     paddingHorizontal: 20,
@@ -258,17 +258,20 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
     marginBottom: 20,
   },
   unitText: {
     fontSize: 14,
     marginBottom: 6,
+    textAlign: 'right',
   },
   dateText: {
     fontSize: 14,
     fontStyle: 'italic',
     color: '#666',
+    textAlign: 'right',
   },
   loadingContainer: {
     flex: 1,
