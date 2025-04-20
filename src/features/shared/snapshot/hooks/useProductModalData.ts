@@ -1,7 +1,7 @@
 // src/features/shared/snapshot/hooks/useProductModalData.ts
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { getProductById, Product } from '@/src/services/supabase/entities/products';
-import { getDailyPriceObservationsByProduct, DailyPriceObservation } from '@/src/services/supabase/entities/prices';
+import { getProductById, Product } from '@/src/services/supabase/entities/producto';
+import { getDailyPriceObservationsByProduct, DailyPriceObservation } from '@/src/services/supabase/entities/precio';
 import { LineGraphDataPoint } from '@/src/hooks/useD3';
 
 // Interface for the consolidated product data with price information

@@ -2,12 +2,12 @@ import cacheService from '../cache';
 import { getTTLForEntity } from '../cache/utils/expiration';
 
 // Import all entity services that need to be initialized
-import { getDepartamentos } from '@/src/services/supabase/entities/departamentos';
+import { getDepartamentos } from '@/src/services/supabase/entities/departamento';
 import { getMajorCategories } from '@/src/services/supabase/entities/majorCategories';
-import { getMarkets } from '@/src/services/supabase/entities/markets';
-import { getMunicipios } from '@/src/services/supabase/entities/municipios';
-import { getPresentations } from '@/src/services/supabase/entities/presentations';
-import { getProducts } from '@/src/services/supabase/entities/products';
+import { getMarkets } from '@/src/services/supabase/entities/mercado';
+import { getMunicipios } from '@/src/services/supabase/entities/municipio';
+import { getPresentations } from '@/src/services/supabase/entities/presentation';
+import { getProducts } from '@/src/services/supabase/entities/producto';
 import { getSubcategories } from '@/src/services/supabase/entities/subcategories';
 import { getUnits } from '@/src/services/supabase/entities/units';
 

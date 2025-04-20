@@ -5,7 +5,7 @@ export {
     type Departamento,
     getDepartamentos,
     getDepartamentoById
-  } from './departamentos';
+  } from './departamento';
   
   // Major Categories
   export {
@@ -21,7 +21,7 @@ export {
     getMarketById,
     getMarketsByMunicipio,
     getMarketsByDepartamento
-  } from './markets';
+  } from './mercado';
   
   // Municipios
   export {
@@ -29,14 +29,14 @@ export {
     getMunicipios,
     getMunicipioById,
     getMunicipiosByDepartamento
-  } from './municipios';
+  } from './municipio';
   
   // Presentations
   export {
     type Presentation,
     getPresentations,
     getPresentationById
-  } from './presentations';
+  } from './presentation';
   
   // Products
   export {
@@ -45,7 +45,7 @@ export {
     getProductById,
     getProductsBySubcategory,
     getProductsByMajorCategory
-  } from './products';
+  } from './producto';
   
   // Subcategories
   export {
@@ -71,4 +71,4 @@ export {
     getDailyPriceObservationsByMarket,
     getDailyPriceObservationsByLocation,
     getDailyPriceObservationsForProductInLocation
-  } from './prices';
+  } from './precio';

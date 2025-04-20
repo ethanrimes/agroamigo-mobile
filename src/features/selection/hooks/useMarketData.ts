@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { Category, SelectionItem, SubCategory } from '../components/body/SelectionPageContentSpace';
 
 // Import Supabase entity services
-import { getMarkets, Market } from '@/src/services/supabase/entities/markets';
-import { getDepartamentos, Departamento } from '@/src/services/supabase/entities/departamentos';
-import { getMunicipios, Municipio } from '@/src/services/supabase/entities/municipios';
+import { getMarkets, Market } from '@/src/services/supabase/entities/mercado';
+import { getDepartamentos, Departamento } from '@/src/services/supabase/entities/departamento';
+import { getMunicipios, Municipio } from '@/src/services/supabase/entities/municipio';
 
 // Removed the DEPARTAMENTO_ICON_MAP since we now have Icon field in the database
 

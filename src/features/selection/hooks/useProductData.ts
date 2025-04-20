@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Category, SelectionItem, SubCategory } from '../components/body/SelectionPageContentSpace';
 
 // Import Supabase entity services
-import { getProducts, Product } from '@/src/services/supabase/entities/products';
+import { getProducts, Product } from '@/src/services/supabase/entities/producto';
 import { getMajorCategories, MajorCategory } from '@/src/services/supabase/entities/majorCategories';
 import { getSubcategories, Subcategory } from '@/src/services/supabase/entities/subcategories';
 

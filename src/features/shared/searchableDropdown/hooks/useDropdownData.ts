@@ -2,20 +2,20 @@
 import { useState, useEffect } from 'react';
 
 // Import repository methods
-import { getProducts } from '@/src/services/supabase/entities/products';
-import { getMarkets } from '@/src/services/supabase/entities/markets';
+import { getProducts } from '@/src/services/supabase/entities/producto';
+import { getMarkets } from '@/src/services/supabase/entities/mercado';
 import { getMajorCategories } from '@/src/services/supabase/entities/majorCategories';
 import { getSubcategories } from '@/src/services/supabase/entities/subcategories';
-import { getDepartamentos } from '@/src/services/supabase/entities/departamentos';
-import { getMunicipios } from '@/src/services/supabase/entities/municipios';
+import { getDepartamentos } from '@/src/services/supabase/entities/departamento';
+import { getMunicipios } from '@/src/services/supabase/entities/municipio';
 
 // Types
-import { Product } from '@/src/services/supabase/entities/products';
-import { Market } from '@/src/services/supabase/entities/markets';
+import { Product } from '@/src/services/supabase/entities/producto';
+import { Market } from '@/src/services/supabase/entities/mercado';
 import { MajorCategory } from '@/src/services/supabase/entities/majorCategories';
 import { Subcategory } from '@/src/services/supabase/entities/subcategories';
-import { Departamento } from '@/src/services/supabase/entities/departamentos';
-import { Municipio } from '@/src/services/supabase/entities/municipios';
+import { Departamento } from '@/src/services/supabase/entities/departamento';
+import { Municipio } from '@/src/services/supabase/entities/municipio';
 
 interface HierarchicalData {
     [key: string]: {

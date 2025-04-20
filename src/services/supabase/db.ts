@@ -4,14 +4,14 @@ import supabase from './client';
 export { supabase };
 
 // Import all entity operations from the entities folder
-import * as Markets from './entities/markets';
-import * as Municipios from './entities/municipios';
-import * as Departamentos from './entities/departamentos';
-import * as Products from './entities/products';
+import * as Markets from './entities/mercado';
+import * as Municipios from './entities/municipio';
+import * as Departamentos from './entities/departamento';
+import * as Products from './entities/producto';
 import * as MajorCategories from './entities/majorCategories';
 import * as Subcategories from './entities/subcategories';
-import * as Prices from './entities/prices';
-import * as Presentations from './entities/presentations';
+import * as Prices from './entities/precio';
+import * as Presentations from './entities/presentation';
 import * as Units from './entities/units';
 import * as Insumos from './entities/insumos';
 
@@ -30,14 +30,14 @@ export {
 };
 
 // Export entity types
-export type { Market } from './entities/markets';
-export type { Municipio } from './entities/municipios';
-export type { Departamento } from './entities/departamentos';
-export type { Product } from './entities/products';
+export type { Market } from './entities/mercado';
+export type { Municipio } from './entities/municipio';
+export type { Departamento } from './entities/departamento';
+export type { Product } from './entities/producto';
 export type { MajorCategory } from './entities/majorCategories';
 export type { Subcategory } from './entities/subcategories';
-export type { DailyPriceObservation } from './entities/prices';
-export type { Presentation } from './entities/presentations';
+export type { DailyPriceObservation } from './entities/precio';
+export type { Presentation } from './entities/presentation';
 export type { Unit } from './entities/units';
 // export type { Insumo } from './entities/insumos';
 
