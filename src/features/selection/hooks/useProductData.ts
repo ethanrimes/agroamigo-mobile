@@ -7,18 +7,7 @@ import { getProducts, Product } from '@/src/services/supabase/entities/products'
 import { getMajorCategories, MajorCategory } from '@/src/services/supabase/entities/majorCategories';
 import { getSubcategories, Subcategory } from '@/src/services/supabase/entities/subcategories';
 
-// Add a mapping of icon names to match major categories
-const CATEGORY_ICON_MAP: Record<string, string> = {
-  'Frutas': 'apple',
-  'Verduras y Hortalizas': 'leaf',
-  'Cereales': 'package',
-  'Legumbres': 'coffee',
-  'Carnes': 'target',
-  'Lácteos': 'droplet',
-  // Add more mappings as needed
-  // Default fallback
-  'default': 'circle'
-};
+// Removed the CATEGORY_ICON_MAP since we now have Icon field in the database
 
 export const useProductData = () => {
   const [data, setData] = useState<Category[]>([]);
@@ -63,12 +52,11 @@ export const useProductData = () => {
       
       // First, create categories from major categories
       majorCategories.forEach(majorCategory => {
-        const iconName = CATEGORY_ICON_MAP[majorCategory.MajorCategory] || CATEGORY_ICON_MAP.default;
-        
+        // Use the Icon field from the database instead of the map
         categoriesMap.set(majorCategory.MajorCategoryId, {
           id: `major-${majorCategory.MajorCategoryId}`,
           title: majorCategory.MajorCategory,
-          icon: iconName,
+          icon: majorCategory.Icon,
           subCategories: []
         });
       });
@@ -105,6 +93,7 @@ export const useProductData = () => {
             title: product.artiNombre,
             price: '$xx.xx', // You might want to fetch actual prices from another service
             trend: determineTrend(), // You might want to determine trend based on historical data
+            // Could add Icon here if needed for individual products
           };
           
           subCategory.items.push(selectionItem);

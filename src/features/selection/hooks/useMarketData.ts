@@ -7,19 +7,7 @@ import { getMarkets, Market } from '@/src/services/supabase/entities/markets';
 import { getDepartamentos, Departamento } from '@/src/services/supabase/entities/departamentos';
 import { getMunicipios, Municipio } from '@/src/services/supabase/entities/municipios';
 
-// Add a mapping of icon names for departamentos
-const DEPARTAMENTO_ICON_MAP: Record<string, string> = {
-  'Antioquia': 'mountain',
-  'Atlántico': 'anchor',
-  'Bogotá D.C.': 'building',
-  'Bolívar': 'compass',
-  'Boyacá': 'flag',
-  'Caldas': 'coffee',
-  'Valle del Cauca': 'palmtree',
-  // Add more mappings as needed
-  // Default fallback
-  'default': 'map-pin'
-};
+// Removed the DEPARTAMENTO_ICON_MAP since we now have Icon field in the database
 
 export const useMarketData = () => {
   const [data, setData] = useState<Category[]>([]);
@@ -47,12 +35,11 @@ export const useMarketData = () => {
         
         // First, create categories from departamentos
         departamentos.forEach(departamento => {
-          const iconName = DEPARTAMENTO_ICON_MAP[departamento.Departamento] || DEPARTAMENTO_ICON_MAP.default;
-          
+          // Use the Icon field from the database instead of the map
           categoriesMap.set(departamento.CodDepartamento, {
             id: `dep-${departamento.CodDepartamento}`,
             title: departamento.Departamento,
-            icon: iconName,
+            icon: departamento.Icon,
             subCategories: []
           });
         });
@@ -90,6 +77,7 @@ export const useMarketData = () => {
               subtitle: market.Municipio,
               price: `${getRandomVendorCount()} vendedores`,
               trend: determineTrend(),
+              // Could add Icon if needed for market items
             };
             
             subCategory.items.push(selectionItem);
@@ -143,7 +131,7 @@ export const useMarketData = () => {
     return {
       id: 'demo-category',
       title: 'Departamentos',
-      icon: 'map',
+      icon: 'map', // Example icon
       subCategories: [
         {
           id: 'demo-subcategory-1',

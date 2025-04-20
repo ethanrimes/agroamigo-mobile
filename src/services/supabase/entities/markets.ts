@@ -9,6 +9,7 @@ export type Market = {
   CodDepartamento: number;
   Municipio: string;
   CodMunicipio: number;
+  Icon: string; // Added Icon field
 };
 
 /**

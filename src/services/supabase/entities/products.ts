@@ -8,7 +8,7 @@ export type Product = {
   keystring: string;
   MajorCategoryId: number;
   SubcategoryId: number;
-  icon: string;
+  Icon: string; // Renamed from "icon" to "Icon"
 };
 
 /**

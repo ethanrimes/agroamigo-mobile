@@ -5,6 +5,7 @@ import { getTTLForEntity } from '../../cache/utils/expiration';
 export type MajorCategory = {
   MajorCategoryId: number;
   MajorCategory: string;
+  Icon: string; // Added Icon field
 };
 
 /**

@@ -6,6 +6,7 @@ export type Subcategory = {
   SubcategoryId: number;
   Subcategory: string;
   MajorCategoryId: number;
+  Icon: string; // Added Icon field
 };
 
 /**

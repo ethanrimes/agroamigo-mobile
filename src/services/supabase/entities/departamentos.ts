@@ -5,6 +5,7 @@ import { getTTLForEntity } from '../../cache/utils/expiration';
 export type Departamento = {
   CodDepartamento: number;
   Departamento: string;
+  Icon: string; // Added Icon field
 };
 
 /**
