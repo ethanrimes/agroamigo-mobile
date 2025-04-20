@@ -1,89 +1,162 @@
 // src/features/selection/hooks/useSelectionData.ts
 import { useState, useEffect } from 'react';
-import { Category } from '../components/body';
+import { Category, SelectionItem, SubCategory } from '../components/body/SelectionPageContentSpace';
 
-type SelectionType = 'products' | 'markets' | 'insumos';
+// Import Supabase entity services
+import { getProducts, Product } from '@/src/services/supabase/entities/products';
+import { getMajorCategories, MajorCategory } from '@/src/services/supabase/entities/majorCategories';
+import { getSubcategories, Subcategory } from '@/src/services/supabase/entities/subcategories';
 
-// Mock data for products
-const productsData: Category[] = [
-  {
-    id: 'fruits',
-    title: 'Frutas',
-    icon: 'apple',
-    subCategories: [
-      {
-        id: 'citrus',
-        title: 'Cítricos',
-        items: [
-          {
-            id: 'limon-tahiti',
-            title: 'Limón - tahití',
-            price: '$xx.xx',
-            trend: 'up',
-          },
-          {
-            id: 'limon-comun',
-            title: 'Limón – común',
-            price: '$xx.xx',
-            trend: 'down',
-          },
-          {
-            id: 'mandarina',
-            title: 'Mandarina',
-            price: '$xx.xx',
-            trend: 'up',
-          },
-        ],
-      },
-      {
-        id: 'other-fruits',
-        title: 'Otras Frutas',
-        items: [
-          {
-            id: 'uva-isabela',
-            title: 'Uva - Isabela',
-            price: '$xx.xx',
-            trend: 'down',
-          },
-          {
-            id: 'uva-importada',
-            title: 'Uva - importada',
-            price: '$xx.xx',
-            trend: 'up',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'vegetables',
-    title: 'Verduras y Hortalizas',
-    icon: 'leaf',
-    subCategories: [
-      {
-        id: 'leafy-greens',
-        title: 'Vegetales de Hoja',
-        items: [
-          {
-            id: 'lechuga',
-            title: 'Lechuga',
-            price: '$xx.xx',
-            trend: 'stable',
-          },
-          {
-            id: 'espinaca',
-            title: 'Espinaca',
-            price: '$xx.xx',
-            trend: 'up',
-          },
-        ],
-      },
-    ],
-  },
-];
+// Add a mapping of icon names to match major categories
+const CATEGORY_ICON_MAP: Record<string, string> = {
+  'Frutas': 'apple',
+  'Verduras y Hortalizas': 'leaf',
+  'Cereales': 'package',
+  'Legumbres': 'coffee',
+  'Carnes': 'target',
+  'Lácteos': 'droplet',
+  // Add more mappings as needed
+  // Default fallback
+  'default': 'circle'
+};
 
-// Mock data for markets
-const marketsData: Category[] = [
+export type SelectionType = 'products' | 'markets' | 'insumos';
+
+export const useSelectionData = (type: SelectionType) => {
+  const [data, setData] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Simulate API call
+    const fetchData = async () => {
+      setLoading(true);
+      
+      try {
+        console.log(`[useSelectionData] Fetching data for type: ${type}`);
+        
+        switch (type) {
+          case 'products':
+            const productCategories = await fetchProductsData();
+            setData(productCategories);
+            break;
+          case 'markets':
+            // Keep the existing mock markets data for now
+            // In the future, this would be replaced with actual Supabase fetching
+            setData(mockMarketsData);
+            break;
+          case 'insumos':
+            // Keep the existing mock insumos data for now
+            // In the future, this would be replaced with actual Supabase fetching
+            setData(mockInsumosData);
+            break;
+          default:
+            setData([]);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('[useSelectionData] Error fetching data:', err);
+        setError('Error fetching data');
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [type]);
+
+  // Function to fetch and structure product data
+  const fetchProductsData = async (): Promise<Category[]> => {
+    try {
+      console.log('[useSelectionData] Fetching products, major categories, and subcategories');
+      
+      // Fetch all the necessary data in parallel for better performance
+      const [products, majorCategories, subcategories] = await Promise.all([
+        getProducts(),
+        getMajorCategories(),
+        getSubcategories()
+      ]);
+      
+      console.log(`[useSelectionData] Fetched ${products.length} products, ${majorCategories.length} major categories, ${subcategories.length} subcategories`);
+      
+      // Transform the data into the required structure
+      const categoriesMap = new Map<number, Category>();
+      
+      // First, create categories from major categories
+      majorCategories.forEach(majorCategory => {
+        const iconName = CATEGORY_ICON_MAP[majorCategory.MajorCategory] || CATEGORY_ICON_MAP.default;
+        
+        categoriesMap.set(majorCategory.MajorCategoryId, {
+          id: `major-${majorCategory.MajorCategoryId}`,
+          title: majorCategory.MajorCategory,
+          icon: iconName,
+          subCategories: []
+        });
+      });
+      
+      // Then, add subcategories to their respective major categories
+      const subCategoriesMap = new Map<number, SubCategory>();
+      
+      subcategories.forEach(subcategory => {
+        const category = categoriesMap.get(subcategory.MajorCategoryId);
+        
+        if (category) {
+          const subCategory: SubCategory = {
+            id: `sub-${subcategory.Subcategory_Id}`,
+            title: subcategory.Subcategory,
+            items: []
+          };
+          
+          subCategoriesMap.set(subcategory.Subcategory_Id, subCategory);
+          category.subCategories.push(subCategory);
+        }
+      });
+      
+      // Finally, add products to their respective subcategories
+      products.forEach(product => {
+        const subCategory = subCategoriesMap.get(product.SubcategoryId);
+        
+        if (subCategory) {
+          const selectionItem: SelectionItem = {
+            id: product.artiId.toString(),
+            title: product.artiNombre,
+            price: '$xx.xx', // You might want to fetch actual prices from another service
+            trend: determineTrend(), // You might want to determine trend based on historical data
+          };
+          
+          subCategory.items.push(selectionItem);
+        }
+      });
+      
+      // Filter out categories with no subcategories or empty subcategories
+      const result = Array.from(categoriesMap.values())
+        .filter(category => 
+          category.subCategories.length > 0 && 
+          category.subCategories.some(subCategory => subCategory.items.length > 0)
+        );
+      
+      console.log(`[useSelectionData] Constructed ${result.length} categories with data`);
+      
+      return result;
+    } catch (error) {
+      console.error('[useSelectionData] Error in fetchProductsData:', error);
+      throw error;
+    }
+  };
+
+  // Helper to randomly determine a trend (replace with actual logic later)
+  const determineTrend = (): 'up' | 'down' | 'stable' => {
+    const random = Math.random();
+    if (random < 0.33) return 'up';
+    if (random < 0.66) return 'down';
+    return 'stable';
+  };
+
+  return { data, loading, error };
+};
+
+// Mock data for markets (keeping for now)
+const mockMarketsData: Category[] = [
   {
     id: 'regional-markets',
     title: 'Mercados Regionales',
@@ -113,8 +186,8 @@ const marketsData: Category[] = [
   },
 ];
 
-// Mock data for insumos (supplies)
-const insumosData: Category[] = [
+// Mock data for insumos (keeping for now)
+const mockInsumosData: Category[] = [
   {
     id: 'fertilizers',
     title: 'Fertilizantes',
@@ -154,46 +227,5 @@ const insumosData: Category[] = [
     ],
   },
 ];
-
-export const useSelectionData = (type: SelectionType) => {
-  const [data, setData] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Simulate API call
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Simulate delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Return appropriate data based on type
-        switch (type) {
-          case 'products':
-            setData(productsData);
-            break;
-          case 'markets':
-            setData(marketsData);
-            break;
-          case 'insumos':
-            setData(insumosData);
-            break;
-          default:
-            setData([]);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching data');
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [type]);
-
-  return { data, loading, error };
-};
 
 export default useSelectionData;

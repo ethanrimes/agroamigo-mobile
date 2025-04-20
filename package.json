@@ -45,6 +45,7 @@
     "expo-router": "~4.0.20",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
+    "expo-storage": "^52.0.40",
     "expo-system-ui": "~4.0.9",
     "expo-web-browser": "~14.0.2",
     "fs": "^0.0.1-security",
@@ -66,7 +67,8 @@
     "react-native-svg": "^15.8.0",
     "react-native-web": "~0.19.13",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "expo-secure-store": "~14.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
