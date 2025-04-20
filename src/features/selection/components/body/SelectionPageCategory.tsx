@@ -1,11 +1,12 @@
 // src/features/selection/components/body/SelectionPageCategory.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, ListRenderItemInfo } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import CategoryHeader from './CategoryHeader';
 import SubCategoryHeader from './SubCategoryHeader';
 import SelectionListItem from './SelectionListItem';
-import CategoryIcon, { CategoryIconName } from '@/src/components/ui/icons/CategoryIcon';
+import { CategoryIconName } from '@/src/components/ui/icons/CategoryIcon';
+import AccordionAnimation from '@/src/components/animations/AccordionAnimation';
 
 interface SubCategory {
   id: string;
@@ -19,6 +20,7 @@ interface SelectionItem {
   subtitle?: string;
   price: string;
   trend: 'up' | 'down' | 'stable';
+  trendValue?: string;
 }
 
 interface SelectionPageCategoryProps {
@@ -35,6 +37,13 @@ const SelectionPageCategory: React.FC<SelectionPageCategoryProps> = ({
   category,
   onItemPress,
 }) => {
+  // State to track if the accordion is open or closed
+  const [isOpen, setIsOpen] = useState(true);
+
+  const toggleAccordion = () => {
+    setIsOpen(!isOpen);
+  };
+
   const renderItem = ({ item, index }: ListRenderItemInfo<any>) => {
     // If the item is a subcategory header
     if (item.type === 'header') {
@@ -48,6 +57,7 @@ const SelectionPageCategory: React.FC<SelectionPageCategoryProps> = ({
         subtitle={item.subtitle}
         price={item.price}
         trend={item.trend}
+        trendValue={item.trendValue}
         onPress={() => onItemPress && onItemPress(item)}
       />
     );
@@ -81,15 +91,19 @@ const SelectionPageCategory: React.FC<SelectionPageCategoryProps> = ({
     <VStack className="w-full mb-4">
       <CategoryHeader 
         title={category.title} 
-        icon={category.icon as CategoryIconName} 
+        icon={category.icon as CategoryIconName}
+        isOpen={isOpen}
+        onToggle={toggleAccordion}
       />
       
-      <FlatList
-        data={flattenedData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        scrollEnabled={false}
-      />
+      <AccordionAnimation isOpen={isOpen}>
+        <FlatList
+          data={flattenedData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+        />
+      </AccordionAnimation>
     </VStack>
   );
 };
