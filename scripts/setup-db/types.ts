@@ -57,7 +57,7 @@ export interface TableSchema {
   }
   
   export interface Subcategory {
-    Subcategory_Id: number;
+    SubcategoryId: number;
     Subcategory: string;
     MajorCategoryId: number;
   }

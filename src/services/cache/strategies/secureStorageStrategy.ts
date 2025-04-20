@@ -22,21 +22,28 @@ class SecureStorageStrategy implements CacheStrategy {
   async get<T>(key: string): Promise<T | null> {
     try {
       const fullKey = this.getFullKey(key);
-      const jsonValue = await SecureStore.getItemAsync(fullKey);
-      
-      if (jsonValue === null) {
+      // Add a try-catch specifically for the SecureStore.getItemAsync call
+      try {
+        const jsonValue = await SecureStore.getItemAsync(fullKey);
+        
+        if (jsonValue === null) {
+          return null;
+        }
+        
+        const item: CacheItem<T> = JSON.parse(jsonValue);
+        
+        // Check if item has expired
+        if (item.expiresAt !== null && Date.now() > item.expiresAt) {
+          await this.remove(key);
+          return null;
+        }
+        
+        return item.value;
+      } catch (secureStoreError) {
+        console.warn('SecureStore access error:', secureStoreError);
+        // Fall back to null when SecureStore is unavailable
         return null;
       }
-      
-      const item: CacheItem<T> = JSON.parse(jsonValue);
-      
-      // Check if item has expired
-      if (item.expiresAt !== null && Date.now() > item.expiresAt) {
-        await this.remove(key);
-        return null;
-      }
-      
-      return item.value;
     } catch (error) {
       console.error('SecureStore get error:', error);
       return null;
@@ -50,7 +57,12 @@ class SecureStorageStrategy implements CacheStrategy {
       const item: CacheItem<T> = { value, expiresAt };
       
       // SecureStore only accepts string values
-      await SecureStore.setItemAsync(fullKey, JSON.stringify(item));
+      try {
+        await SecureStore.setItemAsync(fullKey, JSON.stringify(item));
+      } catch (secureStoreError) {
+        console.warn('SecureStore write error:', secureStoreError);
+        // Handle the case when SecureStore is not available
+      }
     } catch (error) {
       console.error('SecureStore set error:', error);
     }
@@ -69,7 +81,11 @@ class SecureStorageStrategy implements CacheStrategy {
   async remove(key: string): Promise<void> {
     try {
       const fullKey = this.getFullKey(key);
-      await SecureStore.deleteItemAsync(fullKey);
+      try {
+        await SecureStore.deleteItemAsync(fullKey);
+      } catch (secureStoreError) {
+        console.warn('SecureStore delete error:', secureStoreError);
+      }
     } catch (error) {
       console.error('SecureStore remove error:', error);
     }
@@ -83,18 +99,21 @@ class SecureStorageStrategy implements CacheStrategy {
       console.warn('SecureStore clear operation is not fully supported. Only known keys can be cleared.');
       
       // One option would be to store a master list of keys in SecureStore itself
-      // and then iterate through that list to delete all keys
-      const masterKeyList = await SecureStore.getItemAsync(`${this.keyPrefix}master_key_list`);
-      if (masterKeyList) {
-        const keys: string[] = JSON.parse(masterKeyList);
-        
-        // Delete all keys in the master list
-        for (const key of keys) {
-          await SecureStore.deleteItemAsync(key);
+      try {
+        const masterKeyList = await SecureStore.getItemAsync(`${this.keyPrefix}master_key_list`);
+        if (masterKeyList) {
+          const keys: string[] = JSON.parse(masterKeyList);
+          
+          // Delete all keys in the master list
+          for (const key of keys) {
+            await SecureStore.deleteItemAsync(key);
+          }
+          
+          // Reset the master list
+          await SecureStore.setItemAsync(`${this.keyPrefix}master_key_list`, JSON.stringify([]));
         }
-        
-        // Reset the master list
-        await SecureStore.setItemAsync(`${this.keyPrefix}master_key_list`, JSON.stringify([]));
+      } catch (secureStoreError) {
+        console.warn('SecureStore master key access error:', secureStoreError);
       }
     } catch (error) {
       console.error('SecureStore clear error:', error);
@@ -102,4 +121,7 @@ class SecureStorageStrategy implements CacheStrategy {
   }
 }
 
+// Export the class itself instead of an instance
+export { SecureStorageStrategy };
+// Also export a singleton instance for backward compatibility
 export default new SecureStorageStrategy();

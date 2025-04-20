@@ -78,7 +78,7 @@ const tableSchemas: TableSchema[] = [
   {
     name: 'Subcategory',
     columns: [
-      { name: 'Subcategory_Id', type: 'INT', nullable: false },
+      { name: 'SubcategoryId', type: 'INT', nullable: false },
       { name: 'Subcategory', type: 'VARCHAR(255)', nullable: false },
       { name: 'MajorCategoryId', type: 'INT', nullable: false }
     ],
@@ -91,7 +91,7 @@ const tableSchemas: TableSchema[] = [
         }
       }
     ],
-    primaryKey: 'Subcategory_Id'
+    primaryKey: 'SubcategoryId'
   },
   
   // Producto table
@@ -117,7 +117,7 @@ const tableSchemas: TableSchema[] = [
         column: 'SubcategoryId',
         references: {
           table: 'Subcategory',
-          column: 'Subcategory_Id'
+          column: 'SubcategoryId'
         }
       }
     ],
@@ -174,7 +174,7 @@ const tableSchemas: TableSchema[] = [
         column: 'SubcategoryId',
         references: {
           table: 'Subcategory',
-          column: 'Subcategory_Id'
+          column: 'SubcategoryId'
         }
       },
       {

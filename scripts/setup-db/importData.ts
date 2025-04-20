@@ -124,7 +124,7 @@ import {
       
       // Convert CSV data to the correct types
       const data: Subcategory[] = rawData.map(row => ({
-        Subcategory_Id: parseInt(row.Subcategory_Id),
+        SubcategoryId: parseInt(row.SubcategoryId),
         Subcategory: row.Subcategory,
         MajorCategoryId: parseInt(row.MajorCategoryId),
       }));

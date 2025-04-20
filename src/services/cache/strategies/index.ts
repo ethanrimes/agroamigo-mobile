@@ -1,7 +1,8 @@
 import memoryStrategy from './memoryStrategy';
-import secureStorageStrategy from './secureStorageStrategy';
+import secureStorageStrategy, { SecureStorageStrategy } from './secureStorageStrategy';
 
 export {
   memoryStrategy,
-  secureStorageStrategy
+  secureStorageStrategy,
+  SecureStorageStrategy
 };

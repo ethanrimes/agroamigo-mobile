@@ -3,7 +3,7 @@ import cacheService from '../../cache';
 import { getTTLForEntity } from '../../cache/utils/expiration';
 
 export type Subcategory = {
-  Subcategory_Id: number;
+  SubcategoryId: number;
   Subcategory: string;
   MajorCategoryId: number;
 };
@@ -54,7 +54,7 @@ export const getSubcategoryById = async (subcategoryId: number): Promise<Subcate
   const cachedCollection = await cacheService.getCollection<Subcategory>('Subcategory');
   
   if (cachedCollection) {
-    const subcategory = cachedCollection.find(s => s.Subcategory_Id === subcategoryId);
+    const subcategory = cachedCollection.find(s => s.SubcategoryId === subcategoryId);
     if (subcategory) {
       // Cache the individual result as well
       await cacheService.set(cacheParams, subcategory);
@@ -66,7 +66,7 @@ export const getSubcategoryById = async (subcategoryId: number): Promise<Subcate
   const { data, error } = await supabase
     .from('Subcategory')
     .select('*')
-    .eq('Subcategory_Id', subcategoryId)
+    .eq('SubcategoryId', subcategoryId)
     .single();
   
   if (error) throw error;

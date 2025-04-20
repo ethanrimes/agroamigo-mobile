@@ -79,6 +79,16 @@ export const useSelectionData = (type: SelectionType) => {
       
       console.log(`[useSelectionData] Fetched ${products.length} products, ${majorCategories.length} major categories, ${subcategories.length} subcategories`);
       
+      // Debug: Log samples of each data type
+      console.log('DEBUG - Sample Products (5):');
+      products.slice(0, 5).forEach((p, i) => console.log(`  Product ${i+1}:`, p));
+      
+      console.log('DEBUG - Sample Major Categories (5 or all):');
+      majorCategories.slice(0, 5).forEach((c, i) => console.log(`  Category ${i+1}:`, c));
+      
+      console.log('DEBUG - Sample Subcategories (5):');
+      subcategories.slice(0, 5).forEach((s, i) => console.log(`  Subcategory ${i+1}:`, s));
+      
       // Transform the data into the required structure
       const categoriesMap = new Map<number, Category>();
       
@@ -94,6 +104,10 @@ export const useSelectionData = (type: SelectionType) => {
         });
       });
       
+      console.log('DEBUG - Categories created from major categories:');
+      console.log(`  Total categories: ${categoriesMap.size}`);
+      console.log('  Category IDs in map:', Array.from(categoriesMap.keys()));
+      
       // Then, add subcategories to their respective major categories
       const subCategoriesMap = new Map<number, SubCategory>();
       
@@ -102,21 +116,45 @@ export const useSelectionData = (type: SelectionType) => {
         
         if (category) {
           const subCategory: SubCategory = {
-            id: `sub-${subcategory.Subcategory_Id}`,
+            id: `sub-${subcategory.SubcategoryId}`,
             title: subcategory.Subcategory,
             items: []
           };
           
-          subCategoriesMap.set(subcategory.Subcategory_Id, subCategory);
+          subCategoriesMap.set(subcategory.SubcategoryId, subCategory);
           category.subCategories.push(subCategory);
+        } else {
+          console.log(`WARNING: No major category found for subcategory ${subcategory.Subcategory} (ID: ${subcategory.SubcategoryId}, Major Category ID: ${subcategory.MajorCategoryId})`);
         }
       });
       
+      console.log('DEBUG - Subcategories Map:');
+      console.log(`  Total subcategories: ${subCategoriesMap.size}`);
+      console.log('  Subcategory IDs in map:', Array.from(subCategoriesMap.keys()));
+      
+      // Check data types of keys
+      console.log('DEBUG - Data type check:');
+      if (products.length > 0) {
+        console.log(`  First 5 product SubcategoryId types:`);
+        products.slice(0, 5).forEach((p, i) => 
+          console.log(`    Product ${i+1} SubcategoryId: ${p.SubcategoryId}, Type: ${typeof p.SubcategoryId}`)
+        );
+      }
+      
+      if (subCategoriesMap.size > 0) {
+        console.log(`  First 5 subcategory key types:`);
+        Array.from(subCategoriesMap.keys()).slice(0, 5).forEach((key, i) => 
+          console.log(`    Subcategory key ${i+1}: ${key}, Type: ${typeof key}`)
+        );
+      }
+      
       // Finally, add products to their respective subcategories
+      let matchedProducts = 0;
       products.forEach(product => {
         const subCategory = subCategoriesMap.get(product.SubcategoryId);
         
         if (subCategory) {
+          matchedProducts++;
           const selectionItem: SelectionItem = {
             id: product.artiId.toString(),
             title: product.artiNombre,
@@ -128,6 +166,25 @@ export const useSelectionData = (type: SelectionType) => {
         }
       });
       
+      console.log(`DEBUG - Product mapping results: Matched ${matchedProducts} out of ${products.length} products`);
+      
+      // Debug: Show the first 5 categories and their subcategories with item counts
+      console.log('DEBUG - Category structure after mapping:');
+      Array.from(categoriesMap.values()).slice(0, 5).forEach((category, i) => {
+        console.log(`  Category ${i+1}: ${category.title}`);
+        console.log(`    Subcategories: ${category.subCategories.length}`);
+        category.subCategories.forEach((sub, j) => {
+          console.log(`      Subcategory ${j+1}: ${sub.title}, Items: ${sub.items.length}`);
+        });
+      });
+      
+      // Try a direct lookup for the first 5 products
+      console.log('DEBUG - Direct lookup test for 5 products:');
+      products.slice(0, 5).forEach((product, i) => {
+        const subCategory = subCategoriesMap.get(product.SubcategoryId);
+        console.log(`  Product ${i+1} (${product.artiNombre}, SubcategoryId: ${product.SubcategoryId}): ${subCategory ? 'MATCHED' : 'NOT MATCHED'}`);
+      });
+      
       // Filter out categories with no subcategories or empty subcategories
       const result = Array.from(categoriesMap.values())
         .filter(category => 
@@ -136,6 +193,49 @@ export const useSelectionData = (type: SelectionType) => {
         );
       
       console.log(`[useSelectionData] Constructed ${result.length} categories with data`);
+      
+      // If no categories were constructed, check why
+      if (result.length === 0) {
+        console.log('DEBUG - Why no categories were constructed:');
+        
+        const allCategories = Array.from(categoriesMap.values());
+        console.log(`  Total unfiltered categories: ${allCategories.length}`);
+        
+        const withSubcategories = allCategories.filter(cat => cat.subCategories.length > 0);
+        console.log(`  Categories with subcategories: ${withSubcategories.length}`);
+        
+        const withItems = allCategories.filter(cat => 
+          cat.subCategories.some(sub => sub.items.length > 0)
+        );
+        console.log(`  Categories with subcategories containing items: ${withItems.length}`);
+        
+        // If we're still getting no results, let's try creating a test category 
+        // with some products to ensure the UI rendering works
+        if (result.length === 0 && products.length > 0) {
+          console.log('DEBUG - Creating a test category with sample products for UI testing');
+          
+          const testCategory: Category = {
+            id: 'test-category',
+            title: 'Test Category',
+            icon: 'apple',
+            subCategories: [
+              {
+                id: 'test-subcategory',
+                title: 'Test Subcategory',
+                items: products.slice(0, 10).map(product => ({
+                  id: product.artiId.toString(),
+                  title: product.artiNombre,
+                  price: '$xx.xx',
+                  trend: 'up' as const,
+                }))
+              }
+            ]
+          };
+          
+          // Uncomment this to add a test category for UI debugging
+          // return [testCategory];
+        }
+      }
       
       return result;
     } catch (error) {
