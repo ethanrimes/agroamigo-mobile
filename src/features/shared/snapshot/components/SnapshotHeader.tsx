@@ -7,18 +7,25 @@ interface SnapshotHeaderProps {
   title: string;
   iconSource?: any; // Can be a require() or a URL
   iconName?: string; // For using a system icon
+  subtitle?: string;
 }
 
 const SnapshotHeader: React.FC<SnapshotHeaderProps> = ({
   title,
   iconSource,
   iconName,
+  subtitle,
 }) => {
   const { colors, typography, spacing } = useTheme();
   
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <View style={styles.titleContainer}>
+    <View style={styles.container}>
+      {/* Main header section with title and icon */}
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>
+          {title}
+        </Text>
+        
         {/* Icon */}
         {iconSource && (
           <Image 
@@ -28,41 +35,65 @@ const SnapshotHeader: React.FC<SnapshotHeaderProps> = ({
           />
         )}
         
-        {/* Title */}
-        <Text 
-          style={[
-            styles.title, 
-            // { 
-            //   color: colors.text.primary,
-            //   ...typography.textStyles.headline3,
-            //   marginLeft: iconSource ? spacing.md : 0,
-            // }
-          ]}
-        >
-          {title}
-        </Text>
+        {/* Placeholder for icon without source */}
+        {!iconSource && iconName && (
+          <View style={styles.iconPlaceholder}>
+            {/* This would be replaced with an actual icon component */}
+            <Text style={styles.iconText}>{iconName}</Text>
+          </View>
+        )}
       </View>
+      
+      {/* Subtitle section (e.g., location) */}
+      {subtitle && (
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>{subtitle}</Text>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    padding: 20,
   },
-  titleContainer: {
+  headerRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  icon: {
-    width: 36,
-    height: 36,
+    marginBottom: 16,
   },
   title: {
+    fontSize: 36,
+    fontWeight: 'bold',
     flex: 1,
+  },
+  icon: {
+    width: 48,
+    height: 48,
+  },
+  iconPlaceholder: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#000',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    color: '#fff',
+    fontSize: 24,
+  },
+  subtitleContainer: {
+    backgroundColor: '#F3F4F6',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#4B5563',
   },
 });
 

@@ -28,86 +28,29 @@ const SnapshotData: React.FC<SnapshotDataProps> = ({
     return `${price.toLocaleString('es-CO')}`;
   };
   
-  // Format trend percentage for display
-  const formatTrendPercentage = (percentage: number) => {
-    return `${percentage.toFixed(1)}%`;
-  };
-  
   return (
     <View style={styles.container}>
-      {/* Prices Section */}
-      <View style={styles.pricesContainer}>
-        <View style={styles.priceSection}>
-          {/* Trend ticker and max price label */}
-          <View style={styles.priceRow}>
-            <TrendTicker 
-              value={formatTrendPercentage(trendPercentage)} 
-              trend={trend as any} // Cast to match the expected prop type
-            />
-            <Text style={[
-              styles.priceLabel, 
-              { color: colors.text.secondary || '#666' }
-            ]}>
-              Máximo:
-            </Text>
-          </View>
-          {/* Max price value */}
-          <Text style={[
-            styles.priceValue, 
-            { color: colors.text.primary || '#000' }
-          ]}>
-            {formatPrice(maxPrice)}
-          </Text>
-        </View>
-        
-        <View style={[
-          styles.priceSeparator, 
-          { backgroundColor: colors.border.light || '#E0E0E0' }
-        ]} />
-        
-        <View style={styles.priceSection}>
-          {/* Min price label */}
-          <Text style={[
-            styles.priceLabel, 
-            { color: colors.text.secondary || '#666' }
-          ]}>
-            Mínimo:
-          </Text>
-          {/* Min price value */}
-          <Text style={[
-            styles.priceValue,
-            { color: colors.text.primary || '#000' }
-          ]}>
-            {formatPrice(minPrice)}
-          </Text>
-        </View>
+      {/* Graph Section Label */}
+      <View style={styles.sectionLabelContainer}>
+        <Text style={styles.sectionLabel}>Tendencia Mes</Text>
       </View>
       
-      {/* Additional Info Section */}
+      {/* Price Range Display */}
+      <View style={styles.priceContainer}>
+        <Text style={styles.priceRange}>
+          ${formatPrice(minPrice)} - ${formatPrice(maxPrice)}
+        </Text>
+      </View>
+      
+      {/* Unit and Date Info */}
       <View style={styles.infoContainer}>
-        {unit && (
-          <Text style={[
-            styles.infoText, 
-            { 
-              color: colors.text.primary || '#000',
-              textDecorationLine: 'underline'
-            }
-          ]}>
-            / {unit}
-          </Text>
-        )}
+        <Text style={styles.unitText}>
+          / {unit}
+        </Text>
         
-        {date && (
-          <Text style={[
-            styles.dateText, 
-            { 
-              color: colors.text.secondary || '#666',
-              textDecorationLine: 'underline'
-            }
-          ]}>
-            {date}
-          </Text>
-        )}
+        <Text style={styles.dateText}>
+          {date}
+        </Text>
       </View>
     </View>
   );
@@ -117,47 +60,38 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
   },
-  pricesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  sectionLabelContainer: {
+    marginBottom: 8,
   },
-  priceSection: {
-    flex: 1,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  priceLabel: {
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  priceValue: {
-    fontWeight: 'bold',
+  sectionLabel: {
     fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
   },
-  priceSeparator: {
-    width: 1,
-    height: 40,
-    marginHorizontal: 16,
+  priceContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  priceRange: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   infoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
-  infoText: {
-    textDecorationLine: 'underline',
-    fontSize: 14,
+  unitText: {
+    fontSize: 18,
+    color: '#4B5563',
   },
   dateText: {
-    textDecorationLine: 'underline',
-    fontSize: 14,
+    fontSize: 18,
+    color: '#6B7280',
     fontStyle: 'italic',
-  },
+  }
 });
 
 export default SnapshotData;

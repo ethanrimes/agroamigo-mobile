@@ -16,38 +16,21 @@ interface TrendGraphProps {
 const TrendGraph: React.FC<TrendGraphProps> = memo(({
   data,
   title,
-  showAxis = true,
-  showPoints = false,
+  showAxis = false, // Changed to false to match the design
+  showPoints = false, // Keep points hidden to match the design
 }) => {
   const { colors, typography, spacing } = useTheme();
   
-  // Log received data for debugging
-  useEffect(() => {
-    console.log('[TrendGraph] Received data points:', data?.length || 0);
-    if (data && data.length > 0) {
-      console.log('[TrendGraph] First and last data points:', {
-        first: {
-          date: data[0].date?.toISOString(),
-          value: data[0].value
-        },
-        last: {
-          date: data[data.length - 1].date?.toISOString(),
-          value: data[data.length - 1].value
-        }
-      });
-    }
-  }, [data]);
-  
   // Calculate dimensions for the graph
   const graphWidth = Dimensions.get('window').width * 0.85; 
-  const graphHeight = 180;
+  const graphHeight = 150; // Reduced height to match design
   
-  // Define margins for the graph
+  // Define margins for the graph - smaller margins for cleaner look
   const margin = {
-    top: 20,
-    right: 20,
-    bottom: showAxis ? 30 : 10,
-    left: showAxis ? 50 : 10,
+    top: 5,
+    right: 5,
+    bottom: showAxis ? 20 : 5,
+    left: showAxis ? 30 : 5,
   };
   
   // Format functions
@@ -79,14 +62,11 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
     !isNaN(d.date.getTime())
   );
 
-  // Log valid data
-  console.log(`[TrendGraph] Valid data points: ${validData.length} of ${data.length}`);
-
   if (validData.length < 2) {
     return (
       <View style={[styles.container, styles.emptyContainer]}>
         <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-          Datos insuficientes para mostrar gráfico (necesita al menos 2 puntos)
+          Datos insuficientes para mostrar gráfico
         </Text>
       </View>
     );
@@ -94,25 +74,21 @@ const TrendGraph: React.FC<TrendGraphProps> = memo(({
   
   return (
     <View style={styles.container}>
-      {title && (
-        <Text style={[styles.title, { color: colors.text.primary }]}>
-          {title}
-        </Text>
-      )}
       <BaseD3LineGraph
         data={validData}
         width={graphWidth}
         height={graphHeight}
         margin={margin}
-        color={colors.info.default}
+        color="#4F46E5" // Using a stronger blue color to match the design
         showPoints={showPoints}
         showGrid={false}
         showAxis={showAxis}
         smoothCurve={true}
         formatDate={formatDate}
         formatValue={formatValue}
-        yAxisTickCount={showAxis ? 4 : 0}
-        xAxisTickCount={showAxis ? 5 : 0}
+        yAxisTickCount={0} // No ticks for cleaner look
+        xAxisTickCount={0} // No ticks for cleaner look
+        // lineWidth={3} // Thicker line to match design
       />
     </View>
   );
@@ -123,10 +99,10 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 12,
+    marginVertical: 10,
   },
   emptyContainer: {
-    height: 180,
+    height: 150,
     backgroundColor: '#F5F7FA',
     borderRadius: 8,
     justifyContent: 'center',
@@ -136,11 +112,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     padding: 16,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
   }
 });
 

@@ -1,12 +1,13 @@
 // src/features/shared/snapshot/modals/productoSnapshot.tsx
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, ScrollView } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import SnapshotHeader from '../components/SnapshotHeader';
 import SnapshotData from '../components/SnapshotData';
 import TrendGraph from '../components/TrendGraph';
 import SnapshotButtons from '../components/SnapshotButtons';
 import useProductModalData from '../hooks/useProductModalData';
+import { useLocationStore } from '@/src/store/locationStore';
 
 interface ProductoSnapshotProps {
   productId: number;
@@ -15,6 +16,15 @@ interface ProductoSnapshotProps {
 
 const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose }) => {
   const { colors, spacing } = useTheme();
+  const { locationName, departmentName, municipalityName } = useLocationStore();
+  
+  // Format location display
+  const getLocationDisplay = () => {
+    if (municipalityName && departmentName) {
+      return `${municipalityName}, ${departmentName} - CMA`;
+    }
+    return locationName || 'Ubicación';
+  };
   
   // Load product data using our hook
   const { 
@@ -40,7 +50,7 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color={colors.primary.default} />
-        <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
+        <Text style={styles.loadingText}>
           Cargando datos del producto...
         </Text>
       </View>
@@ -51,65 +61,62 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
   if (error || !productData) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Text style={[styles.errorText, ]}>
+        <Text style={styles.errorText}>
           Error al cargar los datos. Intente de nuevo.
         </Text>
-        <Text style={[styles.errorDetail, { color: colors.text.secondary }]}>
+        <Text style={styles.errorDetail}>
           {error?.message || 'No se encontraron datos para este producto'}
         </Text>
       </View>
     );
   }
   
-  // Log what we're displaying
-  console.log('[ProductoSnapshot] Rendering with productData:', {
-    name: productData.name,
-    prices: `${productData.minPrice} - ${productData.maxPrice}`,
-    unit: productData.unit,
-    date: productData.date,
-    graphPoints: graphData?.length || 0
-  });
-  
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {/* Header with product name */}
-      <SnapshotHeader 
-        title={productData.name}
-        iconName={productData.iconName}
-      />
+    <View style={styles.container}>
+      {/* Close button */}
+      <TouchableOpacity 
+        style={styles.closeButton} 
+        onPress={onClose}
+      >
+        <Text style={styles.closeButtonText}>X</Text>
+      </TouchableOpacity>
       
-      {/* Price data section */}
-      <SnapshotData
-        maxPrice={productData.maxPrice}
-        minPrice={productData.minPrice}
-        unit={productData.unit}
-        date={productData.date}
-        trend={productData.trend}
-        trendPercentage={productData.trendPercentage}
-      />
-      
-      {/* Trend Graph */}
-      <View style={styles.graphContainer}>
-        <Text style={[styles.graphTitle, { color: colors.text.secondary }]}>
-          Tendencia de precio
-        </Text>
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.contentContainer}
+      >
+        {/* Header with product name and icon */}
+        <SnapshotHeader 
+          title={productData.name}
+          iconName={productData.iconName}
+          subtitle={getLocationDisplay()}
+        />
+        
+        {/* Trend Graph */}
         <TrendGraph
           data={graphData}
-          showAxis={true}
-          showPoints={true}
+          showAxis={false}
+          showPoints={false}
         />
-      </View>
-      
-      {/* Action Buttons */}
-      <SnapshotButtons
-        onCompare={() => console.log('Compare markets clicked')}
-        onAddFavorite={() => console.log('Add to favorites clicked')}
-        onViewAnalysis={() => console.log('View analysis clicked')}
-      />
-    </ScrollView>
+        
+        {/* Price data section */}
+        <SnapshotData
+          maxPrice={productData.maxPrice}
+          minPrice={productData.minPrice}
+          unit={productData.unit}
+          date={productData.date}
+          trend={productData.trend}
+          trendPercentage={productData.trendPercentage}
+        />
+        
+        {/* Action Buttons */}
+        <SnapshotButtons
+          onCompare={() => console.log('Compare markets clicked')}
+          onAddFavorite={() => console.log('Add to favorites clicked')}
+          onViewAnalysis={() => console.log('View analysis clicked')}
+        />
+      </ScrollView>
+    </View>
   );
 };
 
@@ -117,9 +124,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    borderRadius: 8,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
+    padding: 8,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  scrollContainer: {
+    flex: 1,
   },
   contentContainer: {
-    flexGrow: 1,
+    paddingBottom: 20,
   },
   centerContent: {
     justifyContent: 'center',
@@ -130,25 +153,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+    color: '#4B5563',
   },
   errorText: {
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
+    color: '#EF4444',
   },
   errorDetail: {
     fontSize: 14,
     textAlign: 'center',
-  },
-  graphContainer: {
-    padding: 16,
-    paddingTop: 8,
-  },
-  graphTitle: {
-    fontSize: 16,
-    marginBottom: 8,
-    textAlign: 'center',
+    color: '#6B7280',
   }
 });
 

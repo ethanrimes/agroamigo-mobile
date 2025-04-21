@@ -1,10 +1,6 @@
 // src/features/shared/snapshot/components/SnapshotButtons.tsx
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import {
-  Button,
-  ButtonText,
-} from '@/components/ui/button';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
 interface SnapshotButtonsProps {
@@ -22,64 +18,41 @@ const SnapshotButtons: React.FC<SnapshotButtonsProps> = ({
   
   return (
     <View style={styles.container}>
-      {/* Compare button */}
-      <Button
-        style={[
-          styles.button,
-          { 
-            borderColor: colors.border.light,
-            borderRadius: borders.borderRadii.md,
-          }
-        ]}
-        onPress={onCompare}
-        variant="outline"
-        action="secondary"
-        disabled={!onCompare}
-      >
-        <ButtonText 
-          style={{ textDecorationLine: 'underline' }}
+      {/* Row with two buttons */}
+      <View style={styles.buttonRow}>
+        {/* Compare Markets button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onCompare}
+          disabled={!onCompare}
         >
-          Comparar mercados
-        </ButtonText>
-      </Button>
+          <Text style={styles.buttonText}>
+            Comparar mercados
+          </Text>
+        </TouchableOpacity>
+        
+        {/* Add to Favorites button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onAddFavorite}
+          disabled={!onAddFavorite}
+        >
+          <Text style={styles.buttonText}>
+            Agregar a favoritos
+          </Text>
+        </TouchableOpacity>
+      </View>
       
-      {/* Add to favorites button */}
-      <Button
-        style={[
-          styles.button,
-          { 
-            borderColor: colors.border.light,
-            borderRadius: borders.borderRadii.md,
-          }
-        ]}
-        onPress={onAddFavorite}
-        variant="outline"
-        action="secondary"
-        disabled={!onAddFavorite}
-      >
-        <ButtonText>
-          Agregar a favoritos
-        </ButtonText>
-      </Button>
-      
-      {/* View analysis button (full width) */}
-      <Button
-        style={[
-          styles.fullWidthButton,
-          { 
-            borderColor: colors.border.light,
-            borderRadius: borders.borderRadii.md,
-          }
-        ]}
+      {/* View Analysis button (full width) */}
+      <TouchableOpacity
+        style={styles.fullWidthButton}
         onPress={onViewAnalysis}
-        variant="outline"
-        action="secondary"
         disabled={!onViewAnalysis}
       >
-        <ButtonText style={{ textDecorationLine: 'underline' }}>
+        <Text style={styles.buttonText}>
           Ver análisis
-        </ButtonText>
-      </Button>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -87,17 +60,32 @@ const SnapshotButtons: React.FC<SnapshotButtonsProps> = ({
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
   },
-  button: {
-    width: '48%', // Almost half, with a little space between
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
-  fullWidthButton: {
-    width: '100%',
+  button: {
+    backgroundColor: '#F3F4F6',
+    padding: 16,
+    borderRadius: 8,
+    width: '48%',
+    alignItems: 'center',
   },
+  fullWidthButton: {
+    backgroundColor: '#F3F4F6',
+    padding: 16,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#111827',
+    textDecorationLine: 'underline',
+  }
 });
 
 export default SnapshotButtons;

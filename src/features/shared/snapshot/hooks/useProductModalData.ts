@@ -104,8 +104,8 @@ export const useProductModalData = (productId: number | null) => {
           console.log(`[useProductModalData] Using graph data for prices: Min=${minPrice}, Max=${maxPrice}`);
         } else {
           // Default values if no data
-          minPrice = 5000;
-          maxPrice = 8000;
+          minPrice = 0;
+          maxPrice = 0;
           observationDate = formatDate(new Date());
           
           console.log('[useProductModalData] No price data available, using defaults');
