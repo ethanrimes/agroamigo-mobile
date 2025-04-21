@@ -11,7 +11,19 @@ import { useHomeData } from '../hooks/useHomeData';
 
 const HomeScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { savedPrices, featuredPriceData, isLoading, error } = useHomeData();
+  const { 
+    savedPrices, 
+    featuredPriceData, 
+    isLoading, 
+    error,
+    locationName,
+    currentLocationId
+  } = useHomeData();
+  
+  // Create a location display string
+  const locationDisplayString = React.useMemo(() => {
+    return locationName || `Market ID: ${currentLocationId}`;
+  }, [locationName, currentLocationId]);
   
   // Render loading state
   if (isLoading) {
@@ -35,8 +47,8 @@ const HomeScreen: React.FC = () => {
   
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
-      {/* Theme Header with Logo and Location */}
-      <ThemeHeader location="Medellin, Antioquia" />
+      {/* Theme Header with Logo and Location from locationStore */}
+      <ThemeHeader location={locationDisplayString} />
       
       <ScrollView 
         style={styles.scrollContainer}

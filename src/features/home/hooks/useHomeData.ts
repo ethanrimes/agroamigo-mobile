@@ -2,8 +2,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useHomeActions, SavedPriceItem, FeaturedPriceItem } from './useHomeActions';
 import { getProductById } from '@/src/services/supabase/entities/producto';
-import { getDailyPriceObservationsByProduct } from '@/src/services/supabase/entities/precio';
+import { 
+  getDailyPriceObservationsByProduct,
+  getDailyPriceObservationsByProductAndMarket 
+} from '@/src/services/supabase/entities/precio';
 import { getUnitsPresentationById } from '@/src/services/supabase/entities/unitsPresentation';
+import { useLocationStore } from '@/src/store/locationStore';
 
 // UI data model for saved prices and featured prices
 export interface PriceDisplayItem {
@@ -24,6 +28,7 @@ export const useSavedPricesData = () => {
   const [priceItems, setPriceItems] = useState<PriceDisplayItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { currentLocationId } = useLocationStore();
 
   useEffect(() => {
     const fetchPriceData = async () => {
@@ -41,15 +46,26 @@ export const useSavedPricesData = () => {
               // Fetch the units presentation name
               const unitsPresentation = await getUnitsPresentationById(item.UnitsPresentationId);
               
-              // Fetch the recent price observations
-              const priceObservations = await getDailyPriceObservationsByProduct(item.artiId);
+              // Fetch the recent price observations filtered by product AND market
+              const priceObservations = await getDailyPriceObservationsByProductAndMarket(
+                item.artiId,
+                currentLocationId
+              );
+              
+              // If no observations for the current market, fallback to any available data
+              let sortedObservations = priceObservations;
+              
+              if (!sortedObservations || sortedObservations.length === 0) {
+                console.log(`No observations for product ${item.artiId} in market ${currentLocationId}, fetching any available data`);
+                const allObservations = await getDailyPriceObservationsByProduct(item.artiId);
+                sortedObservations = allObservations;
+              }
               
               // Sort by date descending to get most recent first
-              const sortedObservations = priceObservations
-                .sort((a, b) => {
-                  if (!a.date || !b.date) return 0;
-                  return new Date(b.date).getTime() - new Date(a.date).getTime();
-                });
+              sortedObservations = sortedObservations.sort((a, b) => {
+                if (!a.date || !b.date) return 0;
+                return new Date(b.date).getTime() - new Date(a.date).getTime();
+              });
               
               // Get the most recent observation
               const latestObservation = sortedObservations[0];
@@ -116,7 +132,7 @@ export const useSavedPricesData = () => {
     };
     
     fetchPriceData();
-  }, [savedPrices, isLoadingActions]);
+  }, [savedPrices, isLoadingActions, currentLocationId]);  // Add currentLocationId dependency
   
   return {
     savedPrices: priceItems,
@@ -131,6 +147,7 @@ export const useFeaturedPriceData = () => {
   const [featuredPriceData, setFeaturedPriceData] = useState<PriceDisplayItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { currentLocationId } = useLocationStore();
   
   useEffect(() => {
     const fetchFeaturedPriceData = async () => {
@@ -145,15 +162,26 @@ export const useFeaturedPriceData = () => {
         // Fetch the units presentation name
         const unitsPresentation = await getUnitsPresentationById(featuredPriceItem.UnitsPresentationId);
         
-        // Fetch the recent price observations
-        const priceObservations = await getDailyPriceObservationsByProduct(featuredPriceItem.artiId);
+        // Fetch the recent price observations filtered by product AND market
+        const priceObservations = await getDailyPriceObservationsByProductAndMarket(
+          featuredPriceItem.artiId,
+          currentLocationId
+        );
+        
+        // If no observations for the current market, fallback to any available data
+        let sortedObservations = priceObservations;
+        
+        if (!sortedObservations || sortedObservations.length === 0) {
+          console.log(`No observations for featured product ${featuredPriceItem.artiId} in market ${currentLocationId}, fetching any available data`);
+          const allObservations = await getDailyPriceObservationsByProduct(featuredPriceItem.artiId);
+          sortedObservations = allObservations;
+        }
         
         // Sort by date descending to get most recent first
-        const sortedObservations = priceObservations
-          .sort((a, b) => {
-            if (!a.date || !b.date) return 0;
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-          });
+        sortedObservations = sortedObservations.sort((a, b) => {
+          if (!a.date || !b.date) return 0;
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
         
         // Get the most recent observation
         const latestObservation = sortedObservations[0];
@@ -205,7 +233,7 @@ export const useFeaturedPriceData = () => {
     };
     
     fetchFeaturedPriceData();
-  }, [featuredPriceItem, isLoadingActions]);
+  }, [featuredPriceItem, isLoadingActions, currentLocationId]);  // Add currentLocationId dependency
   
   return {
     featuredPriceData,
@@ -219,6 +247,7 @@ export const useHomeData = () => {
   const { savedPrices, isLoading: isSavedPricesLoading, error: savedPricesError } = useSavedPricesData();
   const { featuredPriceData, isLoading: isFeaturedPriceLoading, error: featuredPriceError } = useFeaturedPriceData();
   const { getRandomFeaturedPriceItem } = useHomeActions();
+  const { currentLocationId, locationName } = useLocationStore();
   
   // Create a derived random featured item if we have multiple featured items
   const featuredItem = useMemo(() => {
@@ -233,6 +262,8 @@ export const useHomeData = () => {
     featuredPriceData: featuredItem,
     isLoading: isSavedPricesLoading || isFeaturedPriceLoading,
     error: savedPricesError || featuredPriceError,
+    currentLocationId,
+    locationName,
   };
 };
 

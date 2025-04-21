@@ -7,8 +7,6 @@ import { getProducts, Product } from '@/src/services/supabase/entities/producto'
 import { getMajorCategories, MajorCategory } from '@/src/services/supabase/entities/majorCategories';
 import { getSubcategories, Subcategory } from '@/src/services/supabase/entities/subcategories';
 
-// Removed the CATEGORY_ICON_MAP since we now have Icon field in the database
-
 export const useProductData = () => {
   const [data, setData] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

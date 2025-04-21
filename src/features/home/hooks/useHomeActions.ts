@@ -3,6 +3,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { savedProductsManager, SavedProduct } from '@/src/services/cache/entities/savedProductsManager';
 import { getProductById } from '@/src/services/supabase/entities/producto';
 import { useRouter } from 'expo-router';
+import { useLocationStore } from '@/src/store/locationStore';
+import { getDailyPriceObservationsByMarket } from '@/src/services/supabase/entities/precio';
 
 // Define the types
 export interface SavedPriceItem {
@@ -33,6 +35,7 @@ export const useHomeActions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { currentLocationId } = useLocationStore();
   
   // Function to fetch saved products
   useEffect(() => {
@@ -79,6 +82,58 @@ export const useHomeActions = () => {
     
     fetchSavedProducts();
   }, []);
+  
+  // Function to fetch a featured price item based on current location
+  useEffect(() => {
+    const fetchFeaturedPriceItem = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get price observations for the current market
+        const marketObservations = await getDailyPriceObservationsByMarket(currentLocationId);
+        
+        // If there are no observations for this market, keep the default
+        if (!marketObservations || marketObservations.length === 0) {
+          console.log(`No price observations for market ID: ${currentLocationId}`);
+          return;
+        }
+        
+        // Get the most recent observations
+        const recentObservations = marketObservations
+          .sort((a, b) => {
+            if (!a.date || !b.date) return 0;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+          })
+          .slice(0, 10); // Take the 10 most recent observations
+        
+        // Pick a random observation from the recent ones
+        const randomIndex = Math.floor(Math.random() * recentObservations.length);
+        const selectedObservation = recentObservations[randomIndex];
+        
+        if (selectedObservation) {
+          // Fetch the product details to get the icon
+          const productDetails = await getProductById(selectedObservation.artiId);
+          
+          setFeaturedPriceItem({
+            artiId: selectedObservation.artiId,
+            UnitsId: selectedObservation.unitsId || 1,
+            PresentationId: selectedObservation.presentationId || 1,
+            UnitsPresentationId: selectedObservation.UnitsPresentationId || 1,
+            icon: productDetails.Icon || 'package', // Default to 'package' if no icon
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching featured price item:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Only fetch featured price item if we have a valid market ID
+    if (currentLocationId > 0) {
+      fetchFeaturedPriceItem();
+    }
+  }, [currentLocationId]);
   
   // Function to get a random featured price item
   const getRandomFeaturedPriceItem = useCallback(<T extends {artiId: number}>(items: T[] | null): T | null => {
