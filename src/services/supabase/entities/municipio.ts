@@ -5,7 +5,6 @@ import { getTTLForEntity } from '../../cache/utils/expiration';
 export type Municipio = {
   CodMunicipio: number;
   Municipio: string;
-  Departamento: string;
   CodDepartamento: number;
   Icon: string; // Added Icon field
 };

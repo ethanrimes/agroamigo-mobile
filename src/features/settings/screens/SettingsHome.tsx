@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import ThemeHeader from '@/src/components/molecules/ThemeHeader';
+import ThemeHeader from '@/src/features/shared/themeHeader/ThemeHeader';
 import SettingsHeader from '../components/SettingsHeader';
 import SettingsSection from '../components/SettingsSection';
 import SettingsItem from '../components/SettingsItem';
@@ -23,13 +23,13 @@ const SettingsHome: React.FC = () => {
 
         <SettingsSection title="Datos">
           <SettingsItem title="Ubicación predeterminada" route="/settings/location" />
-          <SettingsItem title="Control de información" route="/settings/products-visibility" />
+          <SettingsItem title="Preferencias de datos" route="/settings/datos" />
           <SettingsItem title="Caché sin conexión" route="/settings/offline-cache" />
         </SettingsSection>
 
         <SettingsSection title="Permisos">
-          <SettingsItem title="Usar mi ubicación" route="/settings/location-permission" />
-          <SettingsItem title="Recibir notificaciones" route="/settings/notifications" />
+          <SettingsItem title="Ubicación" route="/settings/location-permission" />
+          <SettingsItem title="Notificaciones" route="/settings/notifications" />
         </SettingsSection>
 
         <SettingsSection title="Información">

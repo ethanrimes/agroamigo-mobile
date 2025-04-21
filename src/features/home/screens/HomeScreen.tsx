@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import ThemeHeader from '@/src/components/molecules/ThemeHeader';
+import ThemeHeader from '@/src/features/shared/themeHeader/ThemeHeader';
 import HomeHeader from '../components/header/HomeHeader';
 import SavedPricesCarousel from '../components/body/SavedPricesCarousel';
 import Divider from '@/src/components/ui/layout/Separator';

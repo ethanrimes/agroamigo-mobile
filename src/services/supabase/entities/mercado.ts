@@ -5,9 +5,7 @@ import { getTTLForEntity } from '../../cache/utils/expiration';
 export type Market = {
   fuenId: number;
   Mercado: string;
-  Departamento: string;
   CodDepartamento: number;
-  Municipio: string;
   CodMunicipio: number;
   Icon: string; // Added Icon field
 };
