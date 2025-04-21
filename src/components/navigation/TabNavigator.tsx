@@ -1,7 +1,7 @@
 // src/components/ui/navigation/TabNavigator.tsx
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
-import { Home, Leaf, ShoppingBag, Globe } from 'lucide-react-native';
+import { Home, Leaf, ShoppingBag, Globe, Settings } from 'lucide-react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 
@@ -47,6 +47,12 @@ export const TabNavigator: React.FC = () => {
       label: 'Insumos',
       icon: (props: TabIconProps) => <ShoppingBag {...props} />,
       path: '/insumos',
+    },
+    {
+      name: 'settings',
+      label: 'Ajustes',
+      icon: (props: TabIconProps) => <Settings {...props} />,
+      path: '/settings',
     },
   ];
 
