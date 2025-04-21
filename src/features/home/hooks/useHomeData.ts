@@ -1,32 +1,12 @@
 // src/features/home/hooks/useHomeData.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useHomeActions, SavedPriceItem, FeaturedPriceItem } from './useHomeActions';
+import { getProductById } from '@/src/services/supabase/entities/producto';
+import { getDailyPriceObservationsByProduct } from '@/src/services/supabase/entities/precio';
+import { getUnitsPresentationById } from '@/src/services/supabase/entities/unitsPresentation';
 
-// Define types for our data models
-interface PriceObservation {
-  dailyPriceObsId: number;
-  minPrice: number;
-  maxPrice: number;
-  artiId: number;
-  SubcategoryId: number;
-  MajorCategoryId: number;
-  fuenId: number;
-  CodMunicipio: number;
-  CodDepartamento: number;
-  PresentationId: number;
-  UnitsId: number;
-}
-
-interface Product {
-  artiId: number;
-  artiNombre: string;
-  keystring: string;
-  MajorCategoryId: number;
-  SubcategoryId: number;
-  icon: string;
-}
-
-// Combined type for the UI
-interface SavedPriceItem {
+// UI data model for saved prices and featured prices
+export interface PriceDisplayItem {
   artiId: number;
   artiNombre: string;
   minPrice: number;
@@ -35,134 +15,224 @@ interface SavedPriceItem {
   trend: 'up' | 'down' | 'neutral';
   trendValue: string;
   origin?: string;
+  unitsPresentationName?: string;
 }
 
-export const useHomeData = () => {
-  const [savedPrices, setSavedPrices] = useState<SavedPriceItem[]>([]);
-  const [featuredPriceData, setFeaturedPriceData] = useState<SavedPriceItem[]>([]);
+// Hook to get data for the saved prices
+export const useSavedPricesData = () => {
+  const { savedPrices, isLoading: isLoadingActions } = useHomeActions();
+  const [priceItems, setPriceItems] = useState<PriceDisplayItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    // For now, we'll use dummy data
-    const fetchHomeData = async () => {
+    const fetchPriceData = async () => {
+      if (isLoadingActions || savedPrices.length === 0) return;
+
       try {
         setIsLoading(true);
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const priceDisplayItems = await Promise.all(
+          savedPrices.map(async (item): Promise<PriceDisplayItem> => {
+            try {
+              // Fetch product details
+              const product = await getProductById(item.artiId);
+              
+              // Fetch the units presentation name
+              const unitsPresentation = await getUnitsPresentationById(item.UnitsPresentationId);
+              
+              // Fetch the recent price observations
+              const priceObservations = await getDailyPriceObservationsByProduct(item.artiId);
+              
+              // Sort by date descending to get most recent first
+              const sortedObservations = priceObservations
+                .sort((a, b) => {
+                  if (!a.date || !b.date) return 0;
+                  return new Date(b.date).getTime() - new Date(a.date).getTime();
+                });
+              
+              // Get the most recent observation
+              const latestObservation = sortedObservations[0];
+              
+              // Get the previous observation for trend comparison
+              const previousObservation = sortedObservations[1];
+              
+              // Calculate trend percentage
+              let trendValue = '0%';
+              let trend: 'up' | 'down' | 'neutral' = 'neutral';
+              
+              if (latestObservation && previousObservation) {
+                // Calculate average prices
+                const latestAvg = (latestObservation.minPrice + latestObservation.maxPrice) / 2;
+                const prevAvg = (previousObservation.minPrice + previousObservation.maxPrice) / 2;
+                
+                // Calculate percentage change
+                const percentChange = ((latestAvg - prevAvg) / prevAvg) * 100;
+                
+                // Determine trend direction
+                if (percentChange > 0) {
+                  trend = 'up';
+                } else if (percentChange < 0) {
+                  trend = 'down';
+                }
+                
+                // Format trend value as percentage
+                trendValue = `${Math.abs(percentChange).toFixed(1)}%`;
+              }
+              
+              return {
+                artiId: item.artiId,
+                artiNombre: product.artiNombre,
+                minPrice: latestObservation?.minPrice || 0,
+                maxPrice: latestObservation?.maxPrice || 0,
+                icon: item.icon,
+                trend,
+                trendValue,
+                unitsPresentationName: unitsPresentation?.Name,
+              };
+            } catch (err) {
+              console.error(`Error fetching price data for product ${item.artiId}:`, err);
+              // Return a default object if there's an error
+              return {
+                artiId: item.artiId,
+                artiNombre: 'Product unavailable',
+                minPrice: 0,
+                maxPrice: 0,
+                icon: item.icon || 'package',
+                trend: 'neutral',
+                trendValue: '0%',
+              };
+            }
+          })
+        );
         
-        // Mock data for saved prices
-        const mockSavedPrices: SavedPriceItem[] = [
-          {
-            artiId: 1,
-            artiNombre: 'Tomate',
-            minPrice: 2500,
-            maxPrice: 3500,
-            icon: 'cherry',
-            trend: 'down',
-            trendValue: '10%',
-          },
-          {
-            artiId: 2,
-            artiNombre: 'Cebolla',
-            minPrice: 1800,
-            maxPrice: 2200,
-            icon: 'potato',
-            trend: 'up',
-            trendValue: '5%',
-          },
-          {
-            artiId: 3,
-            artiNombre: 'Zanahoria',
-            minPrice: 1200,
-            maxPrice: 1500,
-            icon: 'carrot',
-            trend: 'down',
-            trendValue: '3%',
-          },
-          {
-            artiId: 4,
-            artiNombre: 'Papa',
-            minPrice: 1000,
-            maxPrice: 1300,
-            icon: 'potato',
-            trend: 'up',
-            trendValue: '8%',
-          },
-          {
-            artiId: 5,
-            artiNombre: 'Manzana',
-            minPrice: 3000,
-            maxPrice: 4500,
-            icon: 'apple',
-            trend: 'down',
-            trendValue: '15%',
-            origin: 'Importada',
-          },
-          {
-            artiId: 6,
-            artiNombre: 'Pescado',
-            minPrice: 12000,
-            maxPrice: 15000,
-            icon: 'fish',
-            trend: 'neutral',
-            trendValue: '0%',
-          },
-        ];
-        
-        // Mock data for featured prices
-        const mockFeaturedPrices: SavedPriceItem[] = [
-          {
-            artiId: 5,
-            artiNombre: 'Manzana',
-            minPrice: 3000,
-            maxPrice: 4500,
-            icon: 'apple',
-            trend: 'down',
-            trendValue: '15%',
-            origin: 'Importada',
-          },
-          {
-            artiId: 7,
-            artiNombre: 'Banana',
-            minPrice: 2000,
-            maxPrice: 2800,
-            icon: 'banana',
-            trend: 'up',
-            trendValue: '7%',
-            origin: 'Importada',
-          },
-          {
-            artiId: 8,
-            artiNombre: 'Carne',
-            minPrice: 18000,
-            maxPrice: 25000,
-            icon: 'beef',
-            trend: 'down',
-            trendValue: '3%',
-          },
-        ];
-        
-        setSavedPrices(mockSavedPrices);
-        setFeaturedPriceData(mockFeaturedPrices);
-        setIsLoading(false);
+        setPriceItems(priceDisplayItems);
       } catch (err) {
-        setError('Error fetching home data');
+        setError('Error fetching price data');
+        console.error('Error fetching price data:', err);
+      } finally {
         setIsLoading(false);
-        console.error('Error fetching home data:', err);
       }
     };
     
-    fetchHomeData();
-  }, []);
+    fetchPriceData();
+  }, [savedPrices, isLoadingActions]);
+  
+  return {
+    savedPrices: priceItems,
+    isLoading: isLoading || isLoadingActions,
+    error,
+  };
+};
+
+// Hook to get data for the featured price
+export const useFeaturedPriceData = () => {
+  const { featuredPriceItem, isLoading: isLoadingActions } = useHomeActions();
+  const [featuredPriceData, setFeaturedPriceData] = useState<PriceDisplayItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchFeaturedPriceData = async () => {
+      if (isLoadingActions || !featuredPriceItem) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch product details
+        const product = await getProductById(featuredPriceItem.artiId);
+        
+        // Fetch the units presentation name
+        const unitsPresentation = await getUnitsPresentationById(featuredPriceItem.UnitsPresentationId);
+        
+        // Fetch the recent price observations
+        const priceObservations = await getDailyPriceObservationsByProduct(featuredPriceItem.artiId);
+        
+        // Sort by date descending to get most recent first
+        const sortedObservations = priceObservations
+          .sort((a, b) => {
+            if (!a.date || !b.date) return 0;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+          });
+        
+        // Get the most recent observation
+        const latestObservation = sortedObservations[0];
+        
+        // Get the previous observation for trend comparison
+        const previousObservation = sortedObservations[1];
+        
+        // Calculate trend percentage
+        let trendValue = '0%';
+        let trend: 'up' | 'down' | 'neutral' = 'neutral';
+        
+        if (latestObservation && previousObservation) {
+          // Calculate average prices
+          const latestAvg = (latestObservation.minPrice + latestObservation.maxPrice) / 2;
+          const prevAvg = (previousObservation.minPrice + previousObservation.maxPrice) / 2;
+          
+          // Calculate percentage change
+          const percentChange = ((latestAvg - prevAvg) / prevAvg) * 100;
+          
+          // Determine trend direction
+          if (percentChange > 0) {
+            trend = 'up';
+          } else if (percentChange < 0) {
+            trend = 'down';
+          }
+          
+          // Format trend value as percentage
+          trendValue = `${Math.abs(percentChange).toFixed(1)}%`;
+        }
+        
+        setFeaturedPriceData({
+          artiId: featuredPriceItem.artiId,
+          artiNombre: product.artiNombre,
+          minPrice: latestObservation?.minPrice || 0,
+          maxPrice: latestObservation?.maxPrice || 0,
+          icon: featuredPriceItem.icon,
+          trend,
+          trendValue,
+          unitsPresentationName: unitsPresentation?.Name,
+          // Determine if imported (this is just a placeholder, you may need to adjust this logic)
+          origin: product.MajorCategoryId === 3 ? 'Importada' : undefined,
+        });
+      } catch (err) {
+        setError('Error fetching featured price data');
+        console.error('Error fetching featured price data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchFeaturedPriceData();
+  }, [featuredPriceItem, isLoadingActions]);
+  
+  return {
+    featuredPriceData,
+    isLoading: isLoading || isLoadingActions,
+    error,
+  };
+};
+
+// Main hook that combines both data sources
+export const useHomeData = () => {
+  const { savedPrices, isLoading: isSavedPricesLoading, error: savedPricesError } = useSavedPricesData();
+  const { featuredPriceData, isLoading: isFeaturedPriceLoading, error: featuredPriceError } = useFeaturedPriceData();
+  const { getRandomFeaturedPriceItem } = useHomeActions();
+  
+  // Create a derived random featured item if we have multiple featured items
+  const featuredItem = useMemo(() => {
+    if (Array.isArray(featuredPriceData)) {
+      return getRandomFeaturedPriceItem(featuredPriceData);
+    }
+    return featuredPriceData;
+  }, [featuredPriceData, getRandomFeaturedPriceItem]);
   
   return {
     savedPrices,
-    featuredPriceData,
-    isLoading,
-    error,
+    featuredPriceData: featuredItem,
+    isLoading: isSavedPricesLoading || isFeaturedPriceLoading,
+    error: savedPricesError || featuredPriceError,
   };
 };
 

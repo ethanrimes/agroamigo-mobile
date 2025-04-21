@@ -1,58 +1,166 @@
 // src/features/home/hooks/useHomeActions.ts
 import { useState, useCallback, useEffect } from 'react';
+import { savedProductsManager, SavedProduct } from '@/src/services/cache/entities/savedProductsManager';
+import { getProductById } from '@/src/services/supabase/entities/producto';
+import { useRouter } from 'expo-router';
 
 // Define the types
-interface SavedPriceItem {
+export interface SavedPriceItem {
   artiId: number;
-  artiNombre: string;
-  minPrice: number;
-  maxPrice: number;
+  UnitsId: number;
+  PresentationId: number;
+  UnitsPresentationId: number;
   icon: string;
-  trend: 'up' | 'down' | 'neutral';
-  trendValue: string;
-  origin?: string;
+}
+
+export interface FeaturedPriceItem {
+  artiId: number;
+  UnitsId: number;
+  PresentationId: number;
+  UnitsPresentationId: number;
+  icon: string;
 }
 
 export const useHomeActions = () => {
-  // State to track the current featured item index
-  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+  const [savedPrices, setSavedPrices] = useState<SavedPriceItem[]>([]);
+  const [featuredPriceItem, setFeaturedPriceItem] = useState<FeaturedPriceItem>({
+    artiId: 1, 
+    UnitsId: 1, 
+    PresentationId: 1,
+    UnitsPresentationId: 1,
+    icon: "apple"
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  
+  // Function to fetch saved products
+  useEffect(() => {
+    const fetchSavedProducts = async () => {
+      try {
+        setIsLoading(true);
+        // Get saved products from the savedProductsManager
+        const products = await savedProductsManager.getSavedProducts();
+        
+        // For each saved product, fetch the product details to get the icon
+        const enrichedProducts = await Promise.all(
+          products.map(async (product): Promise<SavedPriceItem> => {
+            try {
+              const productDetails = await getProductById(product.artiId);
+              return {
+                artiId: product.artiId,
+                UnitsId: 1, // Default value, will be fetched from UnitsPresentationId
+                PresentationId: 1, // Default value, will be fetched from UnitsPresentationId
+                UnitsPresentationId: product.UnitsPresentationId,
+                icon: productDetails.Icon || 'package', // Default to 'package' if no icon
+              };
+            } catch (err) {
+              console.error(`Error fetching product details for artiId: ${product.artiId}`, err);
+              // Return a default object if product details fetch fails
+              return {
+                artiId: product.artiId,
+                UnitsId: 1,
+                PresentationId: 1,
+                UnitsPresentationId: product.UnitsPresentationId,
+                icon: 'package', // Default icon
+              };
+            }
+          })
+        );
+        
+        setSavedPrices(enrichedProducts);
+      } catch (err) {
+        setError('Error fetching saved products');
+        console.error('Error fetching saved products:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSavedProducts();
+  }, []);
   
   // Function to get a random featured price item
-  const getRandomFeaturedPriceItem = useCallback((items: SavedPriceItem[]) => {
-    if (!items || items.length === 0) {
-      return null;
-    }
+  const getRandomFeaturedPriceItem = useCallback(<T extends {artiId: number}>(items: T[] | null): T | null => {
+    if (!items || items.length === 0) return null;
     
     // If there's only one item, return it
-    if (items.length === 1) {
-      return items[0];
-    }
+    if (items.length === 1) return items[0];
     
-    // Return either a single item or the whole array for transition
-    // Depending on the use case, you might want to return all items
-    // for the FeaturePriceTransition component
-    return items;
+    // Otherwise, select a random item
+    const randomIndex = Math.floor(Math.random() * items.length);
+    return items[randomIndex];
   }, []);
   
   // Function to navigate to product detail
   const navigateToProductDetail = useCallback((artiId: number) => {
-    // This would use navigation in a real app
-    console.log('Navigate to product detail:', artiId);
-    // router.push(`/products/${artiId}`);
-  }, []);
+    router.push(`/productos/detail/${artiId}`);
+  }, [router]);
   
   // Function to toggle saving a product
-  const toggleSaveProduct = useCallback((artiId: number, isSaved: boolean) => {
-    console.log('Toggle save product:', artiId, isSaved ? 'unsave' : 'save');
-    // In a real app, this would update the state and possibly make an API call
-    return !isSaved;
+  const toggleSaveProduct = useCallback(async (artiId: number, isSaved: boolean, UnitsPresentationId: number = 1) => {
+    try {
+      if (isSaved) {
+        // Find the SavedProductId for this artiId and UnitsPresentationId
+        const products = await savedProductsManager.getSavedProducts();
+        const savedProduct = products.find(
+          p => p.artiId === artiId && p.UnitsPresentationId === UnitsPresentationId
+        );
+        
+        if (savedProduct) {
+          await savedProductsManager.removeSavedProduct(savedProduct.SavedProductId);
+          
+          // Update local state
+          setSavedPrices(prev => prev.filter(
+            p => !(p.artiId === artiId && p.UnitsPresentationId === UnitsPresentationId)
+          ));
+        }
+      } else {
+        // Add the product to saved products
+        await savedProductsManager.addSavedProduct(artiId, UnitsPresentationId);
+        
+        // Fetch the product details to get the icon
+        const productDetails = await getProductById(artiId);
+        
+        // Update local state
+        setSavedPrices(prev => [
+          ...prev,
+          {
+            artiId,
+            UnitsId: 1, // Default value, will be fetched from UnitsPresentationId
+            PresentationId: 1, // Default value, will be fetched from UnitsPresentationId
+            UnitsPresentationId: UnitsPresentationId,
+            icon: productDetails.Icon || 'package', // Default to 'package' if no icon
+          }
+        ]);
+      }
+      
+      return !isSaved;
+    } catch (err) {
+      console.error('Error toggling save product:', err);
+      return isSaved; // Return original state on error
+    }
+  }, []);
+  
+  // Function to check if a product is saved
+  const isProductSaved = useCallback(async (artiId: number, UnitsPresentationId: number = 1) => {
+    try {
+      return await savedProductsManager.isProductSaved(artiId, UnitsPresentationId);
+    } catch (err) {
+      console.error('Error checking if product is saved:', err);
+      return false;
+    }
   }, []);
   
   return {
+    savedPrices,
+    featuredPriceItem,
     getRandomFeaturedPriceItem,
     navigateToProductDetail,
     toggleSaveProduct,
-    currentFeaturedIndex,
+    isProductSaved,
+    isLoading,
+    error
   };
 };
 

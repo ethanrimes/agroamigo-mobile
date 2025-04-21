@@ -10,7 +10,7 @@ export type DailyPriceObservation = {
   fuenId: number;
   minPrice: number;
   maxPrice: number;
-  unitsPresentationId?: number;
+  UnitsPresentationId?: number;
   unitsId?: number;
   presentationId?: number;
 };

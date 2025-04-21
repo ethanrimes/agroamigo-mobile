@@ -15,7 +15,7 @@ interface PriceDataResult {
 }
 
 interface UnitsPresentationCount {
-  unitsPresentationId: number;
+  UnitsPresentationId: number;
   count: number;
 }
 
@@ -88,15 +88,15 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
         const unitsPresentationCounts: Record<number, UnitsPresentationCount> = {};
 
         observations.forEach(obs => {
-          if (obs.unitsPresentationId && obs.unitsPresentationId > 0) {
-            if (!unitsPresentationCounts[obs.unitsPresentationId]) {
-              unitsPresentationCounts[obs.unitsPresentationId] = {
-                unitsPresentationId: obs.unitsPresentationId,
+          if (obs.UnitsPresentationId && obs.UnitsPresentationId > 0) {
+            if (!unitsPresentationCounts[obs.UnitsPresentationId]) {
+              unitsPresentationCounts[obs.UnitsPresentationId] = {
+                UnitsPresentationId: obs.UnitsPresentationId,
                 count: 0
               };
             }
             
-            unitsPresentationCounts[obs.unitsPresentationId].count++;
+            unitsPresentationCounts[obs.UnitsPresentationId].count++;
           }
         });
 
@@ -105,9 +105,9 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
         let maxCount = 0;
 
         Object.values(unitsPresentationCounts).forEach(item => {
-          if (item.count > maxCount && item.unitsPresentationId > 0) {
+          if (item.count > maxCount && item.UnitsPresentationId > 0) {
             maxCount = item.count;
-            mostCommonUnitsPresentationId = item.unitsPresentationId;
+            mostCommonUnitsPresentationId = item.UnitsPresentationId;
           }
         });
 
@@ -117,20 +117,20 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
         let filtered = observations;
         if (mostCommonUnitsPresentationId > 0) {
           filtered = observations.filter(
-            obs => obs.unitsPresentationId === mostCommonUnitsPresentationId
+            obs => obs.UnitsPresentationId === mostCommonUnitsPresentationId
           );
           console.log(`[useRecentProductPriceData] Filtered to ${filtered.length} observations with the same units presentation`);
         } else if (observations.length > 0) {
           // If no common units presentation found, but we have observations,
           // use the first one's units presentation if available
           const firstObsWithUnitsPresentation = observations.find(
-            obs => obs.unitsPresentationId && obs.unitsPresentationId > 0
+            obs => obs.UnitsPresentationId && obs.UnitsPresentationId > 0
           );
           
-          if (firstObsWithUnitsPresentation && firstObsWithUnitsPresentation.unitsPresentationId) {
-            mostCommonUnitsPresentationId = firstObsWithUnitsPresentation.unitsPresentationId;
+          if (firstObsWithUnitsPresentation && firstObsWithUnitsPresentation.UnitsPresentationId) {
+            mostCommonUnitsPresentationId = firstObsWithUnitsPresentation.UnitsPresentationId;
             filtered = observations.filter(
-              obs => obs.unitsPresentationId === mostCommonUnitsPresentationId
+              obs => obs.UnitsPresentationId === mostCommonUnitsPresentationId
             );
             console.log(`[useRecentProductPriceData] Using first available units presentation ID: ${mostCommonUnitsPresentationId}`);
           } else {
@@ -210,7 +210,7 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
         fuenId: marketId,
         minPrice,
         maxPrice,
-        unitsPresentationId: 1,
+        UnitsPresentationId: 1,
         unitsId: 1,
         presentationId: 1
       });

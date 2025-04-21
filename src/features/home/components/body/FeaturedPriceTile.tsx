@@ -16,6 +16,7 @@ interface FeaturedPriceItemType {
   trend: 'up' | 'down' | 'neutral';
   trendValue: string;
   origin?: string;
+  unitsPresentationName?: string;
 }
 
 interface FeaturedPriceTileProps {
@@ -93,9 +94,14 @@ const FeaturedPriceTile: React.FC<FeaturedPriceTileProps> = ({ item }) => {
                       <Text style={[styles.productName, { color: theme.colors.text.primary }]}>
                         {featuredItem.artiNombre}
                       </Text>
+                      {featuredItem.unitsPresentationName && (
+                        <Text style={[styles.unitText, { color: theme.colors.text.tertiary }]}>
+                          {featuredItem.unitsPresentationName}
+                        </Text>
+                      )}
                       {featuredItem.origin && (
                         <Text style={[styles.originText, { color: theme.colors.text.tertiary }]}>
-                          Importada
+                          {featuredItem.origin}
                         </Text>
                       )}
                     </View>
@@ -133,9 +139,14 @@ const FeaturedPriceTile: React.FC<FeaturedPriceTileProps> = ({ item }) => {
                 <Text style={[styles.productName, { color: theme.colors.text.primary }]}>
                   {items[0].artiNombre}
                 </Text>
+                {items[0].unitsPresentationName && (
+                  <Text style={[styles.unitText, { color: theme.colors.text.tertiary }]}>
+                    {items[0].unitsPresentationName}
+                  </Text>
+                )}
                 {items[0].origin && (
                   <Text style={[styles.originText, { color: theme.colors.text.tertiary }]}>
-                    Importada
+                    {items[0].origin}
                   </Text>
                 )}
               </View>
@@ -198,6 +209,10 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 18,
     fontWeight: '600',
+    marginBottom: 2,
+  },
+  unitText: {
+    fontSize: 11,
     marginBottom: 2,
   },
   originText: {

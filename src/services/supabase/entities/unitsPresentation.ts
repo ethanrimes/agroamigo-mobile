@@ -38,12 +38,12 @@ export const getUnitsPresentations = async (): Promise<UnitsPresentation[]> => {
 /**
  * Get units presentation by ID, with cache support
  */
-export const getUnitsPresentationById = async (unitsPresentationId: number): Promise<UnitsPresentation> => {
+export const getUnitsPresentationById = async (UnitsPresentationId: number): Promise<UnitsPresentation> => {
   // Try to get from cache first
   const cacheParams = {
     entity: 'UnitsPresentation',
     method: 'getById',
-    params: { unitsPresentationId }
+    params: { UnitsPresentationId }
   };
   
   const cachedData = await cacheService.get<UnitsPresentation>(cacheParams);
@@ -56,7 +56,7 @@ export const getUnitsPresentationById = async (unitsPresentationId: number): Pro
   const cachedCollection = await cacheService.getCollection<UnitsPresentation>('UnitsPresentation');
   
   if (cachedCollection) {
-    const unitsPresentation = cachedCollection.find(up => up.UnitsPresentationId === unitsPresentationId);
+    const unitsPresentation = cachedCollection.find(up => up.UnitsPresentationId === UnitsPresentationId);
     if (unitsPresentation) {
       // Cache the individual result as well
       await cacheService.set(cacheParams, unitsPresentation);
@@ -68,7 +68,7 @@ export const getUnitsPresentationById = async (unitsPresentationId: number): Pro
   const { data, error } = await supabase
     .from('UnitsPresentation')
     .select('*')
-    .eq('UnitsPresentationId', unitsPresentationId)
+    .eq('UnitsPresentationId', UnitsPresentationId)
     .single();
   
   if (error) throw error;

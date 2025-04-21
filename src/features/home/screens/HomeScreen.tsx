@@ -1,6 +1,6 @@
 // src/features/home/screens/HomeScreen.tsx
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import ThemeHeader from '@/src/components/molecules/ThemeHeader';
 import HomeHeader from '../components/header/HomeHeader';
@@ -8,15 +8,30 @@ import SavedPricesCarousel from '../components/body/SavedPricesCarousel';
 import Divider from '@/src/components/ui/layout/Separator';
 import FeaturedPriceTile from '../components/body/FeaturedPriceTile';
 import { useHomeData } from '../hooks/useHomeData';
-import { useHomeActions } from '../hooks/useHomeActions';
 
 const HomeScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { savedPrices, featuredPriceData } = useHomeData();
-  const { getRandomFeaturedPriceItem } = useHomeActions();
+  const { savedPrices, featuredPriceData, isLoading, error } = useHomeData();
   
-  // Get a featured price item to display
-  const featuredItem = getRandomFeaturedPriceItem(featuredPriceData);
+  // Render loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent, { backgroundColor: theme.colors.background.primary }]}>
+        <ActivityIndicator size="large" color={theme.colors.green.shade5} />
+      </View>
+    );
+  }
+  
+  // Render error state
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerContent, { backgroundColor: theme.colors.background.primary }]}>
+        <Text style={{ color: theme.colors.action.error, fontSize: 16 }}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
   
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
@@ -42,7 +57,7 @@ const HomeScreen: React.FC = () => {
         {/* Featured Price Section */}
         <View style={styles.sectionContainer}>
           <FeaturedPriceTile 
-            item={featuredItem} 
+            item={featuredPriceData} 
           />
         </View>
         
@@ -56,6 +71,10 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContainer: {
     flex: 1,

@@ -14,6 +14,7 @@ interface SavedPriceTileProps {
     icon: string;
     trend: 'up' | 'down' | 'neutral';
     trendValue: string;
+    unitsPresentationName?: string;
   };
   onPress?: () => void;
 }
@@ -50,6 +51,12 @@ const SavedPriceTile: React.FC<SavedPriceTileProps> = ({
             {item.artiNombre}
           </Text>
           
+          {item.unitsPresentationName && (
+            <Text style={[styles.unitPresentation, { color: theme.colors.text.tertiary }]} numberOfLines={1}>
+              {item.unitsPresentationName}
+            </Text>
+          )}
+          
           <Text style={[styles.priceRange, { color: theme.colors.text.secondary }]}>
             ${item.minPrice.toLocaleString()} - ${item.maxPrice.toLocaleString()}
           </Text>
@@ -74,7 +81,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
     width: 110, // Smaller width to fit 3 in a row
-    height: 100, // Smaller height
+    height: 110, // Increased height to accommodate unit presentation
   },
   contentContainer: {
     padding: 8,
@@ -91,6 +98,10 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 12,
     fontWeight: '600',
+    marginBottom: 2,
+  },
+  unitPresentation: {
+    fontSize: 9,
     marginBottom: 2,
   },
   priceRange: {

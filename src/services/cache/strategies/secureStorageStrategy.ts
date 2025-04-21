@@ -22,7 +22,6 @@ class SecureStorageStrategy implements CacheStrategy {
   async get<T>(key: string): Promise<T | null> {
     try {
       const fullKey = this.getFullKey(key);
-      // Add a try-catch specifically for the SecureStore.getItemAsync call
       try {
         const jsonValue = await SecureStore.getItemAsync(fullKey);
         
@@ -32,7 +31,6 @@ class SecureStorageStrategy implements CacheStrategy {
         
         const item: CacheItem<T> = JSON.parse(jsonValue);
         
-        // Check if item has expired
         if (item.expiresAt !== null && Date.now() > item.expiresAt) {
           await this.remove(key);
           return null;
@@ -41,7 +39,6 @@ class SecureStorageStrategy implements CacheStrategy {
         return item.value;
       } catch (secureStoreError) {
         console.warn('SecureStore access error:', secureStoreError);
-        // Fall back to null when SecureStore is unavailable
         return null;
       }
     } catch (error) {

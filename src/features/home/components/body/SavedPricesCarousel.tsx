@@ -1,20 +1,13 @@
 // src/features/home/components/body/SavedPricesCarousel.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import SavedPriceTile from './SavedPriceTile';
 import { useRouter } from 'expo-router';
+import { PriceDisplayItem } from '../../hooks/useHomeData';
 
 interface SavedPricesCarouselProps {
-  savedPrices: Array<{
-    artiId: number;
-    artiNombre: string;
-    minPrice: number;
-    maxPrice: number;
-    icon: string;
-    trend: 'up' | 'down' | 'neutral';
-    trendValue: string;
-  }>;
+  savedPrices: PriceDisplayItem[];
 }
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -30,6 +23,20 @@ const SavedPricesCarousel: React.FC<SavedPricesCarouselProps> = ({
   // Refs for both FlatLists to sync their scrolling
   const topRowRef = useRef<FlatList>(null);
   const bottomRowRef = useRef<FlatList>(null);
+  
+  // Handle empty state
+  if (!savedPrices || savedPrices.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+          Precios Guardados
+        </Text>
+        <Text style={[styles.emptyText, { color: theme.colors.text.tertiary }]}>
+          No tienes productos guardados
+        </Text>
+      </View>
+    );
+  }
   
   // Split the data into two rows
   const splitData = () => {
@@ -70,46 +77,50 @@ const SavedPricesCarousel: React.FC<SavedPricesCarouselProps> = ({
       
       <View style={styles.carouselContainer}>
         {/* Top row */}
-        <FlatList
-          ref={topRowRef}
-          data={topRow}
-          keyExtractor={(item) => `top-${item.artiId.toString()}`}
-          renderItem={({ item }) => (
-            <SavedPriceTile
-              item={item}
-              onPress={() => handleItemPress(item.artiId)}
-            />
-          )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-          onScroll={(e) => handleScroll(e, bottomRowRef)}
-          scrollEventThrottle={16}
-          snapToAlignment="start"
-          snapToInterval={ITEM_WIDTH + 8} // Width + margin
-          decelerationRate="fast"
-        />
+        {topRow.length > 0 && (
+          <FlatList
+            ref={topRowRef}
+            data={topRow}
+            keyExtractor={(item) => `top-${item.artiId.toString()}`}
+            renderItem={({ item }) => (
+              <SavedPriceTile
+                item={item}
+                onPress={() => handleItemPress(item.artiId)}
+              />
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.listContainer}
+            onScroll={(e) => handleScroll(e, bottomRowRef)}
+            scrollEventThrottle={16}
+            snapToAlignment="start"
+            snapToInterval={ITEM_WIDTH + 8} // Width + margin
+            decelerationRate="fast"
+          />
+        )}
         
         {/* Bottom row */}
-        <FlatList
-          ref={bottomRowRef}
-          data={bottomRow}
-          keyExtractor={(item) => `bottom-${item.artiId.toString()}`}
-          renderItem={({ item }) => (
-            <SavedPriceTile
-              item={item}
-              onPress={() => handleItemPress(item.artiId)}
-            />
-          )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.listContainer, styles.bottomRow]}
-          onScroll={(e) => handleScroll(e, topRowRef)}
-          scrollEventThrottle={16}
-          snapToAlignment="start"
-          snapToInterval={ITEM_WIDTH + 8} // Width + margin
-          decelerationRate="fast"
-        />
+        {bottomRow.length > 0 && (
+          <FlatList
+            ref={bottomRowRef}
+            data={bottomRow}
+            keyExtractor={(item) => `bottom-${item.artiId.toString()}`}
+            renderItem={({ item }) => (
+              <SavedPriceTile
+                item={item}
+                onPress={() => handleItemPress(item.artiId)}
+              />
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[styles.listContainer, styles.bottomRow]}
+            onScroll={(e) => handleScroll(e, topRowRef)}
+            scrollEventThrottle={16}
+            snapToAlignment="start"
+            snapToInterval={ITEM_WIDTH + 8} // Width + margin
+            decelerationRate="fast"
+          />
+        )}
       </View>
     </View>
   );
@@ -133,6 +144,11 @@ const styles = StyleSheet.create({
   bottomRow: {
     marginTop: 8,
   },
+  emptyText: {
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontSize: 14,
+  }
 });
 
 export default SavedPricesCarousel;
