@@ -1,8 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { CacheStrategy } from '../types';
 
-// Note: This strategy has replaced AsyncStorage completely
-
 interface CacheItem<T> {
   value: T;
   expiresAt: number | null; // Timestamp when item expires, null for no expiration
@@ -13,15 +11,19 @@ interface CacheItem<T> {
  */
 class SecureStorageStrategy implements CacheStrategy {
   // Prefix for all cache keys
-  private keyPrefix = 'app_secure_cache:';
+  private keyPrefix = 'app_secure_cache_';
 
   private getFullKey(key: string): string {
-    return `${this.keyPrefix}${key}`;
+    // Sanitize the key to ensure it only contains allowed characters
+    // Replace any non-alphanumeric characters, ".", "-", and "_" with underscores
+    const sanitizedKey = key.replace(/[^a-zA-Z0-9\._\-]/g, '_');
+    return `${this.keyPrefix}${sanitizedKey}`;
   }
 
   async get<T>(key: string): Promise<T | null> {
     try {
       const fullKey = this.getFullKey(key);
+      // Add a try-catch specifically for the SecureStore.getItemAsync call
       try {
         const jsonValue = await SecureStore.getItemAsync(fullKey);
         
@@ -31,6 +33,7 @@ class SecureStorageStrategy implements CacheStrategy {
         
         const item: CacheItem<T> = JSON.parse(jsonValue);
         
+        // Check if item has expired
         if (item.expiresAt !== null && Date.now() > item.expiresAt) {
           await this.remove(key);
           return null;
@@ -39,6 +42,7 @@ class SecureStorageStrategy implements CacheStrategy {
         return item.value;
       } catch (secureStoreError) {
         console.warn('SecureStore access error:', secureStoreError);
+        // Fall back to null when SecureStore is unavailable
         return null;
       }
     } catch (error) {
@@ -97,17 +101,19 @@ class SecureStorageStrategy implements CacheStrategy {
       
       // One option would be to store a master list of keys in SecureStore itself
       try {
-        const masterKeyList = await SecureStore.getItemAsync(`${this.keyPrefix}master_key_list`);
+        const masterKeyListKey = this.getFullKey('master_key_list');
+        const masterKeyList = await SecureStore.getItemAsync(masterKeyListKey);
         if (masterKeyList) {
           const keys: string[] = JSON.parse(masterKeyList);
           
           // Delete all keys in the master list
           for (const key of keys) {
-            await SecureStore.deleteItemAsync(key);
+            const sanitizedKey = this.getFullKey(key);
+            await SecureStore.deleteItemAsync(sanitizedKey);
           }
           
           // Reset the master list
-          await SecureStore.setItemAsync(`${this.keyPrefix}master_key_list`, JSON.stringify([]));
+          await SecureStore.setItemAsync(masterKeyListKey, JSON.stringify([]));
         }
       } catch (secureStoreError) {
         console.warn('SecureStore master key access error:', secureStoreError);
