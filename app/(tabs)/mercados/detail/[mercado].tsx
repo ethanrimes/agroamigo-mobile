@@ -1,4 +1,4 @@
-// Import needed for app/tabs/mercados/detail/[mercado].tsx
+// app/tabs/mercados/detail/[mercado].tsx
 import React from 'react';
 import { Stack } from 'expo-router';
 import MarketDetailScreen from '@/src/features/detail/screens/MarketDetailScreen';

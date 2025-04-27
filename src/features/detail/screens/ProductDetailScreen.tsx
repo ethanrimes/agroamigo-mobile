@@ -1,27 +1,19 @@
 // src/features/detail/screens/ProductDetailScreen.tsx
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import DetailScreen from '../components/DetailScreen';
+import { ProductoPrecioScreen, ProductoCantidadScreen } from './priceQuantityViews';
 
+/**
+ * Container component that determines which product screen to display
+ * based on the URL parameters
+ */
 const ProductDetailScreen: React.FC = () => {
-  const { producto } = useLocalSearchParams();
-  const productoId = Array.isArray(producto) ? producto[0] : producto;
+  const { view = 'price' } = useLocalSearchParams<{ view?: string }>();
   
-  if (!productoId) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text>Product ID is missing</Text>
-      </View>
-    );
-  }
+  // Determine which screen to show based on view parameter
+  const isPriceView = view === 'price';
   
-  return (
-    <DetailScreen 
-      id={productoId} 
-      type="producto" 
-    />
-  );
+  return isPriceView ? <ProductoPrecioScreen /> : <ProductoCantidadScreen />;
 };
 
 export default ProductDetailScreen;

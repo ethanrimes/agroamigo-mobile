@@ -1,27 +1,19 @@
 // src/features/detail/screens/MarketDetailScreen.tsx
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import DetailScreen from '../components/DetailScreen';
+import { MercadoPrecioScreen, MercadoCantidadScreen } from './priceQuantityViews';
 
+/**
+ * Container component that determines which market screen to display
+ * based on the URL parameters
+ */
 const MarketDetailScreen: React.FC = () => {
-  const { mercado } = useLocalSearchParams();
-  const marketId = Array.isArray(mercado) ? mercado[0] : mercado;
+  const { view = 'price' } = useLocalSearchParams<{ view?: string }>();
   
-  if (!marketId) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text>Market ID not found</Text>
-      </View>
-    );
-  }
+  // Determine which screen to show based on view parameter
+  const isPriceView = view === 'price';
   
-  return (
-    <DetailScreen 
-      id={marketId} 
-      type="mercado" 
-    />
-  );
+  return isPriceView ? <MercadoPrecioScreen /> : <MercadoCantidadScreen />;
 };
 
 export default MarketDetailScreen;
