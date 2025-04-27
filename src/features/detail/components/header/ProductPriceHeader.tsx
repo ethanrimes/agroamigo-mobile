@@ -15,7 +15,7 @@ const ProductPriceHeader: React.FC<ProductPriceHeaderProps> = ({
   productId 
 }) => {
   return (
-    <DetailHeader title="Precio Producto">
+    <DetailHeader title="Agro Amigo">
       <View>
         {/* Product price specific header content will be added later */}
       </View>

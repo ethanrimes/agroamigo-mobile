@@ -1,6 +1,7 @@
 import supabase from '../client';
 import cacheService from '../../cache';
 import { getTTLForEntity } from '../../cache/utils/expiration';
+import { getDailyPriceObservationsByProduct } from './precio';
 
 export type UnitsPresentation = {
   UnitsPresentationId: number;
@@ -221,4 +222,64 @@ export const getUnitsPresentationByUnitsAndPresentation = async (
   await cacheService.set(cacheParams, unitsPresentation);
   
   return unitsPresentation;
+};
+
+/**
+ * Get the most common units presentation ID associated with a product
+ * by analyzing historical price observations
+ */
+export const getMostCommonUnitsPresentationByProductId = async (artiId: number): Promise<number | null> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'UnitsPresentation',
+    method: 'getMostCommonByProductId',
+    params: { artiId }
+  };
+  
+  const cachedData = await cacheService.get<number>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // Get all price observations for this product
+  const priceObservations = await getDailyPriceObservationsByProduct(artiId);
+  
+  // If no observations found, return null
+  if (!priceObservations || priceObservations.length === 0) {
+    return null;
+  }
+  
+  // Count occurrences of each UnitsPresentationId
+  const counts = new Map<number, number>();
+  
+  for (const observation of priceObservations) {
+    if (observation.UnitsPresentationId) {
+      const currentCount = counts.get(observation.UnitsPresentationId) || 0;
+      counts.set(observation.UnitsPresentationId, currentCount + 1);
+    }
+  }
+  
+  // If no UnitsPresentationId found in observations, return null
+  if (counts.size === 0) {
+    return null;
+  }
+  
+  // Find the most frequent UnitsPresentationId
+  let mostCommonId: number | null = null;
+  let maxCount = 0;
+  
+  for (const [id, count] of counts.entries()) {
+    if (count > maxCount) {
+      mostCommonId = id;
+      maxCount = count;
+    }
+  }
+  
+  // Cache the result before returning
+  if (mostCommonId !== null) {
+    await cacheService.set(cacheParams, mostCommonId);
+  }
+  
+  return mostCommonId;
 };

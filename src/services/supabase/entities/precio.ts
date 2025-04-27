@@ -208,3 +208,46 @@ export const getLatestPriceObservation = async (
   
   return observation;
 };
+
+/**
+ * Get the most recent price date for a product and units presentation
+ */
+export const getMostRecentPriceDateByProductAndUnitsPresentation = async (
+  artiId: number,
+  unitsPresentationId: number
+): Promise<string | null> => {
+  // Try to get from cache first
+  const cacheParams = {
+    entity: 'DailyProductPriceObservation',
+    method: 'getMostRecentDateByProductAndUnitsPresentation',
+    params: { artiId, unitsPresentationId }
+  };
+  
+  const cachedData = await cacheService.get<string>(cacheParams);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // If not in cache, fetch from API
+  const { data, error } = await supabase
+    .from('DailyProductPriceObservation')
+    .select('date')
+    .eq('artiId', artiId)
+    .eq('UnitsPresentationId', unitsPresentationId)
+    .order('date', { ascending: false })
+    .limit(1);
+  
+  if (error) throw error;
+  
+  // If no results, return null
+  if (!data || data.length === 0 || !data[0].date) {
+    return null;
+  }
+  
+  // Store in cache before returning
+  const mostRecentDate = data[0].date as string;
+  await cacheService.set(cacheParams, mostRecentDate);
+  
+  return mostRecentDate;
+};
