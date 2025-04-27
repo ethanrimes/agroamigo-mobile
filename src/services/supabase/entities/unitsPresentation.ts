@@ -269,9 +269,11 @@ export const getMostCommonUnitsPresentationByProductId = async (artiId: number):
     }
     
     // Log sample observation
-    console.log(`[getMostCommonUnitsPresentationByProductId] Sample observation:`, JSON.stringify(priceObservations[0]));
+    if (priceObservations.length > 0) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] Sample observation:`, JSON.stringify(priceObservations[0]));
+    }
     
-    // Create a map to count combinations of UnitsId and PresentationId
+    // Create a map to count combinations of both UnitsPresentationId and (UnitsId, PresentationId)
     const combinationCounts = new Map<string, {
       count: number;
       unitsPresentationId: number | null;
@@ -281,23 +283,35 @@ export const getMostCommonUnitsPresentationByProductId = async (artiId: number):
     
     // Count occurrences of each combination
     for (const observation of priceObservations) {
-      // Skip observations without necessary data
-      if (!observation.UnitsId && !observation.PresentationId && !observation.UnitsPresentationId) {
-        continue;
+      // Try to use the UnitsPresentationId if available
+      if (observation.UnitsPresentationId) {
+        const key = `unitsPresentationId-${observation.UnitsPresentationId}`;
+        
+        const current = combinationCounts.get(key) || {
+          count: 0,
+          unitsPresentationId: observation.UnitsPresentationId,
+          UnitsId: observation.UnitsId || null,
+          PresentationId: observation.PresentationId || null
+        };
+        
+        current.count++;
+        combinationCounts.set(key, current);
       }
       
-      // Create a key for the combination
-      const key = `${observation.UnitsId || 'null'}-${observation.PresentationId || 'null'}`;
-      
-      const current = combinationCounts.get(key) || {
-        count: 0,
-        unitsPresentationId: observation.UnitsPresentationId || null,
-        UnitsId: observation.UnitsId || null,
-        PresentationId: observation.PresentationId || null
-      };
-      
-      current.count++;
-      combinationCounts.set(key, current);
+      // Also track by individual UnitsId and PresentationId if available
+      if (observation.UnitsId && observation.PresentationId) {
+        const key = `units-presentation-${observation.UnitsId}-${observation.PresentationId}`;
+        
+        const current = combinationCounts.get(key) || {
+          count: 0,
+          unitsPresentationId: observation.UnitsPresentationId || null,
+          UnitsId: observation.UnitsId,
+          PresentationId: observation.PresentationId
+        };
+        
+        current.count++;
+        combinationCounts.set(key, current);
+      }
     }
     
     console.log(`[getMostCommonUnitsPresentationByProductId] Found ${combinationCounts.size} unique combinations`);
@@ -334,9 +348,21 @@ export const getMostCommonUnitsPresentationByProductId = async (artiId: number):
     
     console.log(`[getMostCommonUnitsPresentationByProductId] Most common combination:`, mostCommon);
     
-    // If we found a combination but it doesn't have a UnitsPresentationId,
-    // try to find the corresponding UnitsPresentation record
-    if (mostCommon.UnitsId && mostCommon.PresentationId && !mostCommon.unitsPresentationId) {
+    // If we found a UnitsPresentationId, but no individual IDs, try to get them
+    if (mostCommon.unitsPresentationId && (!mostCommon.UnitsId || !mostCommon.PresentationId)) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] Looking up UnitsId/PresentationId from UnitsPresentationId...`);
+      try {
+        const unitsPresentation = await getUnitsPresentationById(mostCommon.unitsPresentationId);
+        mostCommon.UnitsId = unitsPresentation.UnitsId;
+        mostCommon.PresentationId = unitsPresentation.PresentationId;
+        console.log(`[getMostCommonUnitsPresentationByProductId] Found UnitsId: ${unitsPresentation.UnitsId}, PresentationId: ${unitsPresentation.PresentationId}`);
+      } catch (error) {
+        console.error('[getMostCommonUnitsPresentationByProductId] Error finding UnitsId/PresentationId from UnitsPresentationId:', error);
+      }
+    }
+    
+    // If we found individual IDs but no UnitsPresentationId, try to find the corresponding record
+    if ((!mostCommon.unitsPresentationId) && mostCommon.UnitsId && mostCommon.PresentationId) {
       console.log(`[getMostCommonUnitsPresentationByProductId] Looking up UnitsPresentationId...`);
       try {
         const unitsPresentation = await getUnitsPresentationByUnitsAndPresentation(

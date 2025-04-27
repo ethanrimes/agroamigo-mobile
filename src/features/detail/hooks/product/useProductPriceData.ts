@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo, useLayoutEffect, useCallback, useRef } from 'react';
-import { DailyPriceObservation, getDailyPriceObservationsByProduct } from '../../../../services/supabase/entities/precio';
+import { 
+  DailyPriceObservation, 
+  getDailyPriceObservationsByProduct,
+  getFilteredProductMarketPriceDistribution // Import the new optimized function
+} from '../../../../services/supabase/entities/precio';
 import { 
   getMostCommonUnitsPresentationByProductId, 
   getUnitsPresentationById 
@@ -21,11 +25,19 @@ export type PriceDataPoint = {
   price: number;
   marketId: number;
   marketName: string;
+  marketIcon: string;
   municipioId: number;
   municipioName: string;
+  municipioIcon: string;
+  departamentoId: number;
+  departamentoName: string;
+  departamentoIcon: string;
   date: string;
 };
 
+/**
+ * Type definition for the complete price distribution data
+ */
 export type PriceDistributionData = {
   minPrice: number;
   maxPrice: number;
@@ -266,37 +278,35 @@ export const useProductIdFromRoute = () => {
  * Main hook to fetch price data for a product
  * If no artiId is provided, it will attempt to extract it from the current route
  */
-export const useProductPriceData = (artiId?: number) => {
+/**
+ * Type definition for price data point with extended market information
+ */
+
+
+/**
+ * Main hook to fetch price data for a product with market information
+ * If no artiId is provided, it will attempt to extract it from the current route
+ */
+export const useProductPriceData = (artiId?: number): PriceDistributionData => {
   const routeArtiId = useProductIdFromRoute();
   const productId = artiId || routeArtiId || 0;
   
   console.log(`[useProductPriceData] Initializing with product ID: ${productId} (provided: ${artiId}, from route: ${routeArtiId})`);
   
   const [productName, setProductName] = useState<string>('');
-  const [rawPriceData, setRawPriceData] = useState<DailyPriceObservation[]>([]);
+  const [rawPriceData, setRawPriceData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   
   // Use the units presentation hook
   const { 
     unitsPresentationId, 
-    UnitsId,                 // Make sure to destructure this
-    PresentationId,          // Make sure to destructure this
-    unitsPresentationName,
-    setUnitsPresentationId,
-    isLoading: isLoadingUnitsPresentation,
-    error: unitsPresentationError 
-  } = useUnitsPresentation(productId);
-
-  console.log({
-    unitsPresentationId,
     UnitsId,
     PresentationId,
     unitsPresentationName,
-    setUnitsPresentationId,
     isLoading: isLoadingUnitsPresentation,
-    error: unitsPresentationError
-  });
+    error: unitsPresentationError 
+  } = useUnitsPresentation(productId);
   
   // Use the date hook (depends on units presentation being loaded)
   const {
@@ -332,9 +342,8 @@ export const useProductPriceData = (artiId?: number) => {
     }
   }, [productId]);
   
-  // Fetch price data when both units presentation and date are available
+  // Fetch price data with market information when both units presentation and date are available
   useEffect(() => {
-    // In useProductPriceData, modify the fetchPriceData function:
     const fetchPriceData = async () => {
       console.log(`[useProductPriceData] Fetching price data for product ID: ${productId}`);
       try {
@@ -342,44 +351,35 @@ export const useProductPriceData = (artiId?: number) => {
         
         if (productId <= 0) {
           console.log('[useProductPriceData] Invalid product ID');
+          setIsLoading(false);
           return;
         }
         
-        // Get all price observations for this product
-        const allPriceObservations = await getDailyPriceObservationsByProduct(productId);
-        console.log(`[useProductPriceData] Total price observations fetched: ${allPriceObservations.length}`);
+        // Use the new function that provides joined market data
+        const observations = await getFilteredProductMarketPriceDistribution(
+          productId,
+          {
+            unitsPresentationId: unitsPresentationId,
+            unitsId: UnitsId,
+            presentationId: PresentationId,
+            date: date
+          }
+        );
         
-        // Filter by unitsPresentationId if available
-        let filteredObservations = allPriceObservations;
+        console.log(`[useProductPriceData] Fetched ${observations.length} price observations with market data`);
         
-        if (unitsPresentationId) {
-          filteredObservations = allPriceObservations.filter(obs => 
-            obs.UnitsPresentationId === unitsPresentationId
-          );
-        } 
-        // Otherwise, filter by individual UnitsId and PresentationId if available
-        else if (UnitsId && PresentationId) {
-          filteredObservations = allPriceObservations.filter(obs => 
-            obs.UnitsId === UnitsId && obs.PresentationId === PresentationId
-          );
-        }
-        
-        // Filter by date if available
-        if (date) {
-          filteredObservations = filteredObservations.filter(obs => obs.date === date);
-        } else if (filteredObservations.length > 0) {
-          // If no date specified, use the most recent date from the observations
-          const dates = filteredObservations.map(obs => obs.date).filter(Boolean) as string[];
+        // If no date was specified but we got observations, use the most recent date
+        if (!date && observations.length > 0) {
+          const dates = observations.map(obs => obs.date).filter(Boolean) as string[];
           if (dates.length > 0) {
             dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
             const mostRecentDate = dates[0];
-            filteredObservations = filteredObservations.filter(obs => obs.date === mostRecentDate);
             setDate(mostRecentDate);
+            console.log(`[useProductPriceData] Setting most recent date: ${mostRecentDate}`);
           }
         }
         
-        console.log(`[useProductPriceData] Filtered price observations: ${filteredObservations.length}`);
-        setRawPriceData(filteredObservations);
+        setRawPriceData(observations);
         setIsLoading(false);
       } catch (err) {
         console.error('[useProductPriceData] Error fetching price data:', err);
@@ -388,199 +388,116 @@ export const useProductPriceData = (artiId?: number) => {
       }
     };
 
-    if (productId > 0 && unitsPresentationId && date) {
+    // Only fetch when we have the necessary information
+    if (productId > 0 && (unitsPresentationId || (UnitsId && PresentationId))) {
       fetchPriceData();
+    } else {
+      console.log(`[useProductPriceData] Missing required data for fetching prices - Product ID: ${productId}, UnitsPresentationId: ${unitsPresentationId}, UnitsId: ${UnitsId}, PresentationId: ${PresentationId}`);
     }
-  }, [productId, unitsPresentationId, date]);
+  }, [productId, unitsPresentationId, UnitsId, PresentationId, date]);
 
-  // Format and process the raw price data
-  const processedData = useMemo<PriceDistributionData>(() => {
-    console.log(`[useProductPriceData] Processing raw price data (${rawPriceData.length} records)`);
+  // Process the raw data to compute statistics and format data points
+  const processedData = useMemo(() => {
+    console.log(`[useProductPriceData] Processing ${rawPriceData.length} price observations`);
     
-    // Default return value when data is loading or has errors
-    const defaultData: PriceDistributionData = {
-      minPrice: 0,
-      maxPrice: 0,
-      avgPrice: 0,
-      dataPoints: [],
-      productName: productName,
-      unitsPresentationName: unitsPresentationName,
-      date: date || '',
-      isLoading: isLoading || isLoadingUnitsPresentation || isLoadingDate,
-      error: error || unitsPresentationError || dateError
+    if (rawPriceData.length === 0) {
+      return {
+        minPrice: 0,
+        avgPrice: 0,
+        maxPrice: 0,
+        dataPoints: []
+      };
+    }
+    
+    // Map raw data to PriceDataPoint format - now includes market-related fields directly
+    const dataPoints: PriceDataPoint[] = rawPriceData.map(obs => {
+      return {
+        price: obs.precio || ((obs.minPrice + obs.maxPrice) / 2),
+        marketId: obs.marketId || obs.fuenId,
+        marketName: obs.marketName || 'Unknown Market',
+        marketIcon: obs.marketIcon || '',
+        municipioId: obs.municipioId || 0,
+        municipioName: obs.municipioName || 'Unknown Municipio',
+        municipioIcon: obs.municipioIcon || '',
+        departamentoId: obs.departamentoId || 0,
+        departamentoName: obs.departamentoName || 'Unknown Departamento',
+        departamentoIcon: obs.departamentoIcon || '',
+        date: obs.date || new Date().toISOString().split('T')[0]
+      };
+    });
+    
+    // Calculate price statistics
+    const prices = dataPoints.map(point => point.price);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+    const avgPrice = prices.length > 0 ? 
+      prices.reduce((sum, price) => sum + price, 0) / prices.length : 0;
+    
+    console.log(`[useProductPriceData] Processed stats - min: ${minPrice}, avg: ${avgPrice.toFixed(2)}, max: ${maxPrice}, points: ${dataPoints.length}`);
+    
+    return {
+      minPrice,
+      avgPrice,
+      maxPrice,
+      dataPoints
     };
-
-    if (
-      isLoading || 
-      isLoadingUnitsPresentation || 
-      isLoadingDate || 
-      !rawPriceData || 
-      rawPriceData.length === 0
-    ) {
-      console.log('[useProductPriceData] Returning default data due to loading or empty results');
-      return defaultData;
-    }
-
-    try {
-      // Process raw price data into data points with market info
-      const dataPointsPromise = Promise.all(
-        rawPriceData.map(async (obs): Promise<PriceDataPoint> => {
-          // Take average of min and max as the representative price
-          const price = (obs.minPrice + obs.maxPrice) / 2;
-          
-          // Get market info
-          const market = await getMarketById(obs.fuenId);
-          
-          // Get municipio info
-          const municipio = await getMunicipioById(market.CodMunicipio);
-          
-          return {
-            price,
-            marketId: obs.fuenId,
-            marketName: market.Mercado,
-            municipioId: market.CodMunicipio,
-            municipioName: municipio.Municipio,
-            date: obs.date || '',
-          };
-        })
-      );
-
-      // Calculate min, max, and average prices
-      let minPrice = Number.MAX_VALUE;
-      let maxPrice = Number.MIN_VALUE;
-      let totalPrice = 0;
-
-      for (const obs of rawPriceData) {
-        const avgPrice = (obs.minPrice + obs.maxPrice) / 2;
-        minPrice = Math.min(minPrice, obs.minPrice);
-        maxPrice = Math.max(maxPrice, obs.maxPrice);
-        totalPrice += avgPrice;
-      }
-
-      const avgPrice = totalPrice / rawPriceData.length;
-      
-      console.log(`[useProductPriceData] Calculated price range: min=${minPrice}, max=${maxPrice}, avg=${avgPrice}`);
-
-      return {
-        minPrice,
-        maxPrice,
-        avgPrice,
-        dataPoints: [], // This will be populated asynchronously
-        productName,
-        unitsPresentationName,
-        date: date || '',
-        isLoading: false,
-        error: null
-      };
-    } catch (err) {
-      console.error('[useProductPriceData] Error processing price data:', err);
-      return {
-        ...defaultData,
-        error: err instanceof Error ? err : new Error('Failed to process price data'),
-        isLoading: false
-      };
-    }
-  }, [
-    rawPriceData, 
-    isLoading, 
-    isLoadingUnitsPresentation, 
-    isLoadingDate, 
-    error, 
-    unitsPresentationError, 
-    dateError,
+  }, [rawPriceData]);
+  
+  // Return the complete price distribution data
+  return {
+    minPrice: processedData.minPrice,
+    avgPrice: processedData.avgPrice,
+    maxPrice: processedData.maxPrice,
+    dataPoints: processedData.dataPoints,
     productName,
     unitsPresentationName,
-    date
-  ]);
-
-  // As a separate effect, load the market data for the data points
-  const [dataPoints, setDataPoints] = useState<PriceDataPoint[]>([]);
-  
-  useEffect(() => {
-    const loadDataPoints = async () => {
-      if (rawPriceData.length === 0) return;
-      
-      console.log(`[useProductPriceData] Loading market data for ${rawPriceData.length} data points`);
-      
-      try {
-        const points = await Promise.all(
-          rawPriceData.map(async (obs): Promise<PriceDataPoint> => {
-            // Take average of min and max as the representative price
-            const price = (obs.minPrice + obs.maxPrice) / 2;
-            
-            // Get market info
-            const market = await getMarketById(obs.fuenId);
-            
-            // Get municipio info
-            const municipio = await getMunicipioById(market.CodMunicipio);
-            
-            return {
-              price,
-              marketId: obs.fuenId,
-              marketName: market.Mercado,
-              municipioId: market.CodMunicipio,
-              municipioName: municipio.Municipio,
-              date: obs.date || '',
-            };
-          })
-        );
-        
-        console.log(`[useProductPriceData] Loaded ${points.length} data points with market information`);
-        setDataPoints(points);
-      } catch (err) {
-        console.error('[useProductPriceData] Error loading market data:', err);
-        setError(err instanceof Error ? err : new Error('Failed to load market data'));
-      }
-    };
-    
-    loadDataPoints();
-  }, [rawPriceData]);
-
-  // Return the full data object
-  return {
-    ...processedData,
-    dataPoints,
-    // Include the state setters from the hooks
-    setUnitsPresentationId,
-    setDate,
-    // Include loading states
+    date: date || '',
     isLoading: isLoading || isLoadingUnitsPresentation || isLoadingDate,
-    // Include all errors
     error: error || unitsPresentationError || dateError
   };
 };
 
 /**
- * Hook to get price data formatted as a tuple [min, avg, max, dataPoints]
+ * Type definition for the formatted price data tuple
  */
-export const useFormattedPriceData = (artiId?: number) => {
+export type FormattedPriceData = [
+  minPrice: number,
+  avgPrice: number,
+  maxPrice: number,
+  dataPoints: PriceDataPoint[]
+];
+
+/**
+ * Hook to get price data formatted as a tuple [min, avg, max, dataPoints]
+ * with proper TypeScript typing
+ */
+export const useFormattedPriceData = (artiId?: number): FormattedPriceData => {
   const priceData = useProductPriceData(artiId);
   
   console.log(`[useFormattedPriceData] Formatting price data for product ID: ${artiId}`);
-  console.log(`[useFormattedPriceData] Data points: ${priceData.dataPoints.length}, min: ${priceData.minPrice}, avg: ${priceData.avgPrice}, max: ${priceData.maxPrice}`);
   
-  return useMemo(() => {
+  return useMemo((): FormattedPriceData => {
+    // Safely access properties with default values if priceData is undefined
+    const dataPoints = priceData?.dataPoints || [];
+    const minPrice = priceData?.minPrice || 0;
+    const avgPrice = priceData?.avgPrice || 0;
+    const maxPrice = priceData?.maxPrice || 0;
+    
+    console.log(`[useFormattedPriceData] Data points: ${dataPoints.length}, min: ${minPrice}, avg: ${avgPrice}, max: ${maxPrice}`);
+    
     return [
-      priceData.minPrice,
-      priceData.avgPrice,
-      priceData.maxPrice,
-      priceData.dataPoints
-    ] as const;
+      minPrice,
+      avgPrice,
+      maxPrice,
+      dataPoints
+    ];
   }, [
-    priceData.minPrice,
-    priceData.avgPrice,
-    priceData.maxPrice,
-    priceData.dataPoints
+    priceData?.minPrice,
+    priceData?.avgPrice,
+    priceData?.maxPrice,
+    priceData?.dataPoints
   ]);
 };
-
-// Export hooks
-// export {
-//   useProductIdFromRoute,
-//   useUnitsPresentation,
-//   usePriceDateInfo,
-//   useProductPriceData
-// };
 
 // Default export
 export default useProductPriceData;
