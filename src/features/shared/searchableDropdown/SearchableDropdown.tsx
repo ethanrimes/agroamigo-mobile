@@ -4,43 +4,37 @@ import { View, StyleSheet, Animated, TouchableWithoutFeedback, Keyboard, Text } 
 import SearchBar from '@/src/components/ui/search/SearchBar';
 import DropdownList from './components/DropdownList';
 import { useDropdownVisibility } from './hooks/useDropdownVisibility';
-import { useDropdownData } from './hooks/useDropdownData';
+import { useDropdownData, DataType } from './hooks/useDropdownData';
 import { useInputDataFilter } from './hooks/useInputDataFilter';
+import { useSearchableSelection, SelectableItem } from './hooks/useSearchableSelection';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import { useSnapshotStore } from '@/src/store/snapshotStore';
-
-// Define SnapshotType to prevent type errors
-type SnapshotType = 'producto' | 'mercado' | 'insumo';
 
 // Types to define the data structure and the order of data types
 export type DataTypeOrder = 'producto-mercado' | 'mercado-producto';
 
-interface SearchableDropdownProps {
+interface SearchableDropdownProps<T extends SelectableItem = SelectableItem> {
   placeholder?: string;
-  onItemSelect?: (item: any, type: string) => void;
+  onItemSelect?: (item: T, type: string) => void;
   dataTypeOrder?: DataTypeOrder;
-  enableSnapshotModal?: boolean; // New prop to control snapshot modal integration
+  dataTypes?: DataType[];
+  initialSelectedItem?: T | null;
+  initialSelectedType?: string;
+  enableSnapshotModal?: boolean; // Control snapshot modal integration
+  containerStyle?: any; // Additional container styling
 }
 
-const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
+const SearchableDropdown = <T extends SelectableItem = SelectableItem>({
   placeholder = 'Buscar productos, mercados...',
   onItemSelect,
   dataTypeOrder = 'producto-mercado',
-  enableSnapshotModal = false, // Default to false to maintain backward compatibility
-}) => {
+  dataTypes = ['producto', 'mercado'],
+  initialSelectedItem = null,
+  initialSelectedType = '',
+  enableSnapshotModal = false,
+  containerStyle = {},
+}: SearchableDropdownProps<T>) => {
   const [searchText, setSearchText] = useState('');
   const { theme } = useTheme();
-  
-  // IMPORTANT: Get the openModal function from the store
-  const { openModal } = useSnapshotStore();
-  
-  // Add debug logging for props
-  console.log('[SearchableDropdown] Props:', { 
-    placeholder, 
-    dataTypeOrder, 
-    enableSnapshotModal,
-    hasOnItemSelect: !!onItemSelect
-  });
   
   // Hook to handle dropdown visibility and animation
   const { 
@@ -50,8 +44,32 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     hideDropdown 
   } = useDropdownVisibility();
   
+  // Hook to handle selection state with visual enhancements
+  const {
+    selectedItem,
+    selectedType,
+    hasSelection,
+    selectItem,
+    clearSelection,
+    getDisplayText,
+    getSelectedStyle
+  } = useSearchableSelection<T>({
+    initialSelectedItem,
+    initialSelectedType,
+    // Creating a wrapper function that ensures types align correctly
+    onSelectionChange: onItemSelect ? (item, type) => {
+      // Only call onItemSelect when item is not null
+      if (item !== null) {
+        onItemSelect(item, type);
+      }
+    } : undefined
+  });
+  
+  // Get style enhancements for the search bar
+  const { containerStyle: selectionContainerStyle, textStyle } = getSelectedStyle();
+  
   // Hook to fetch data from repositories
-  const { data, isLoading } = useDropdownData();
+  const { data, isLoading } = useDropdownData({ dataTypes });
   
   // Hook to filter data based on search input
   const filteredData = useInputDataFilter(data, searchText, dataTypeOrder);
@@ -68,25 +86,17 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
   };
   
-  // Handle item selection
-  const handleItemSelect = (item: any, type: string) => {
+  // Internal handler for item selection
+  const handleItemSelection = (item: any, type: string) => {
     console.log('[SearchableDropdown] Item selection detected:', { 
       type,
-      itemId: item?.artiId || 'No ID',
+      itemId: item?.artiId || item?.fuenId || 'No ID',
       itemName: item?.artiNombre || item?.Mercado || 'Unknown',
       timestamp: new Date().toISOString()
     });
     
-    if (onItemSelect) {
-      if (typeof onItemSelect === 'function') {
-        console.log('[SearchableDropdown] Calling onItemSelect callback');
-        onItemSelect(item, type);
-      } else {
-        console.error('[SearchableDropdown] onItemSelect exists but is not a function:', typeof onItemSelect);
-      }
-    } else {
-      console.log('[SearchableDropdown] No onItemSelect callback provided');
-    }
+    // Call the selection handler
+    selectItem(item as T, type);
     
     // Close dropdown and clear search after selection
     hideDropdown();
@@ -118,24 +128,47 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   
   // Return the JSX
   return (
-    <View style={styles.container}>
-      {/* Touchable overlay for outside clicks when in search mode */}
+    <View style={[styles.container, containerStyle]}>
+      {/* Touchable overlay for outside clicks when dropdown is visible */}
       {isVisible && (
         <TouchableWithoutFeedback onPress={handleOutsideClick}>
           <View style={styles.overlay} />
         </TouchableWithoutFeedback>
       )}
       
-      {/* Search Bar */}
-      <SearchBar
-        placeholder={placeholder}
-        value={searchText}
-        onChangeText={handleSearchTextChange}
-        // onClear={() => {
-        //   setSearchText('');
-        //   hideDropdown();
-        // }}
-      />
+      {/* Enhanced SearchBar */}
+      <View style={[
+        hasSelection && styles.selectedContainer,
+        selectionContainerStyle
+      ]}>
+        <SearchBar
+          placeholder={placeholder}
+          value={searchText}
+          onChangeText={handleSearchTextChange}
+          containerStyle={[
+            hasSelection && styles.enhancedSearchContainer,
+            selectionContainerStyle
+          ]}
+          inputStyle={textStyle}
+          rightElement={
+            hasSelection && !searchText ? (
+              <View style={styles.selectionIndicator}>
+                <Text 
+                  style={[styles.selectionText, textStyle]} 
+                  numberOfLines={1}
+                >
+                  {getDisplayText()}
+                </Text>
+                <TouchableWithoutFeedback onPress={clearSelection}>
+                  <View style={styles.clearButton}>
+                    <Text style={{ color: theme.colors.text.secondary }}>✕</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            ) : undefined
+          }
+        />
+      </View>
       
       {/* Dropdown List */}
       {isVisible && (
@@ -146,8 +179,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           <DropdownList
             data={filteredData}
             isLoading={isLoading}
-            onItemSelect={handleItemSelect}
+            onItemSelect={handleItemSelection}
             dataTypeOrder={dataTypeOrder}
+            enableSnapshotModal={enableSnapshotModal}
           />
         </Animated.View>
       )}
@@ -184,6 +218,28 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+  },
+  selectedContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  enhancedSearchContainer: {
+    borderWidth: 2,
+    borderColor: '#28C888', // Primary color from the theme
+  },
+  selectionIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: '75%',
+  },
+  selectionText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#263238',
+    marginRight: 8,
+  },
+  clearButton: {
+    padding: 4,
   }
 });
 

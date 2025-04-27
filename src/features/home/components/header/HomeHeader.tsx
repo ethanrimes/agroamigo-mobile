@@ -1,12 +1,15 @@
 // src/features/home/components/header/HomeHeader.tsx
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import VStack from '@/src/components/ui/layout/VStack';
 import SearchableDropdown from '@/src/features/shared/searchableDropdown';
+import { LocationComponent } from '@/src/components/ui/data';
+import useFormattedLocation from '../../hooks/useFormattedLocation';
 
 const HomeHeader: React.FC = () => {
   const { theme } = useTheme();
+  const formattedLocation = useFormattedLocation();
   
   // Handle selection from the search dropdown
   const handleSearchItemSelect = (item: any, type: string) => {
@@ -17,8 +20,6 @@ const HomeHeader: React.FC = () => {
       : type === 'mercado' 
         ? item.Mercado 
         : 'Selected item';
-    
-    // Alert.alert('Item Selected', `You selected ${itemName} (${type})`);
     
     // Here you would typically navigate to a details screen
     // or perform some other action based on the selected item
@@ -42,7 +43,7 @@ const HomeHeader: React.FC = () => {
           </Text>
         </View>
         
-        {/* Pass enableSnapshotModal={true} to SearchableDropdown */}
+        {/* SearchableDropdown with custom placeholder */}
         <View style={styles.searchContainer}>
           <SearchableDropdown 
             placeholder="Buscar productos, mercados..."
@@ -50,6 +51,11 @@ const HomeHeader: React.FC = () => {
             dataTypeOrder="producto-mercado"
             enableSnapshotModal={true}
           />
+        </View>
+        
+        {/* LocationComponent displaying the current location */}
+        <View style={styles.locationContainer}>
+          <LocationComponent location={formattedLocation} />
         </View>
       </VStack>
     </View>
@@ -64,7 +70,7 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     marginBottom: 16,
-    alignItems: 'center', // Center the content horizontally
+    alignItems: 'center',
   },
   welcomeTitle: {
     fontSize: 32,
@@ -78,6 +84,11 @@ const styles = StyleSheet.create({
     width: '100%',
     zIndex: 1000, // Ensure dropdown appears above other elements
   },
+  locationContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 8,
+  }
 });
 
 export default HomeHeader;

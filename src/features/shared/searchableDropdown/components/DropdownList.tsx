@@ -1,5 +1,5 @@
 // src/features/shared/searchableDropdown/components/DropdownList.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, Text, StyleSheet, ActivityIndicator, View, TouchableWithoutFeedback } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import DataTypeHeader from './DataTypeHeader';
@@ -7,20 +7,21 @@ import MajorCategoryHeader from './MajorCategoryHeader';
 import SubcategoryHeader from './SubcategoryHeader';
 import DropdownItem from './DropdownItem';
 import { DataTypeOrder } from '../SearchableDropdown';
-import { useEffect } from 'react';
 
 interface DropdownListProps {
   data: any;
   isLoading: boolean;
   onItemSelect: (item: any, type: string) => void;
   dataTypeOrder: DataTypeOrder;
+  enableSnapshotModal?: boolean;
 }
 
 const DropdownList: React.FC<DropdownListProps> = ({
   data,
   isLoading,
   onItemSelect,
-  dataTypeOrder
+  dataTypeOrder,
+  enableSnapshotModal = false
 }) => {
   const { theme } = useTheme();
 
@@ -35,6 +36,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
     }
     
     console.log('[DropdownList] dataTypeOrder:', dataTypeOrder);
+    console.log('[DropdownList] enableSnapshotModal:', enableSnapshotModal);
     
     // Check if we have data
     if (data) {
@@ -180,6 +182,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
                       item={item}
                       type={type}
                       onSelect={safeItemSelect}
+                      enableSnapshotModal={enableSnapshotModal}
                     />
                   ))}
                 </View>

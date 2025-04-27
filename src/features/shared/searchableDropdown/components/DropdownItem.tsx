@@ -9,16 +9,18 @@ interface DropdownItemProps {
   item: any;
   type: string;
   onSelect: (item: any, type: string) => void;
+  enableSnapshotModal?: boolean;
 }
 
 const DropdownItem: React.FC<DropdownItemProps> = ({
   item,
   type,
   onSelect,
+  enableSnapshotModal = false
 }) => {
   const { theme } = useTheme();
   const tapRef = useRef<TapGestureHandler>(null);
-  // Import openModal from the store
+  // Import openModal from the store, but only use it if enableSnapshotModal is true
   const { openModal } = useSnapshotStore();
 
   // Get the display name based on the data type
@@ -36,6 +38,8 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
         return item.Subcategory || 'Unknown Subcategory';
       case 'majorCategory':
         return item.MajorCategory || 'Unknown Category';
+      case 'insumo':
+        return item.insumoNombre || item.artiNombre || 'Unknown Input';
       default:
         return 'Unknown Item';
     }
@@ -48,7 +52,9 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
         return item.artiId;
       case 'mercado':
         // Adjust this based on your actual market ID property
-        return item.id || item.mercadoId || item.MercadoId;
+        return item.fuenId || item.id || item.mercadoId || item.MercadoId;
+      case 'insumo':
+        return item.insumoId || item.artiId;
       default:
         return null;
     }
@@ -67,13 +73,17 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
         onSelect(item, type);
       }
       
-      // IMPORTANT: Open the modal if the type is supported
-      const itemId = getItemId();
-      if ((type === 'producto' || type === 'mercado') && itemId !== null && typeof itemId === 'number') {
-        console.log(`[DropdownItem] Opening snapshot modal with type=${type}, id=${itemId}`);
-        openModal(type as SnapshotType, itemId);
+      // Open the modal only if enableSnapshotModal is true
+      if (enableSnapshotModal && (type === 'producto' || type === 'mercado' || type === 'insumo')) {
+        const itemId = getItemId();
+        if (itemId !== null && typeof itemId === 'number') {
+          console.log(`[DropdownItem] Opening snapshot modal with type=${type}, id=${itemId}`);
+          openModal(type as SnapshotType, itemId);
+        } else {
+          console.log(`[DropdownItem] Not opening modal for type=${type}, id=${itemId} - invalid ID`);
+        }
       } else {
-        console.log(`[DropdownItem] Not opening modal for type=${type}, id=${itemId}`);
+        console.log(`[DropdownItem] Not opening modal: enableSnapshotModal=${enableSnapshotModal}, type=${type}`);
       }
     }
   };

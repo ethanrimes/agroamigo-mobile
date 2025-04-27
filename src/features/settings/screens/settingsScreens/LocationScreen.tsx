@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import ThemeHeader from '@/src/features/shared/themeHeader/ThemeHeader';
-import SearchableSelectedDisplay from '@/src/features/shared/searchableDropdown/SearchableSelectedDisplay';
+import SearchableDropdown from '@/src/features/shared/searchableDropdown/SearchableDropdown';
 import useLocationSetting from '@/src/features/settings/hooks/useLocationSetting';
 import { getMarketById } from '@/src/services/supabase/entities/mercado';
 
@@ -46,15 +46,14 @@ const LocationScreen: React.FC = () => {
           
           <View style={styles.dropdownContainer}>
             {!isLoading && (
-              <SearchableSelectedDisplay
+              <SearchableDropdown
                 placeholder="Buscar mercados..."
                 onItemSelect={setNewLocation}
                 dataTypeOrder="mercado-producto"
+                dataTypes={['mercado']}
                 initialSelectedItem={initialMarket}
                 initialSelectedType="mercado"
-                buttonVariant="outline"
-                buttonSize="md"
-                enableSnapshotModal={false}
+                containerStyle={styles.searchableDropdown}
               />
             )}
           </View>
@@ -86,8 +85,10 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     marginTop: 8,
-    alignItems: 'center',
   },
+  searchableDropdown: {
+    width: '100%',
+  }
 });
 
 export default LocationScreen;

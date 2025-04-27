@@ -19,7 +19,7 @@ interface UnitsPresentationCount {
   count: number;
 }
 
-export const useRecentProductPriceData = (productId: number | null): PriceDataResult => {
+export const useRecentProductPriceData = (productId: number | null, locationId?: number): PriceDataResult => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [priceObservations, setPriceObservations] = useState<DailyPriceObservation[]>([]);
@@ -27,8 +27,9 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
   const [unitsPresentationName, setUnitsPresentationName] = useState<string>('');
   const [graphData, setGraphData] = useState<LineGraphDataPoint[]>([]);
   
-  // Get the current location (market ID) from the location store
+  // Get the current location (market ID) from the location store if not provided
   const { currentLocationId } = useLocationStore();
+  const marketId = locationId || currentLocationId;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,31 +44,24 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
         // Calculate date range (last 31 days)
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 360); // year for debugging
+        startDate.setDate(startDate.getDate() - 31); // 1 month of data
 
-        console.log(`[useRecentProductPriceData] Fetching price data for product ${productId} in market ${currentLocationId}`);
+        console.log(`[useRecentProductPriceData] Fetching price data for product ${productId} in market ${marketId}`);
         console.log(`[useRecentProductPriceData] Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
-        // Fetch price observations for the last month for the product and market
+        // Fetch price observations for the product and market
         let observations: DailyPriceObservation[] = [];
         try {
           observations = await getDailyPriceObservationsByProductAndMarket(
             productId,
-            currentLocationId,
+            marketId,
             startDate,
             endDate
           );
           console.log(`[useRecentProductPriceData] Found ${observations.length} price observations`);
         } catch (fetchError) {
           console.error('[useRecentProductPriceData] Error fetching price observations:', fetchError);
-          
-          // Create a dummy observation for testing if needed
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[useRecentProductPriceData] Using dummy data for development');
-            observations = generateDummyObservations(productId, currentLocationId);
-          } else {
-            throw fetchError;
-          }
+          throw fetchError;
         }
 
         // Store all observations
@@ -186,38 +180,7 @@ export const useRecentProductPriceData = (productId: number | null): PriceDataRe
     };
 
     fetchData();
-  }, [productId, currentLocationId]);
-  
-  // Helper function to generate dummy observations for development
-  const generateDummyObservations = (productId: number, marketId: number): DailyPriceObservation[] => {
-    const observations: DailyPriceObservation[] = [];
-    const today = new Date();
-    
-    // Generate observations for the last 10 days
-    for (let i = 10; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      // Base price with some minor fluctuation
-      const basePrice = 5000 + (productId % 10) * 100;
-      const minPrice = basePrice - (Math.random() * 500);
-      const maxPrice = basePrice + (Math.random() * 500);
-      
-      observations.push({
-        id: i,
-        date: date.toISOString().split('T')[0],
-        artiId: productId,
-        fuenId: marketId,
-        minPrice,
-        maxPrice,
-        UnitsPresentationId: 1,
-        unitsId: 1,
-        presentationId: 1
-      });
-    }
-    
-    return observations;
-  };
+  }, [productId, marketId]);
 
   return {
     priceObservations,

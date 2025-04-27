@@ -19,7 +19,7 @@ interface ProductData {
   graphData: LineGraphDataPoint[];
 }
 
-export const useProductModalData = (productId: number | null) => {
+export const useProductModalData = (productId: number | null, locationId?: number) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [productData, setProductData] = useState<ProductData | null>(null);
@@ -28,14 +28,14 @@ export const useProductModalData = (productId: number | null) => {
   // Use ref to prevent infinite update loops
   const isUpdatingRef = useRef(false);
   
-  // Get price data from the hook
+  // Get price data from the hook - passing the specific locationId
   const { 
     filteredObservations, 
     unitsPresentationName, 
     loading: priceLoading, 
     error: priceError,
     graphData 
-  } = useRecentProductPriceData(productId);
+  } = useRecentProductPriceData(productId, locationId);
   
   // Get trend data using the graph data
   const trendData = useTrendGraphData(graphData.length > 0 ? graphData : null);
@@ -54,7 +54,7 @@ export const useProductModalData = (productId: number | null) => {
         isUpdatingRef.current = true;
         setLoading(true);
         
-        console.log(`[useProductModalData] Fetching product data for ID: ${productId}`);
+        console.log(`[useProductModalData] Fetching product data for ID: ${productId} at location: ${locationId}`);
         
         // 1. Fetch the product information
         const product: Product = await getProductById(productId);
@@ -146,7 +146,7 @@ export const useProductModalData = (productId: number | null) => {
     };
     
     fetchData();
-  }, [productId, priceLoading, filteredObservations, unitsPresentationName, graphData, trendData]);
+  }, [productId, locationId, priceLoading, filteredObservations, unitsPresentationName, graphData, trendData]);
   
   // Handle price loading/error
   useEffect(() => {

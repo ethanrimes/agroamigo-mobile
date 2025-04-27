@@ -16,40 +16,39 @@ interface UseSearchableSelectionProps<T extends SelectableItem = SelectableItem>
   onSelectionChange?: (item: T | null, type: string) => void;
 }
 
+interface UseSearchableSelectionResult<T> {
+  // Selection state
+  selectedItem: T | null;
+  selectedType: string;
+  // Visual indicators
+  hasSelection: boolean;
+  // Actions
+  selectItem: (item: T, type: string) => void;
+  clearSelection: () => void;
+  // Helpers
+  getDisplayText: () => string;
+  getSelectedStyle: () => {
+    containerStyle: any;
+    textStyle: any;
+  };
+}
+
 export const useSearchableSelection = <T extends SelectableItem = SelectableItem>({
   initialSelectedItem = null,
   initialSelectedType = '',
   onSelectionChange,
-}: UseSearchableSelectionProps<T> = {}) => {
-  // Track whether we're in search mode or display mode
-  const [isSearchMode, setIsSearchMode] = useState(!initialSelectedItem);
-  
+}: UseSearchableSelectionProps<T> = {}): UseSearchableSelectionResult<T> => {
   // Track the selected item and its type
   const [selectedItem, setSelectedItem] = useState<T | null>(initialSelectedItem);
   const [selectedType, setSelectedType] = useState<string>(initialSelectedType);
   
-  // Toggle between search mode and display mode
-  const toggleSearchMode = useCallback(() => {
-    setIsSearchMode(prev => !prev);
-  }, []);
-  
-  // Enter search mode
-  const enterSearchMode = useCallback(() => {
-    setIsSearchMode(true);
-  }, []);
-  
-  // Cancel search and return to display mode
-  const cancelSearch = useCallback(() => {
-    if (selectedItem) {
-      setIsSearchMode(false);
-    }
-  }, [selectedItem]);
+  // Computed property to check if there's a selection
+  const hasSelection = selectedItem !== null;
   
   // Handle item selection from dropdown
-  const handleItemSelect = useCallback((item: T, type: string) => {
+  const selectItem = useCallback((item: T, type: string) => {
     setSelectedItem(item);
     setSelectedType(type);
-    setIsSearchMode(false);
     
     if (onSelectionChange) {
       onSelectionChange(item, type);
@@ -60,7 +59,6 @@ export const useSearchableSelection = <T extends SelectableItem = SelectableItem
   const clearSelection = useCallback(() => {
     setSelectedItem(null);
     setSelectedType('');
-    setIsSearchMode(true);
     
     if (onSelectionChange) {
       onSelectionChange(null, '');
@@ -70,7 +68,7 @@ export const useSearchableSelection = <T extends SelectableItem = SelectableItem
   // Get display text for the button based on selected item
   const getDisplayText = useCallback(() => {
     if (!selectedItem) {
-      return 'Seleccionar';
+      return '';
     }
     
     // Try to find the best property to display, checking in order of preference
@@ -86,15 +84,42 @@ export const useSearchableSelection = <T extends SelectableItem = SelectableItem
     return `${selectedType}: Seleccionado`;
   }, [selectedItem, selectedType]);
   
+  // Get styles for the search bar based on selection state
+  const getSelectedStyle = useCallback(() => {
+    // Default styles when there's no selection
+    const baseContainerStyle = {};
+    const baseTextStyle = {};
+    
+    if (hasSelection) {
+      // Enhanced styles when there's a selection
+      return {
+        containerStyle: {
+          ...baseContainerStyle,
+          borderWidth: 2,
+          borderColor: '#28C888', // Primary color
+          backgroundColor: 'rgba(40, 200, 136, 0.05)', // Light primary color
+        },
+        textStyle: {
+          ...baseTextStyle,
+          fontWeight: 'bold',
+          color: '#263238', // Dark text color
+        },
+      };
+    }
+    
+    return {
+      containerStyle: baseContainerStyle,
+      textStyle: baseTextStyle,
+    };
+  }, [hasSelection]);
+  
   return {
-    isSearchMode,
     selectedItem,
     selectedType,
-    toggleSearchMode,
-    enterSearchMode,
-    cancelSearch,
-    handleItemSelect,
+    hasSelection,
+    selectItem,
     clearSelection,
     getDisplayText,
+    getSelectedStyle,
   };
 };

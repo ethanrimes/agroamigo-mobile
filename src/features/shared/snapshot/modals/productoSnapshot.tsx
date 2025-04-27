@@ -7,7 +7,8 @@ import SnapshotData from '../components/SnapshotData';
 import TrendGraph from '../components/TrendGraph';
 import SnapshotButtons from '../components/SnapshotButtons';
 import useProductModalData from '../hooks/useProductModalData';
-import { useLocationStore } from '@/src/store/locationStore';
+import SearchableDropdown from '@/src/features/shared/searchableDropdown/SearchableDropdown';
+import useSnapshotLocation from '../hooks/useSnapshotLocation';
 
 interface ProductoSnapshotProps {
   productId: number;
@@ -16,17 +17,17 @@ interface ProductoSnapshotProps {
 
 const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose }) => {
   const { colors, spacing } = useTheme();
-  const { locationName, departmentName, municipalityName } = useLocationStore();
   
-  // Format location display
-  const getLocationDisplay = () => {
-    if (municipalityName && departmentName) {
-      return `${municipalityName}, ${departmentName} - CMA`;
-    }
-    return locationName || 'Ubicación';
-  };
+  // Use our new location hook
+  const { 
+    location, 
+    locationDisplayString, 
+    initialMarket, 
+    isLoadingMarket, 
+    setNewLocation 
+  } = useSnapshotLocation();
   
-  // Load product data using our hook
+  // Load product data using our hook, passing the location.id from our hook
   const { 
     productData,
     productInfo,
@@ -34,16 +35,17 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
     error, 
     graphData,
     trendData
-  } = useProductModalData(productId);
+  } = useProductModalData(productId, location.id); // Modified to accept locationId
   
   // Log component lifecycle for debugging
   useEffect(() => {
     console.log('[ProductoSnapshot] Component mounted with productId:', productId);
+    console.log('[ProductoSnapshot] Using location:', location.id);
     
     return () => {
       console.log('[ProductoSnapshot] Component unmounted');
     };
-  }, [productId]);
+  }, [productId, location.id]);
   
   // Show loading state
   if (loading) {
@@ -89,8 +91,23 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
         <SnapshotHeader 
           title={productData.name}
           iconName={productData.iconName}
-          subtitle={getLocationDisplay()}
+          subtitle={locationDisplayString}
         />
+        
+        {/* Location dropdown - Added directly here instead of inside SnapshotHeader */}
+        <View style={styles.locationContainer}>
+          {!isLoadingMarket && (
+            <SearchableDropdown
+              placeholder="Buscar mercados..."
+              onItemSelect={setNewLocation}
+              dataTypeOrder="mercado-producto"
+              dataTypes={['mercado']}
+              initialSelectedItem={initialMarket}
+              initialSelectedType="mercado"
+              containerStyle={styles.locationDropdown}
+            />
+          )}
+        </View>
         
         {/* Trend Graph */}
         <TrendGraph
@@ -166,6 +183,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     color: '#6B7280',
+  },
+  locationContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: -5,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  locationDropdown: {
+    width: '100%',
   }
 });
 
