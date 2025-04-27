@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import SnapshotHeader from '../components/SnapshotHeader';
+import SnapshotHeader from '@/src/features/shared/snapshot/components/SnapshotHeader';
 import SnapshotData from '../components/SnapshotData';
 import TrendGraph from '../components/TrendGraph';
 import SnapshotButtons from '../components/SnapshotButtons';
@@ -18,7 +18,7 @@ interface ProductoSnapshotProps {
 const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose }) => {
   const { colors, spacing } = useTheme();
   
-  // Use our new location hook
+  // Use our updated location hook
   const { 
     location, 
     locationDisplayString, 
@@ -35,17 +35,18 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
     error, 
     graphData,
     trendData
-  } = useProductModalData(productId, location.id); // Modified to accept locationId
+  } = useProductModalData(productId, location.id);
   
   // Log component lifecycle for debugging
   useEffect(() => {
     console.log('[ProductoSnapshot] Component mounted with productId:', productId);
     console.log('[ProductoSnapshot] Using location:', location.id);
+    console.log('[ProductoSnapshot] Location display string:', locationDisplayString);
     
     return () => {
       console.log('[ProductoSnapshot] Component unmounted');
     };
-  }, [productId, location.id]);
+  }, [productId, location.id, locationDisplayString]);
   
   // Show loading state
   if (loading) {
@@ -87,16 +88,15 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
         style={styles.scrollContainer}
         contentContainerStyle={styles.contentContainer}
       >
-        {/* Header with product name and icon */}
+        {/* Header with product name and icon - without subtitle */}
         <SnapshotHeader 
           title={productData.name}
           iconName={productData.iconName}
-          subtitle={locationDisplayString}
         />
         
-        {/* Location dropdown - Added directly here instead of inside SnapshotHeader */}
+        {/* Location dropdown - Positioned directly below header */}
         <View style={styles.locationContainer}>
-          {!isLoadingMarket && (
+          {!isLoadingMarket ? (
             <SearchableDropdown
               placeholder="Buscar mercados..."
               onItemSelect={setNewLocation}
@@ -105,7 +105,15 @@ const ProductoSnapshot: React.FC<ProductoSnapshotProps> = ({ productId, onClose 
               initialSelectedItem={initialMarket}
               initialSelectedType="mercado"
               containerStyle={styles.locationDropdown}
+              zIndex={2000} // Ensure highest z-index for dropdown
             />
+          ) : (
+            <View style={styles.loadingLocationContainer}>
+              <ActivityIndicator size="small" color={colors.secondary.default} />
+              <Text style={styles.loadingLocationText}>
+                Cargando ubicación...
+              </Text>
+            </View>
           )}
         </View>
         
@@ -148,7 +156,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    zIndex: 10,
+    zIndex: 3000, // Ensure highest z-index for close button
     padding: 8,
   },
   closeButtonText: {
@@ -187,9 +195,10 @@ const styles = StyleSheet.create({
   locationContainer: {
     width: '90%',
     alignSelf: 'center',
-    marginTop: -5,
+    marginTop: 10,
     marginBottom: 15,
     paddingHorizontal: 10,
+    paddingVertical: 5,
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
     shadowColor: '#000',
@@ -197,9 +206,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    zIndex: 1500, // Higher z-index to ensure dropdown appears on top
   },
   locationDropdown: {
     width: '100%',
+  },
+  loadingLocationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  loadingLocationText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  locationDisplayText: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 2,
+    fontStyle: 'italic',
   }
 });
 

@@ -44,7 +44,7 @@ export const useRecentProductPriceData = (productId: number | null, locationId?:
         // Calculate date range (last 31 days)
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 31); // 1 month of data
+        startDate.setMonth(startDate.getMonth() - 6); // 6 months of data instead of 31 days
 
         console.log(`[useRecentProductPriceData] Fetching price data for product ${productId} in market ${marketId}`);
         console.log(`[useRecentProductPriceData] Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);

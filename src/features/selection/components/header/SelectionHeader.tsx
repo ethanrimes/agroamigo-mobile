@@ -5,8 +5,8 @@ import VStack from '@/src/components/ui/layout/VStack';
 import Box from '@/src/components/ui/layout/Box';
 import { LocationComponent } from '@/src/components/ui/data';
 import SearchableDropdown from '@/src/features/shared/searchableDropdown';
-import ThinHeaderStrip from './ThinHeaderStrip';
 import FilterButton from './FilterButton';
+import ThemeHeader from '@/src/features/shared/themeHeader/ThemeHeader';
 import { DataType } from '@/src/features/shared/searchableDropdown/hooks/useDropdownData';
 
 interface SelectionHeaderProps {
@@ -45,8 +45,13 @@ const SelectionHeader: React.FC<SelectionHeaderProps> = ({
       height: 48,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    centeredTextContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
     }
   });
+  
   // Handle item selection if no handler was provided by parent
   const handleItemSelection = (item: any, type: string) => {
     if (onItemSelect) {
@@ -59,12 +64,16 @@ const SelectionHeader: React.FC<SelectionHeaderProps> = ({
 
   return (
     <VStack className="w-full">
-      <ThinHeaderStrip onFilterPress={onFilterPress} />
+      {/* Replace ThinHeaderStrip with ThemeHeader */}
+      <ThemeHeader title="Agro Amigo" />
       
       <Box className="w-full px-4 py-4">
         <VStack className="w-full space-y-2">
-          <Text className="text-2xl font-semibold text-neutral-black">{title}</Text>
-          <Text className="text-base text-neutral-grey">{subtitle}</Text>
+          {/* Center the title and subtitle */}
+          <View style={styles.centeredTextContainer}>
+            <Text className="text-2xl font-semibold text-neutral-black">{title}</Text>
+            <Text className="text-base text-neutral-grey">{subtitle}</Text>
+          </View>
           
           {/* SearchableDropdown with Filter Button */}
           <Box className="pt-4 w-full">

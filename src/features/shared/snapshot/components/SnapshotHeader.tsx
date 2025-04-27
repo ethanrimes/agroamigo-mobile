@@ -7,7 +7,7 @@ interface SnapshotHeaderProps {
   title: string;
   iconSource?: any; // Can be a require() or a URL
   iconName?: string; // For using a system icon
-  subtitle?: string;
+  subtitle?: string; // Optional - we'll make this not render if not provided
 }
 
 const SnapshotHeader: React.FC<SnapshotHeaderProps> = ({
@@ -44,7 +44,7 @@ const SnapshotHeader: React.FC<SnapshotHeaderProps> = ({
         )}
       </View>
       
-      {/* Subtitle section (e.g., location) */}
+      {/* Subtitle section (e.g., location) - only render if provided */}
       {subtitle && (
         <View style={styles.subtitleContainer}>
           <Text style={styles.subtitle}>{subtitle}</Text>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8, // Reduced from original 16
   },
   title: {
     fontSize: 36,
