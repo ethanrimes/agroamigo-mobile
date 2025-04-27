@@ -1,367 +1,239 @@
-// components/charts/BaseD3BarGraph.tsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { G, Rect, Text, Line } from 'react-native-svg';
+import * as d3 from 'd3';
 import D3Container from './D3Container';
-import { useD3BarGraph, useD3Histogram, BarGraphDataPoint } from '../../hooks/useD3';
 import { useTheme } from '../../theme/providers/ThemeProvider';
 
-interface BarGraphProps {
+export type BarGraphDataPoint = {
+  x: string;
+  y: number;
+};
+
+interface BaseD3BarGraphProps {
   data: BarGraphDataPoint[];
   width: number;
   height: number;
   margin?: { top: number; right: number; bottom: number; left: number };
-  color?: string;
+  barColor?: string;
+  showValues?: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   showGrid?: boolean;
-  showAxis?: boolean;
-  barPadding?: number;
-  formatValue?: (value: number) => string;
-  yAxisTickCount?: number;
-  title?: string;
-  style?: any;
+  animated?: boolean;
+  backgroundColor?: string;
 }
 
-const BaseD3BarGraph: React.FC<BarGraphProps> = ({
+const BaseD3BarGraph: React.FC<BaseD3BarGraphProps> = ({
   data,
   width,
   height,
-  margin = { top: 20, right: 30, bottom: 60, left: 50 },
-  color,
-  showGrid = true,
-  showAxis = true,
-  barPadding = 0.2,
-  formatValue = (value) => value.toString(),
-  yAxisTickCount = 5,
-  title,
-  style,
+  margin = { top: 20, right: 20, bottom: 40, left: 40 },
+  barColor,
+  showValues = false,
+  xAxisLabel = '',
+  yAxisLabel = '',
+  showGrid = false,
+  animated = true,
+  backgroundColor,
 }) => {
-  const { svg } = useTheme();
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
+  const animationProgressRef = useRef(0);
   
-  // Use the D3 hook to calculate the bar graph elements
-  const { bars, xAxisTicks, yAxisTicks } = useD3BarGraph(
-    data,
-    width,
-    height,
-    margin,
-    {
-      showGrid,
-      barPadding,
-      color: color || svg.colors.fill.primary,
-      yAxisTickCount,
-      formatValue,
-      minBarWidth: 10,
-      maxBarWidth: 50
+  const { colors, typography } = useTheme();
+  
+  // Calculate dimensions for the chart
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  
+  // Use the provided barColor or default to theme primary color
+  const barFillColor = barColor || colors.primary.default;
+  
+  // Create x and y scales
+  const xScale = d3
+    .scaleBand()
+    .domain(data.map(d => d.x))
+    .range([0, chartWidth])
+    .padding(0.3);
+  
+  const yScale = d3
+    .scaleLinear()
+    .domain([0, d3.max(data, d => d.y) || 0])
+    .nice()
+    .range([chartHeight, 0]);
+  
+  // Generate y-axis ticks
+  const yTicks = yScale.ticks(5);
+  
+  // Animation effect
+  useEffect(() => {
+    if (animated) {
+      animationProgressRef.current = 0;
+      
+      const animate = () => {
+        animationProgressRef.current += 0.1;
+        
+        if (animationProgressRef.current >= 1) {
+          animationProgressRef.current = 1;
+          if (animationRef.current) {
+            clearTimeout(animationRef.current);
+            animationRef.current = null;
+          }
+        } else {
+          animationRef.current = setTimeout(animate, 30);
+        }
+      };
+      
+      animate();
+      
+      return () => {
+        if (animationRef.current) {
+          clearTimeout(animationRef.current);
+          animationRef.current = null;
+        }
+      };
+    } else {
+      animationProgressRef.current = 1;
     }
-  );
+  }, [data, animated]);
   
-  // Skip rendering if no data
-  if (!data || data.length === 0) {
-    return null;
-  }
-
   return (
-    <D3Container width={width} height={height} style={style}>
-      {/* Title */}
-      {title && (
-        <Text
-          x={width / 2}
-          y={margin.top / 2}
-          fontSize={svg.typography.fontSize.title}
-          fontFamily={svg.typography.fontFamily.bold}
-          fontWeight={svg.typography.fontWeight.bold}
-          textAnchor="middle"
-          fill={svg.colors.text.primary}
-        >
-          {title}
-        </Text>
-      )}
-      
-      {/* Grid lines */}
-      {showGrid && (
-        <G>
-          {/* Horizontal grid lines (based on y-axis ticks) */}
-          {yAxisTicks.map(({ value, yOffset }) => (
-            <Line
-              key={`grid-y-${value}`}
-              x1={margin.left}
-              y1={yOffset + margin.top}
-              x2={width - margin.right}
-              y2={yOffset + margin.top}
-              stroke={svg.colors.stroke.axis}
-              strokeWidth={svg.chart.axis.strokeWidth}
-              opacity={svg.chart.axis.gridOpacity}
-            />
-          ))}
-        </G>
-      )}
-      
-      {/* Axes */}
-      {showAxis && (
-        <G>
-          {/* X Axis */}
-          <Line
-            x1={margin.left}
-            y1={height - margin.bottom}
-            x2={width - margin.right}
-            y2={height - margin.bottom}
-            stroke={svg.colors.stroke.default}
-            strokeWidth={svg.chart.axis.strokeWidth}
-          />
-          
-          {/* Y Axis */}
-          <Line
-            x1={margin.left}
-            y1={margin.top}
-            x2={margin.left}
-            y2={height - margin.bottom}
-            stroke={svg.colors.stroke.default}
-            strokeWidth={svg.chart.axis.strokeWidth}
-          />
-          
-          {/* X Axis Ticks */}
-          {xAxisTicks.map(({ value, xOffset, label }, index) => (
-            <G key={`x-${value}-${index}`}>
-              <Line
-                x1={xOffset + margin.left}
-                y1={height - margin.bottom}
-                x2={xOffset + margin.left}
-                y2={height - margin.bottom + svg.chart.axis.tickLength}
-                stroke={svg.colors.stroke.default}
-                strokeWidth={svg.chart.axis.strokeWidth}
-              />
-              <Text
-                x={xOffset + margin.left}
-                y={height - margin.bottom + svg.chart.axis.tickLength + 12}
-                fontSize={svg.typography.fontSize.axisValue}
-                fontFamily={svg.typography.fontFamily.regular}
-                textAnchor="middle"
-                fill={svg.colors.text.tertiary}
-                rotation={data.length > 8 ? 45 : 0}
-                originX={xOffset + margin.left}
-                originY={height - margin.bottom + svg.chart.axis.tickLength + 12}
-              >
-                {label}
-              </Text>
-            </G>
-          ))}
-          
-          {/* Y Axis Ticks */}
-          {yAxisTicks.map(({ value, yOffset, label }) => (
-            <G key={`y-${value}`}>
-              <Line
-                x1={margin.left}
-                y1={yOffset + margin.top}
-                x2={margin.left - svg.chart.axis.tickLength}
-                y2={yOffset + margin.top}
-                stroke={svg.colors.stroke.default}
-                strokeWidth={svg.chart.axis.strokeWidth}
-              />
-              <Text
-                x={margin.left - svg.chart.axis.tickLength - 5}
-                y={yOffset + margin.top + 4}
-                fontSize={svg.typography.fontSize.axisValue}
-                fontFamily={svg.typography.fontFamily.regular}
-                textAnchor="end"
-                fill={svg.colors.text.tertiary}
-              >
-                {label}
-              </Text>
-            </G>
-          ))}
-        </G>
-      )}
-      
-      {/* Bars */}
-      {bars.map((bar, index) => (
-        <Rect
-          key={`bar-${index}`}
-          x={bar.x + margin.left}
-          y={bar.y + margin.top}
-          width={bar.width}
-          height={bar.height}
-          fill={color || svg.colors.fill.primary}
-          rx={svg.shape.borderRadius.small}
+    <D3Container width={width} height={height} backgroundColor={backgroundColor}>
+      <G transform={`translate(${margin.left}, ${margin.top})`}>
+        {/* X-axis line */}
+        <Line
+          x1={0}
+          y1={chartHeight}
+          x2={chartWidth}
+          y2={chartHeight}
+          stroke={colors.border.default}
+          strokeWidth={1}
         />
-      ))}
-    </D3Container>
-  );
-};
-
-interface HistogramProps {
-  data: number[];
-  width: number;
-  height: number;
-  margin?: { top: number; right: number; bottom: number; left: number };
-  bins?: number;
-  color?: string;
-  showGrid?: boolean;
-  showAxis?: boolean;
-  formatValue?: (value: number) => string;
-  yAxisTickCount?: number;
-  title?: string;
-  style?: any;
-}
-
-const BaseD3Histogram: React.FC<HistogramProps> = ({
-  data,
-  width,
-  height,
-  margin = { top: 20, right: 30, bottom: 40, left: 50 },
-  bins = 10,
-  color,
-  showGrid = true,
-  showAxis = true,
-  formatValue = (value) => value.toString(),
-  yAxisTickCount = 5,
-  title,
-  style,
-}) => {
-  const { svg } = useTheme();
-  
-  // Use the D3 hook to calculate the histogram elements
-  const { bars, xAxisTicks, yAxisTicks } = useD3Histogram(
-    data,
-    width,
-    height,
-    margin,
-    {
-      bins,
-      showGrid,
-      color: color || svg.colors.fill.primary,
-      yAxisTickCount,
-      formatValue
-    }
-  );
-  
-  // Skip rendering if no data
-  if (!data || data.length === 0) {
-    return null;
-  }
-
-  return (
-    <D3Container width={width} height={height} style={style}>
-      {/* Title */}
-      {title && (
-        <Text
-          x={width / 2}
-          y={margin.top / 2}
-          fontSize={svg.typography.fontSize.title}
-          fontFamily={svg.typography.fontFamily.bold}
-          fontWeight={svg.typography.fontWeight.bold}
-          textAnchor="middle"
-          fill={svg.colors.text.primary}
-        >
-          {title}
-        </Text>
-      )}
-      
-      {/* Grid lines */}
-      {showGrid && (
-        <G>
-          {/* Horizontal grid lines (based on y-axis ticks) */}
-          {yAxisTicks.map(({ value, yOffset }) => (
+        
+        {/* Y-axis line */}
+        <Line
+          x1={0}
+          y1={0}
+          x2={0}
+          y2={chartHeight}
+          stroke={colors.border.default}
+          strokeWidth={1}
+        />
+        
+        {/* Grid lines */}
+        {showGrid &&
+          yTicks.map((tick, i) => (
             <Line
-              key={`grid-y-${value}`}
-              x1={margin.left}
-              y1={yOffset + margin.top}
-              x2={width - margin.right}
-              y2={yOffset + margin.top}
-              stroke={svg.colors.stroke.axis}
-              strokeWidth={svg.chart.axis.strokeWidth}
-              opacity={svg.chart.axis.gridOpacity}
+              key={`grid-${i}`}
+              x1={0}
+              y1={yScale(tick)}
+              x2={chartWidth}
+              y2={yScale(tick)}
+              stroke={colors.border.light}
+              strokeWidth={0.5}
+              strokeDasharray="4,4"
             />
           ))}
-        </G>
-      )}
-      
-      {/* Axes */}
-      {showAxis && (
-        <G>
-          {/* X Axis */}
-          <Line
-            x1={margin.left}
-            y1={height - margin.bottom}
-            x2={width - margin.right}
-            y2={height - margin.bottom}
-            stroke={svg.colors.stroke.default}
-            strokeWidth={svg.chart.axis.strokeWidth}
-          />
-          
-          {/* Y Axis */}
-          <Line
-            x1={margin.left}
-            y1={margin.top}
-            x2={margin.left}
-            y2={height - margin.bottom}
-            stroke={svg.colors.stroke.default}
-            strokeWidth={svg.chart.axis.strokeWidth}
-          />
-          
-          {/* X Axis Ticks - show fewer ticks for histogram */}
-          {xAxisTicks.filter((_, i, arr) => i % Math.ceil(arr.length / 6) === 0 || i === arr.length - 1)
-            .map(({ value, xOffset, label }, index) => (
-              <G key={`x-${value}-${index}`}>
-                <Line
-                  x1={xOffset + margin.left}
-                  y1={height - margin.bottom}
-                  x2={xOffset + margin.left}
-                  y2={height - margin.bottom + svg.chart.axis.tickLength}
-                  stroke={svg.colors.stroke.default}
-                  strokeWidth={svg.chart.axis.strokeWidth}
-                />
+        
+        {/* Bars */}
+        {data.map((d, i) => {
+          const barHeight = chartHeight - yScale(d.y * animationProgressRef.current);
+          return (
+            <G key={`bar-${i}`}>
+              <Rect
+                x={xScale(d.x)}
+                y={chartHeight - barHeight}
+                width={xScale.bandwidth()}
+                height={barHeight}
+                fill={barFillColor}
+                rx={2}
+                ry={2}
+              />
+              
+              {/* Bar values */}
+              {showValues && (
                 <Text
-                  x={xOffset + margin.left}
-                  y={height - margin.bottom + svg.chart.axis.tickLength + 12}
-                  fontSize={svg.typography.fontSize.axisValue}
-                  fontFamily={svg.typography.fontFamily.regular}
+                  x={(xScale(d.x) || 0) + xScale.bandwidth() / 2}
+                  y={chartHeight - barHeight - 5}
                   textAnchor="middle"
-                  fill={svg.colors.text.tertiary}
+                  fill={colors.text.primary}
+                  fontFamily={typography.fontFamilies.body}
+                  fontSize={typography.fontSizes.xs}
                 >
-                  {label}
+                  {d.y}
                 </Text>
-              </G>
-            ))}
-          
-          {/* Y Axis Ticks */}
-          {yAxisTicks.map(({ value, yOffset, label }) => (
-            <G key={`y-${value}`}>
-              <Line
-                x1={margin.left}
-                y1={yOffset + margin.top}
-                x2={margin.left - svg.chart.axis.tickLength}
-                y2={yOffset + margin.top}
-                stroke={svg.colors.stroke.default}
-                strokeWidth={svg.chart.axis.strokeWidth}
-              />
+              )}
+              
+              {/* X-axis labels */}
               <Text
-                x={margin.left - svg.chart.axis.tickLength - 5}
-                y={yOffset + margin.top + 4}
-                fontSize={svg.typography.fontSize.axisValue}
-                fontFamily={svg.typography.fontFamily.regular}
-                textAnchor="end"
-                fill={svg.colors.text.tertiary}
+                x={(xScale(d.x) || 0) + xScale.bandwidth() / 2}
+                y={chartHeight + 20}
+                textAnchor="middle"
+                fill={colors.text.tertiary}
+                fontFamily={typography.fontFamilies.body}
+                fontSize={typography.fontSizes.xs}
               >
-                {label}
+                {d.x}
               </Text>
             </G>
-          ))}
-        </G>
-      )}
-      
-      {/* Histogram Bars */}
-      {bars.map((bar, index) => (
-        <Rect
-          key={`bar-${index}`}
-          x={bar.x + margin.left}
-          y={bar.y + margin.top}
-          width={bar.width}
-          height={bar.height}
-          fill={color || svg.colors.fill.primary}
-          rx={svg.shape.borderRadius.small}
-        />
-      ))}
+          );
+        })}
+        
+        {/* Y-axis ticks and labels */}
+        {yTicks.map((tick, i) => (
+          <G key={`tick-${i}`}>
+            <Line
+              x1={-5}
+              y1={yScale(tick)}
+              x2={0}
+              y2={yScale(tick)}
+              stroke={colors.border.default}
+              strokeWidth={1}
+            />
+            <Text
+              x={-10}
+              y={yScale(tick)}
+              textAnchor="end"
+              // dominantBaseline="middle"
+              fill={colors.text.tertiary}
+              fontFamily={typography.fontFamilies.body}
+              fontSize={typography.fontSizes.xs}
+            >
+              {tick}
+            </Text>
+          </G>
+        ))}
+        
+        {/* X-axis label */}
+        {xAxisLabel && (
+          <Text
+            x={chartWidth / 2}
+            y={chartHeight + 35}
+            textAnchor="middle"
+            fill={colors.text.secondary}
+            fontFamily={typography.fontFamilies.body}
+            fontSize={typography.fontSizes.sm}
+          >
+            {xAxisLabel}
+          </Text>
+        )}
+        
+        {/* Y-axis label */}
+        {yAxisLabel && (
+          <Text
+            x={-chartHeight / 2}
+            y={-30}
+            textAnchor="middle"
+            transform={`rotate(-90, ${-chartHeight / 2}, ${-30})`}
+            fill={colors.text.secondary}
+            fontFamily={typography.fontFamilies.body}
+            fontSize={typography.fontSizes.sm}
+          >
+            {yAxisLabel}
+          </Text>
+        )}
+      </G>
     </D3Container>
   );
 };
 
-export { BaseD3BarGraph, BaseD3Histogram };
 export default BaseD3BarGraph;

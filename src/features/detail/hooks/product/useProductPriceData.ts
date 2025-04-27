@@ -8,6 +8,7 @@ import { getMostRecentPriceDateByProductAndUnitsPresentation } from '../../../..
 import { getProductById } from '../../../../services/supabase/entities/producto';
 import { getMarketById } from '../../../../services/supabase/entities/mercado';
 import { getMunicipioById } from '../../../../services/supabase/entities/municipio';
+import useNavigationService from '../../../../services/navigation/NavigationService';
 
 export type PriceDataPoint = {
   price: number;
@@ -117,9 +118,35 @@ export const usePriceDateInfo = (artiId: number, unitsPresentationId: number | n
 };
 
 /**
- * Main hook to fetch price data for a product
+ * Hook to extract the product ID from the current route
  */
-export const useProductPriceData = (artiId: number) => {
+export const useProductIdFromRoute = () => {
+  const { currentPath } = useNavigationService();
+  
+  // Extract artiId from pathname
+  // Expected format: /productos/detail/[producto]
+  const getArtiIdFromPath = (): number | null => {
+    if (!currentPath) return null;
+    
+    const segments = currentPath.split('/');
+    const lastSegment = segments[segments.length - 1];
+    
+    // Check if the last segment is a number
+    const parsedId = parseInt(lastSegment, 10);
+    return isNaN(parsedId) ? null : parsedId;
+  };
+  
+  return getArtiIdFromPath();
+};
+
+/**
+ * Main hook to fetch price data for a product
+ * If no artiId is provided, it will attempt to extract it from the current route
+ */
+export const useProductPriceData = (artiId?: number) => {
+  const routeArtiId = useProductIdFromRoute();
+  const productId = artiId || routeArtiId || 0;
+  
   const [productName, setProductName] = useState<string>('');
   const [rawPriceData, setRawPriceData] = useState<DailyPriceObservation[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -132,7 +159,7 @@ export const useProductPriceData = (artiId: number) => {
     setUnitsPresentationId,
     isLoading: isLoadingUnitsPresentation,
     error: unitsPresentationError 
-  } = useUnitsPresentation(artiId);
+  } = useUnitsPresentation(productId);
   
   // Use the date hook (depends on units presentation being loaded)
   const {
@@ -140,23 +167,29 @@ export const useProductPriceData = (artiId: number) => {
     setDate,
     isLoading: isLoadingDate,
     error: dateError
-  } = usePriceDateInfo(artiId, unitsPresentationId);
+  } = usePriceDateInfo(productId, unitsPresentationId);
 
   // Fetch product info
   useEffect(() => {
     const fetchProductInfo = async () => {
       try {
-        const product = await getProductById(artiId);
+        if (productId <= 0) {
+          setError(new Error('Invalid product ID'));
+          setIsLoading(false);
+          return;
+        }
+        
+        const product = await getProductById(productId);
         setProductName(product.artiNombre);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch product info'));
       }
     };
 
-    if (artiId) {
+    if (productId > 0) {
       fetchProductInfo();
     }
-  }, [artiId]);
+  }, [productId]);
   
   // Fetch price data when both units presentation and date are available
   useEffect(() => {
@@ -164,12 +197,12 @@ export const useProductPriceData = (artiId: number) => {
       try {
         setIsLoading(true);
         
-        if (!artiId || !unitsPresentationId || !date) {
+        if (productId <= 0 || !unitsPresentationId || !date) {
           return;
         }
         
         // Get all price observations for this product
-        const allPriceObservations = await getDailyPriceObservationsByProduct(artiId);
+        const allPriceObservations = await getDailyPriceObservationsByProduct(productId);
         
         // Filter by unitsPresentationId and date
         const filteredObservations = allPriceObservations.filter(obs => 
@@ -185,10 +218,10 @@ export const useProductPriceData = (artiId: number) => {
       }
     };
 
-    if (artiId && unitsPresentationId && date) {
+    if (productId > 0 && unitsPresentationId && date) {
       fetchPriceData();
     }
-  }, [artiId, unitsPresentationId, date]);
+  }, [productId, unitsPresentationId, date]);
 
   // Format and process the raw price data
   const processedData = useMemo<PriceDistributionData>(() => {
@@ -340,7 +373,7 @@ export const useProductPriceData = (artiId: number) => {
 /**
  * Hook to get price data formatted as a tuple [min, avg, max, dataPoints]
  */
-export const useFormattedPriceData = (artiId: number) => {
+export const useFormattedPriceData = (artiId?: number) => {
   const priceData = useProductPriceData(artiId);
   
   return useMemo(() => {
@@ -358,4 +391,13 @@ export const useFormattedPriceData = (artiId: number) => {
   ]);
 };
 
+// Export hooks
+// export {
+//   useProductIdFromRoute,
+//   useUnitsPresentation,
+//   usePriceDateInfo,
+//   useProductPriceData
+// };
+
+// Default export
 export default useProductPriceData;
