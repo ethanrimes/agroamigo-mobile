@@ -444,7 +444,7 @@ export const useProductPriceData = (artiId?: number): PriceDistributionData => {
   }, [rawPriceData]);
   
   // Return the complete price distribution data
-  return {
+  const outputState = {
     minPrice: processedData.minPrice,
     avgPrice: processedData.avgPrice,
     maxPrice: processedData.maxPrice,
@@ -455,6 +455,10 @@ export const useProductPriceData = (artiId?: number): PriceDistributionData => {
     isLoading: isLoading || isLoadingUnitsPresentation || isLoadingDate,
     error: error || unitsPresentationError || dateError
   };
+  
+  // console.log('[useProductPriceData] Output state:', outputState);
+  
+  return outputState;
 };
 
 /**
