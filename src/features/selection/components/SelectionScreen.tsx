@@ -1,10 +1,10 @@
 // src/features/selection/components/SelectionScreen.tsx
 import React, { useMemo } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useSelectionFilters } from '../hooks/useSelectionFilters';
 import SelectionHeader from './header/SelectionHeader';
 import SelectionPageContentSpace from './body/SelectionPageContentSpace';
-import SlidingSideDrawer, { FilterCategory } from '@/src/features/shared/slidingSideDrawer';
+import SlidingSideDrawer, { FilterCategory } from '@/src/features/shared/slidingSideDrawer/SlidingSideDrawer';
 
 // Filter configuration for different screen types
 const FILTER_CONFIGS: Record<string, FilterCategory[]> = {
@@ -114,9 +114,11 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
   loading,
   error,
 }) => {
+  // Use the simplified selection filters hook
   const { 
     isFilterPaneVisible, 
     closeFilters, 
+    openFilters,
     filters, 
     toggleFilter,
     clearAllFilters,
@@ -128,10 +130,20 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
     return FILTER_CONFIGS[type] || [];
   }, [type]);
   
+  // Handle filter button press in header
+  const handleFilterPress = () => {
+    openFilters();
+  };
+  
   return (
     <View className="flex-1">
-      <SelectionHeader title={title} location={location} />
-      {/* Pass the content data to the page content space properly */}
+      <SelectionHeader
+        title={title}
+        location={location}
+        onFilterPress={handleFilterPress}
+      />
+      
+      {/* Pass the content data to the page content space */}
       <SelectionPageContentSpace 
         type={type}
         items={data}
@@ -139,13 +151,13 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
         errorMessage={error}
       />
       
-      {/* Sliding side drawer using our new shared component */}
+      {/* Sliding side drawer using our updated component */}
       <SlidingSideDrawer
         isVisible={isFilterPaneVisible}
         onClose={closeFilters}
         title="Filters"
         filterCategories={filterCategories}
-        loading={false} // We're pre-loading the filter categories
+        loading={false}
         appliedFiltersCount={appliedFiltersCount}
         onClearAllFilters={clearAllFilters}
         onToggleFilter={toggleFilter}

@@ -32,7 +32,7 @@ export interface SlidingSideDrawerProps {
 }
 
 const { width } = Dimensions.get('window');
-const DRAWER_WIDTH = width * 0.8;
+const DRAWER_WIDTH = width * 0.85; // Make the drawer wider
 
 /**
  * Reusable sliding side drawer component that slides in from the left
@@ -83,11 +83,13 @@ const SlidingSideDrawer: React.FC<SlidingSideDrawerProps> = ({
     }
   }, [isVisible, translateX, backdropOpacity]);
 
-  // Don't render anything if the drawer is fully hidden
-  if (!isVisible) return null;
+  // Don't render anything if the drawer should be fully hidden
+  if (!isVisible) {
+    return null;
+  }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} pointerEvents={isVisible ? 'auto' : 'none'}>
       {/* Semi-transparent backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View

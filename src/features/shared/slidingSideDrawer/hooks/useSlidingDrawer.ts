@@ -1,29 +1,38 @@
 // src/features/shared/slidingSideDrawer/hooks/useSlidingDrawer.ts
 import { useState, useCallback, useMemo } from 'react';
 
-interface UseSlidingDrawerOptions {
+export interface SlidingDrawerConfig {
   initialFilters?: Record<string, string[]>;
+  initialVisibility?: boolean;
   onFiltersChange?: (filters: Record<string, string[]>) => void;
+  onVisibilityChange?: (isVisible: boolean) => void;
 }
 
-export interface UseSlidingDrawerResult {
+export interface SlidingDrawerResult {
   isVisible: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
+  toggleDrawer: () => void;
   filters: Record<string, string[]>;
   toggleFilter: (category: string, value: string) => void;
   clearAllFilters: () => void;
   appliedFiltersCount: number;
+  getFilterState: (category: string, value: string) => boolean;
 }
 
 /**
  * Custom hook to manage sliding drawer state and filter operations
  */
-export const useSlidingDrawer = (options: UseSlidingDrawerOptions = {}): UseSlidingDrawerResult => {
-  const { initialFilters = {}, onFiltersChange } = options;
+export const useSlidingDrawer = (config: SlidingDrawerConfig = {}): SlidingDrawerResult => {
+  const { 
+    initialFilters = {}, 
+    initialVisibility = false,
+    onFiltersChange,
+    onVisibilityChange
+  } = config;
   
   // Visibility state
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(initialVisibility);
   
   // Filters state
   const [filters, setFilters] = useState<Record<string, string[]>>(initialFilters);
@@ -31,12 +40,27 @@ export const useSlidingDrawer = (options: UseSlidingDrawerOptions = {}): UseSlid
   // Open drawer
   const openDrawer = useCallback(() => {
     setIsVisible(true);
-  }, []);
+    if (onVisibilityChange) {
+      onVisibilityChange(true);
+    }
+  }, [onVisibilityChange]);
   
   // Close drawer
   const closeDrawer = useCallback(() => {
     setIsVisible(false);
-  }, []);
+    if (onVisibilityChange) {
+      onVisibilityChange(false);
+    }
+  }, [onVisibilityChange]);
+  
+  // Toggle drawer visibility
+  const toggleDrawer = useCallback(() => {
+    const newVisibility = !isVisible;
+    setIsVisible(newVisibility);
+    if (onVisibilityChange) {
+      onVisibilityChange(newVisibility);
+    }
+  }, [isVisible, onVisibilityChange]);
   
   // Toggle filter value
   const toggleFilter = useCallback((category: string, value: string) => {
@@ -67,6 +91,12 @@ export const useSlidingDrawer = (options: UseSlidingDrawerOptions = {}): UseSlid
     });
   }, [onFiltersChange]);
   
+  // Get filter state (selected or not)
+  const getFilterState = useCallback((category: string, value: string): boolean => {
+    const categoryFilters = filters[category] || [];
+    return categoryFilters.includes(value);
+  }, [filters]);
+  
   // Clear all filters
   const clearAllFilters = useCallback(() => {
     setFilters({});
@@ -88,10 +118,12 @@ export const useSlidingDrawer = (options: UseSlidingDrawerOptions = {}): UseSlid
     isVisible,
     openDrawer,
     closeDrawer,
+    toggleDrawer,
     filters,
     toggleFilter,
     clearAllFilters,
-    appliedFiltersCount
+    appliedFiltersCount,
+    getFilterState
   };
 };
 

@@ -1,6 +1,6 @@
 // src/features/shared/slidingSideDrawer/components/SideDrawerContentSpace.tsx
 import React from 'react';
-import { ScrollView, View, Text, ActivityIndicator, Pressable } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import VStack from '@/src/components/ui/layout/VStack';
 import HStack from '@/src/components/ui/layout/HStack';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
@@ -33,17 +33,17 @@ const SideDrawerContentSpace: React.FC<SideDrawerContentSpaceProps> = ({
   
   return (
     <ScrollView
-      className="flex-1"
-      contentContainerStyle={{ padding: 16 }}
+      style={styles.scrollView}
+      contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       {loading ? (
-        <View className="items-center justify-center py-8">
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color={colors.primary.default} />
-          <Text className="mt-2 text-neutral-grey text-body-3">Loading filters...</Text>
+          <Text style={styles.loadingText}>Loading filters...</Text>
         </View>
       ) : (
-        <VStack className="space-y-4">
+        <VStack style={styles.filterContainer}>
           {/* Render filter categories dynamically */}
           {filterCategories.map((category, index) => (
             <FilterElement
@@ -65,26 +65,89 @@ const SideDrawerContentSpace: React.FC<SideDrawerContentSpaceProps> = ({
           
           {/* Applied filters count and reset button */}
           {filterCategories.length > 0 && (
-            <HStack className="pt-4 justify-between items-center">
-              {appliedFiltersCount > 0 ? (
-                <Text className="text-body-3 text-neutral-grey">
-                  {appliedFiltersCount} filter{appliedFiltersCount !== 1 ? 's' : ''} applied
-                </Text>
-              ) : (
-                <Text className="text-body-3 text-neutral-grey">No filters applied</Text>
-              )}
+            <View style={styles.footerContainer}>
+              <HStack style={styles.footerContent}>
+                {appliedFiltersCount > 0 ? (
+                  <Text style={styles.filtersAppliedText}>
+                    {appliedFiltersCount} filter{appliedFiltersCount !== 1 ? 's' : ''} applied
+                  </Text>
+                ) : (
+                  <Text style={styles.filtersAppliedText}>No filters applied</Text>
+                )}
+                
+                <Pressable onPress={onClearAllFilters}>
+                  <Text style={styles.resetText}>
+                    Reset all
+                  </Text>
+                </Pressable>
+              </HStack>
               
-              <Pressable onPress={onClearAllFilters}>
-                <Text className="text-info-default text-body-3-medium">
-                  Reset all
-                </Text>
+              {/* Add button to apply filters */}
+              <Pressable style={styles.applyButton}>
+                <Text style={styles.applyButtonText}>Agregar</Text>
               </Pressable>
-            </HStack>
+            </View>
           )}
         </VStack>
       )}
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  loadingText: {
+    marginTop: 8,
+    color: '#757575',
+    fontSize: 14,
+  },
+  filterContainer: {
+    width: '100%',
+    paddingBottom: 20,
+  },
+  footerContainer: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  footerContent: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  filtersAppliedText: {
+    fontSize: 14,
+    color: '#757575',
+  },
+  resetText: {
+    fontSize: 14,
+    color: '#0077cc',
+    fontWeight: '500',
+  },
+  applyButton: {
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  applyButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+});
 
 export default SideDrawerContentSpace;

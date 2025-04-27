@@ -1,6 +1,6 @@
 // src/features/shared/slidingSideDrawer/components/FilterElement.tsx
 import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import VStack from '@/src/components/ui/layout/VStack';
 import HStack from '@/src/components/ui/layout/HStack';
@@ -45,10 +45,12 @@ const FilterElement: React.FC<FilterElementProps> = ({
   };
   
   return (
-    <View>
+    <View style={styles.container}>
+      {/* Category title with red underline effect */}
       <Pressable onPress={toggleExpand}>
-        <HStack className="justify-between py-2">
-          <Text className="text-body-1-semibold">{title}</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>{title}</Text>
+          <View />
           {showMoreIndicator && (
             isExpanded ? (
               <ChevronUp size={20} color={colors.text.primary} />
@@ -56,11 +58,12 @@ const FilterElement: React.FC<FilterElementProps> = ({
               <ChevronDown size={20} color={colors.text.primary} />
             )
           )}
-        </HStack>
+        </View>
       </Pressable>
       
+      {/* Filter options */}
       {isExpanded && (
-        <VStack className="pl-1 space-y-2 py-2">
+        <VStack style={styles.optionsContainer}>
           {options.map((option) => (
             type === 'radio' ? (
               <RadioFilterOption
@@ -81,9 +84,37 @@ const FilterElement: React.FC<FilterElementProps> = ({
         </VStack>
       )}
       
-      {showDivider && <Divider className="bg-neutral-grey/30 h-px my-2" />}
+      {showDivider && <Divider />}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 8,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  optionsContainer: {
+    paddingLeft: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    marginVertical: 8,
+  },
+});
 
 export default FilterElement;
