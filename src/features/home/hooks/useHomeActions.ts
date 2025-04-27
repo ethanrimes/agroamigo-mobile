@@ -116,8 +116,8 @@ export const useHomeActions = () => {
           
           setFeaturedPriceItem({
             artiId: selectedObservation.artiId,
-            UnitsId: selectedObservation.unitsId || 1,
-            PresentationId: selectedObservation.presentationId || 1,
+            UnitsId: selectedObservation.UnitsId || 1,
+            PresentationId: selectedObservation.PresentationId || 1,
             UnitsPresentationId: selectedObservation.UnitsPresentationId || 1,
             icon: productDetails.Icon || 'package', // Default to 'package' if no icon
           });

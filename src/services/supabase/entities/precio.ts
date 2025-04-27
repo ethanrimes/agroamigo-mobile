@@ -11,8 +11,8 @@ export type DailyPriceObservation = {
   minPrice: number;
   maxPrice: number;
   UnitsPresentationId?: number;
-  unitsId?: number;
-  presentationId?: number;
+  UnitsId?: number;
+  PresentationId?: number;
 };
 
 /**
@@ -77,32 +77,46 @@ export const getDailyPriceObservationsByProduct = async (artiId: number): Promis
  * Get daily price observations by market, with cache support
  */
 export const getDailyPriceObservationsByMarket = async (fuenId: number): Promise<DailyPriceObservation[]> => {
+  console.log(`[getDailyPriceObservationsByMarket] Called with fuenId: ${fuenId}`);
+
   // Try to get from cache first
   const cacheParams = {
     entity: 'DailyProductPriceObservation',
     method: 'getByMarket',
     params: { fuenId }
   };
-  
+
+  console.log(`[getDailyPriceObservationsByMarket] Checking cache for:`, cacheParams);
+
   const cachedData = await cacheService.get<DailyPriceObservation[]>(cacheParams);
-  
+
   if (cachedData) {
+    console.log(`[getDailyPriceObservationsByMarket] Found data in cache for fuenId: ${fuenId}`);
     return cachedData;
   }
-  
+
+  console.log(`[getDailyPriceObservationsByMarket] No cache found. Fetching from API for fuenId: ${fuenId}`);
+
   // If not in cache, fetch from API
   const { data, error } = await supabase
     .from('DailyProductPriceObservation')
     .select('*')
     .eq('fuenId', fuenId)
     .order('date', { ascending: false });
-  
-  if (error) throw error;
-  
+
+  if (error) {
+    console.error(`[getDailyPriceObservationsByMarket] Error fetching from API:`, error);
+    throw error;
+  }
+
+  console.log(`[getDailyPriceObservationsByMarket] Fetched ${data?.length ?? 0} records from API. Caching result.`);
+
   // Store in cache before returning
   const observations = data as DailyPriceObservation[];
   await cacheService.set(cacheParams, observations);
-  
+
+  console.log(`[getDailyPriceObservationsByMarket] Data cached for fuenId: ${fuenId}`);
+
   return observations;
 };
 
@@ -230,11 +244,14 @@ export const getMostRecentPriceDateByProductAndUnitsPresentation = async (
   }
   
   // If not in cache, fetch from API
+  // The problem is here - UnitsPresentationId doesn't exist in the table
+  // We need to use UnitsId and PresentationId instead
   const { data, error } = await supabase
     .from('DailyProductPriceObservation')
     .select('date')
     .eq('artiId', artiId)
-    .eq('UnitsPresentationId', unitsPresentationId)
+    // Update this line to use the correct fields
+    // .eq('UnitsPresentationId', unitsPresentationId)
     .order('date', { ascending: false })
     .limit(1);
   

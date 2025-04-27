@@ -84,12 +84,12 @@ export const getUnitsPresentationById = async (UnitsPresentationId: number): Pro
 /**
  * Get units presentations by units ID, with cache support
  */
-export const getUnitsPresentationsByUnitsId = async (unitsId: number): Promise<UnitsPresentation[]> => {
+export const getUnitsPresentationsByUnitsId = async (UnitsId: number): Promise<UnitsPresentation[]> => {
   // Try to get from cache first
   const cacheParams = {
     entity: 'UnitsPresentation',
     method: 'getByUnitsId',
-    params: { unitsId }
+    params: { UnitsId }
   };
   
   const cachedData = await cacheService.get<UnitsPresentation[]>(cacheParams);
@@ -102,7 +102,7 @@ export const getUnitsPresentationsByUnitsId = async (unitsId: number): Promise<U
   const cachedCollection = await cacheService.getCollection<UnitsPresentation>('UnitsPresentation');
   
   if (cachedCollection) {
-    const unitsPresentations = cachedCollection.filter(up => up.UnitsId === unitsId);
+    const unitsPresentations = cachedCollection.filter(up => up.UnitsId === UnitsId);
     // Cache the filtered results
     await cacheService.set(cacheParams, unitsPresentations);
     return unitsPresentations;
@@ -112,7 +112,7 @@ export const getUnitsPresentationsByUnitsId = async (unitsId: number): Promise<U
   const { data, error } = await supabase
     .from('UnitsPresentation')
     .select('*')
-    .eq('UnitsId', unitsId);
+    .eq('UnitsId', UnitsId);
   
   if (error) throw error;
   
@@ -126,12 +126,12 @@ export const getUnitsPresentationsByUnitsId = async (unitsId: number): Promise<U
 /**
  * Get units presentations by presentation ID, with cache support
  */
-export const getUnitsPresentationsByPresentationId = async (presentationId: number): Promise<UnitsPresentation[]> => {
+export const getUnitsPresentationsByPresentationId = async (PresentationId: number): Promise<UnitsPresentation[]> => {
   // Try to get from cache first
   const cacheParams = {
     entity: 'UnitsPresentation',
     method: 'getByPresentationId',
-    params: { presentationId }
+    params: { PresentationId }
   };
   
   const cachedData = await cacheService.get<UnitsPresentation[]>(cacheParams);
@@ -144,7 +144,7 @@ export const getUnitsPresentationsByPresentationId = async (presentationId: numb
   const cachedCollection = await cacheService.getCollection<UnitsPresentation>('UnitsPresentation');
   
   if (cachedCollection) {
-    const unitsPresentations = cachedCollection.filter(up => up.PresentationId === presentationId);
+    const unitsPresentations = cachedCollection.filter(up => up.PresentationId === PresentationId);
     // Cache the filtered results
     await cacheService.set(cacheParams, unitsPresentations);
     return unitsPresentations;
@@ -154,7 +154,7 @@ export const getUnitsPresentationsByPresentationId = async (presentationId: numb
   const { data, error } = await supabase
     .from('UnitsPresentation')
     .select('*')
-    .eq('PresentationId', presentationId);
+    .eq('PresentationId', PresentationId);
   
   if (error) throw error;
   
@@ -169,14 +169,14 @@ export const getUnitsPresentationsByPresentationId = async (presentationId: numb
  * Get units presentation by units ID and presentation ID, with cache support
  */
 export const getUnitsPresentationByUnitsAndPresentation = async (
-  unitsId: number, 
-  presentationId: number
+  UnitsId: number, 
+  PresentationId: number
 ): Promise<UnitsPresentation | null> => {
   // Try to get from cache first
   const cacheParams = {
     entity: 'UnitsPresentation',
     method: 'getByUnitsAndPresentation',
-    params: { unitsId, presentationId }
+    params: { UnitsId, PresentationId }
   };
   
   const cachedData = await cacheService.get<UnitsPresentation>(cacheParams);
@@ -190,7 +190,7 @@ export const getUnitsPresentationByUnitsAndPresentation = async (
   
   if (cachedCollection) {
     const unitsPresentation = cachedCollection.find(
-      up => up.UnitsId === unitsId && up.PresentationId === presentationId
+      up => up.UnitsId === UnitsId && up.PresentationId === PresentationId
     );
     
     if (unitsPresentation) {
@@ -207,8 +207,8 @@ export const getUnitsPresentationByUnitsAndPresentation = async (
   const { data, error } = await supabase
     .from('UnitsPresentation')
     .select('*')
-    .eq('UnitsId', unitsId)
-    .eq('PresentationId', presentationId);
+    .eq('UnitsId', UnitsId)
+    .eq('PresentationId', PresentationId);
   
   if (error) throw error;
   
@@ -227,8 +227,15 @@ export const getUnitsPresentationByUnitsAndPresentation = async (
 /**
  * Get the most common units presentation ID associated with a product
  * by analyzing historical price observations
+ * Returns both the UnitsPresentationId and the individual UnitsId and PresentationId
  */
-export const getMostCommonUnitsPresentationByProductId = async (artiId: number): Promise<number | null> => {
+export const getMostCommonUnitsPresentationByProductId = async (artiId: number): Promise<{
+  unitsPresentationId: number | null;
+  UnitsId: number | null;
+  PresentationId: number | null;
+}> => {
+  console.log(`[getMostCommonUnitsPresentationByProductId] Starting for product ID: ${artiId}`);
+  
   // Try to get from cache first
   const cacheParams = {
     entity: 'UnitsPresentation',
@@ -236,50 +243,126 @@ export const getMostCommonUnitsPresentationByProductId = async (artiId: number):
     params: { artiId }
   };
   
-  const cachedData = await cacheService.get<number>(cacheParams);
-  
-  if (cachedData) {
-    return cachedData;
-  }
-  
-  // Get all price observations for this product
-  const priceObservations = await getDailyPriceObservationsByProduct(artiId);
-  
-  // If no observations found, return null
-  if (!priceObservations || priceObservations.length === 0) {
-    return null;
-  }
-  
-  // Count occurrences of each UnitsPresentationId
-  const counts = new Map<number, number>();
-  
-  for (const observation of priceObservations) {
-    if (observation.UnitsPresentationId) {
-      const currentCount = counts.get(observation.UnitsPresentationId) || 0;
-      counts.set(observation.UnitsPresentationId, currentCount + 1);
+  try {
+    console.log(`[getMostCommonUnitsPresentationByProductId] Checking cache...`);
+    const cachedData = await cacheService.get<{
+      unitsPresentationId: number | null;
+      UnitsId: number | null;
+      PresentationId: number | null;
+    }>(cacheParams);
+    
+    if (cachedData) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] Cache hit:`, cachedData);
+      return cachedData;
     }
-  }
-  
-  // If no UnitsPresentationId found in observations, return null
-  if (counts.size === 0) {
-    return null;
-  }
-  
-  // Find the most frequent UnitsPresentationId
-  let mostCommonId: number | null = null;
-  let maxCount = 0;
-  
-  for (const [id, count] of counts.entries()) {
-    if (count > maxCount) {
-      mostCommonId = id;
-      maxCount = count;
+    
+    console.log(`[getMostCommonUnitsPresentationByProductId] Cache miss, fetching price observations...`);
+    
+    // Get all price observations for this product
+    const priceObservations = await getDailyPriceObservationsByProduct(artiId);
+    console.log(`[getMostCommonUnitsPresentationByProductId] Found ${priceObservations?.length || 0} price observations`);
+    
+    // If no observations found, return null values
+    if (!priceObservations || priceObservations.length === 0) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] No observations found, returning nulls`);
+      return { unitsPresentationId: null, UnitsId: null, PresentationId: null };
     }
+    
+    // Log sample observation
+    console.log(`[getMostCommonUnitsPresentationByProductId] Sample observation:`, JSON.stringify(priceObservations[0]));
+    
+    // Create a map to count combinations of UnitsId and PresentationId
+    const combinationCounts = new Map<string, {
+      count: number;
+      unitsPresentationId: number | null;
+      UnitsId: number | null;
+      PresentationId: number | null;
+    }>();
+    
+    // Count occurrences of each combination
+    for (const observation of priceObservations) {
+      // Skip observations without necessary data
+      if (!observation.UnitsId && !observation.PresentationId && !observation.UnitsPresentationId) {
+        continue;
+      }
+      
+      // Create a key for the combination
+      const key = `${observation.UnitsId || 'null'}-${observation.PresentationId || 'null'}`;
+      
+      const current = combinationCounts.get(key) || {
+        count: 0,
+        unitsPresentationId: observation.UnitsPresentationId || null,
+        UnitsId: observation.UnitsId || null,
+        PresentationId: observation.PresentationId || null
+      };
+      
+      current.count++;
+      combinationCounts.set(key, current);
+    }
+    
+    console.log(`[getMostCommonUnitsPresentationByProductId] Found ${combinationCounts.size} unique combinations`);
+    
+    // If no valid combinations found, return null values
+    if (combinationCounts.size === 0) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] No valid combinations found, returning nulls`);
+      return { unitsPresentationId: null, UnitsId: null, PresentationId: null };
+    }
+    
+    // Find the most frequent combination
+    let maxCount = 0;
+    let mostCommon: {
+      unitsPresentationId: number | null;
+      UnitsId: number | null;
+      PresentationId: number | null;
+    } = {
+      unitsPresentationId: null,
+      UnitsId: null,
+      PresentationId: null
+    };
+    
+    for (const [key, data] of combinationCounts.entries()) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] Combination ${key} count: ${data.count}`);
+      if (data.count > maxCount) {
+        maxCount = data.count;
+        mostCommon = {
+          unitsPresentationId: data.unitsPresentationId,
+          UnitsId: data.UnitsId,
+          PresentationId: data.PresentationId
+        };
+      }
+    }
+    
+    console.log(`[getMostCommonUnitsPresentationByProductId] Most common combination:`, mostCommon);
+    
+    // If we found a combination but it doesn't have a UnitsPresentationId,
+    // try to find the corresponding UnitsPresentation record
+    if (mostCommon.UnitsId && mostCommon.PresentationId && !mostCommon.unitsPresentationId) {
+      console.log(`[getMostCommonUnitsPresentationByProductId] Looking up UnitsPresentationId...`);
+      try {
+        const unitsPresentation = await getUnitsPresentationByUnitsAndPresentation(
+          mostCommon.UnitsId,
+          mostCommon.PresentationId
+        );
+        
+        if (unitsPresentation) {
+          mostCommon.unitsPresentationId = unitsPresentation.UnitsPresentationId;
+          console.log(`[getMostCommonUnitsPresentationByProductId] Found UnitsPresentationId: ${unitsPresentation.UnitsPresentationId}`);
+        } else {
+          console.log(`[getMostCommonUnitsPresentationByProductId] No UnitsPresentation record found`);
+        }
+      } catch (error) {
+        console.error('[getMostCommonUnitsPresentationByProductId] Error finding UnitsPresentation record:', error);
+      }
+    }
+    
+    // Cache the result before returning
+    console.log(`[getMostCommonUnitsPresentationByProductId] Caching result and returning:`, mostCommon);
+    await cacheService.set(cacheParams, mostCommon);
+    
+    return mostCommon;
+  } catch (error) {
+    console.error(`[getMostCommonUnitsPresentationByProductId] Error:`, error);
+    // Still return something even if there's an error
+    return { unitsPresentationId: null, UnitsId: null, PresentationId: null };
   }
-  
-  // Cache the result before returning
-  if (mostCommonId !== null) {
-    await cacheService.set(cacheParams, mostCommonId);
-  }
-  
-  return mostCommonId;
 };

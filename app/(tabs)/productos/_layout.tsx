@@ -12,7 +12,7 @@ export default function ProductosLayout() {
         }}
       />
       <Stack.Screen
-        name="(detail)/[producto]"
+        name="detail/[producto]"
         options={{
           headerShown: false,
           presentation: 'modal',

@@ -78,7 +78,7 @@ export const useRecentProductPriceData = (productId: number | null, locationId?:
           return;
         }
 
-        // Group by UnitsPresentation (presentationId + unitsId combination)
+        // Group by UnitsPresentation (PresentationId + UnitsId combination)
         const unitsPresentationCounts: Record<number, UnitsPresentationCount> = {};
 
         observations.forEach(obs => {

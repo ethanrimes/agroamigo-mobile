@@ -12,7 +12,7 @@ export default function MercadosLayout() {
         }}
       />
       <Stack.Screen
-        name="(detail)/[mercado]"
+        name="detail/[mercado]"
         options={{
           headerShown: false,
           presentation: 'modal',

@@ -12,7 +12,7 @@ export default function InsumosLayout() {
         }}
       />
       <Stack.Screen
-        name="(detail)/[insumo]"
+        name="detail/[insumo]"
         options={{
           headerShown: false,
           presentation: 'modal',
