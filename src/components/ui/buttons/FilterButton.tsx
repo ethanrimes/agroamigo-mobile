@@ -23,7 +23,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
     >
       <Filter 
         size={size} 
-        color={color || colors.text.inverse} 
+        color={color || "#000000"} 
       />
     </Pressable>
   );
