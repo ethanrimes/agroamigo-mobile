@@ -1,22 +1,107 @@
 // src/features/selection/components/SelectionScreen.tsx
-import React from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
-import { SelectionHeader } from './header';
-import { SelectionPageContentSpace, SelectionItem, Category } from './body';
-import SlidingSideDrawer from './SlidingSideDrawer';
+import React, { useMemo } from 'react';
+import { View, Text } from 'react-native';
 import { useSelectionFilters } from '../hooks/useSelectionFilters';
-import { useSelectionLocation } from '../hooks/useSelectionLocation';
-import { useTheme } from '@/src/theme/providers/ThemeProvider';
-import { useRouterNavigation } from '@/src/hooks/useRouterNavigation';
-import { DataType } from '@/src/features/shared/searchableDropdown/hooks/useDropdownData';
+import SelectionHeader from './header/SelectionHeader';
+import SelectionPageContentSpace from './body/SelectionPageContentSpace';
+import SlidingSideDrawer, { FilterCategory } from '@/src/features/shared/slidingSideDrawer';
 
-export type SelectionScreenType = 'products' | 'markets' | 'insumos';
+// Filter configuration for different screen types
+const FILTER_CONFIGS: Record<string, FilterCategory[]> = {
+  products: [
+    {
+      id: 'market_size',
+      title: 'Market size',
+      options: [
+        { id: 'small', label: 'Small (< 1000 kg)' },
+        { id: 'medium', label: 'Medium (1000 - 5000 kg)' },
+        { id: 'large', label: 'Large (> 5000 kg)' }
+      ]
+    },
+    {
+      id: 'update_frequency',
+      title: 'Update frequency',
+      options: [
+        { id: 'daily', label: 'Daily' },
+        { id: 'weekly', label: 'Weekly' },
+        { id: 'monthly', label: 'Monthly' }
+      ]
+    },
+    {
+      id: 'tracked_prices',
+      title: 'Products w/ tracked prices',
+      options: [
+        { id: 'all', label: 'All products' },
+        { id: 'tracked_only', label: 'Tracked only' }
+      ]
+    }
+  ],
+  markets: [
+    {
+      id: 'region',
+      title: 'Region',
+      options: [
+        { id: 'antioquia', label: 'Antioquia' },
+        { id: 'valle', label: 'Valle del Cauca' },
+        { id: 'narino', label: 'Nariño' },
+        { id: 'cauca', label: 'Cauca' }
+      ]
+    },
+    {
+      id: 'market_type',
+      title: 'Market type',
+      options: [
+        { id: 'wholesale', label: 'Wholesale' },
+        { id: 'retail', label: 'Retail' }
+      ]
+    },
+    {
+      id: 'size',
+      title: 'Size',
+      options: [
+        { id: 'small', label: 'Small' },
+        { id: 'medium', label: 'Medium' },
+        { id: 'large', label: 'Large' }
+      ]
+    }
+  ],
+  insumos: [
+    {
+      id: 'category',
+      title: 'Category',
+      options: [
+        { id: 'fertilizers', label: 'Fertilizers' },
+        { id: 'pesticides', label: 'Pesticides' },
+        { id: 'seeds', label: 'Seeds' },
+        { id: 'tools', label: 'Tools & Equipment' }
+      ]
+    },
+    {
+      id: 'price_range',
+      title: 'Price range',
+      options: [
+        { id: 'economy', label: 'Economy' },
+        { id: 'standard', label: 'Standard' },
+        { id: 'premium', label: 'Premium' }
+      ]
+    },
+    {
+      id: 'availability',
+      title: 'Availability',
+      options: [
+        { id: 'in_stock', label: 'In stock' },
+        { id: 'low_stock', label: 'Low stock' },
+        { id: 'out_of_stock', label: 'Out of stock' }
+      ]
+    }
+  ]
+};
 
 interface SelectionScreenProps {
-  type: SelectionScreenType;
+  type: 'products' | 'markets' | 'insumos';
   title: string;
-  // Data state passed from parent component
-  data: Category[];
+  location: string;
+  data: any[];
   loading: boolean;
   error: string | null;
 }
@@ -24,104 +109,47 @@ interface SelectionScreenProps {
 const SelectionScreen: React.FC<SelectionScreenProps> = ({
   type,
   title,
+  location,
   data,
   loading,
   error,
 }) => {
-  const { navigate } = useRouterNavigation();
-  const { colors } = useTheme();
-  const { isFilterPaneVisible, openFilters, closeFilters } = useSelectionFilters();
-  // Get location from the custom hook
-  const { formattedLocation } = useSelectionLocation();
-
-  // Determine which data types to show based on screen type
-  const getDataTypes = (): DataType[] => {
-    switch(type) {
-      case 'products':
-        return ['producto'];
-      case 'markets':
-        return ['mercado'];
-      case 'insumos':
-        return ['insumo'];
-      default:
-        return ['producto', 'mercado'];
-    }
-  };
-
-  // Determine data type order based on screen type
-  const getDataTypeOrder = () => {
-    return type === 'markets' ? 'mercado-producto' : 'producto-mercado';
-  };
-
-  const handleItemPress = (item: SelectionItem) => {
-    // Navigate to detail screen based on item type
-    switch(type) {
-      case 'products':
-        navigate(`/productos/detail/${item.id}`);
-        break;
-      case 'markets':
-        navigate(`/mercados/detail/${item.id}`);
-        break;
-      case 'insumos':
-        navigate(`/insumos/detail/${item.id}`);
-        break;
-    }
-  };
-
-  const handleSearchItemSelect = (item: any, itemType: string) => {
-    // Convert item type to route
-    const routeType = 
-      itemType === 'producto' ? 'productos' : 
-      itemType === 'mercado' ? 'mercados' : 
-      itemType === 'insumo' ? 'insumos' : '';
-    
-    if (routeType) {
-      // Get the ID from the item based on its type
-      const id = 
-        itemType === 'producto' ? item.artiId : 
-        itemType === 'mercado' ? item.fuenId : 
-        itemType === 'insumo' ? item.insumoId : null;
-      
-      if (id) {
-        navigate(`/${routeType}/detail/${id}`);
-      }
-    }
-  };
-
+  const { 
+    isFilterPaneVisible, 
+    closeFilters, 
+    filters, 
+    toggleFilter,
+    clearAllFilters,
+    appliedFiltersCount
+  } = useSelectionFilters();
+  
+  // Get filter categories for this screen type
+  const filterCategories = useMemo(() => {
+    return FILTER_CONFIGS[type] || [];
+  }, [type]);
+  
   return (
-    <View className="flex-1 bg-white">
-      <SelectionHeader
-        title={title}
-        location={formattedLocation}
-        onFilterPress={openFilters}
-        onItemSelect={handleSearchItemSelect}
-        dataTypes={getDataTypes()}
-        dataTypeOrder={getDataTypeOrder()}
+    <View className="flex-1">
+      <SelectionHeader title={title} location={location} />
+      {/* Pass the content data to the page content space properly */}
+      <SelectionPageContentSpace 
+        type={type}
+        items={data}
+        isLoading={loading}
+        errorMessage={error}
       />
       
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={colors.primary.default} />
-        </View>
-      ) : error ? (
-        <View className="flex-1 justify-center items-center p-4">
-          <Text className="text-base text-error-default">{error}</Text>
-          <Text className="text-base mt-2">
-            Por favor, intente nuevamente más tarde.
-          </Text>
-        </View>
-      ) : (
-        <SelectionPageContentSpace
-          categories={data}
-          onItemPress={handleItemPress}
-        />
-      )}
-      
-      {/* Side Drawer for Filters */}
+      {/* Sliding side drawer using our new shared component */}
       <SlidingSideDrawer
         isVisible={isFilterPaneVisible}
         onClose={closeFilters}
-        screenType={type}
+        title="Filters"
+        filterCategories={filterCategories}
+        loading={false} // We're pre-loading the filter categories
+        appliedFiltersCount={appliedFiltersCount}
+        onClearAllFilters={clearAllFilters}
+        onToggleFilter={toggleFilter}
+        selectedFilters={filters}
       />
     </View>
   );

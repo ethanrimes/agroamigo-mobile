@@ -64,7 +64,6 @@ const SelectionHeader: React.FC<SelectionHeaderProps> = ({
 
   return (
     <VStack className="w-full">
-      {/* Replace ThinHeaderStrip with ThemeHeader */}
       <ThemeHeader title="Agro Amigo" />
       
       <Box className="w-full px-4 py-4">

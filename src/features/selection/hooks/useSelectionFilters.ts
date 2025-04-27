@@ -1,42 +1,47 @@
-import { useState, useCallback, useMemo } from 'react';
+// src/features/selection/hooks/useSelectionFilters.ts
+import { useCallback, useMemo } from 'react';
 import { useFilterStore } from '@/src/store/filterStore';
+import { useSlidingDrawer } from '@/src/features/shared/slidingSideDrawer';
 
 export const useSelectionFilters = () => {
   // Use Zustand store to maintain filter state across components
   const { 
-    isFilterPaneVisible, 
-    setFilterPaneVisible, 
     filters, 
     updateFilter, 
     resetFilters 
   } = useFilterStore();
 
-  // Method to open the filter sidebar
-  const openFilters = useCallback(() => {
-    setFilterPaneVisible(true);
-  }, [setFilterPaneVisible]);
-
-  // Method to close the filter sidebar
-  const closeFilters = useCallback(() => {
-    setFilterPaneVisible(false);
-  }, [setFilterPaneVisible]);
+  // Use the shared sliding drawer hook
+  const {
+    isVisible: isFilterPaneVisible,
+    openDrawer: openFilters,
+    closeDrawer: closeFilters,
+    toggleFilter: handleToggleFilter,
+    clearAllFilters: handleClearAllFilters,
+    appliedFiltersCount
+  } = useSlidingDrawer({
+    initialFilters: filters,
+    onFiltersChange: (newFilters) => {
+      // Update each filter category when changed
+      Object.entries(newFilters).forEach(([category, values]) => {
+        // For each category, update with the current values
+        values.forEach(value => {
+          updateFilter(category, value);
+        });
+      });
+    }
+  });
 
   // Method to toggle a specific filter value
   const toggleFilter = useCallback((category: string, value: string) => {
-    updateFilter(category, value);
-  }, [updateFilter]);
+    handleToggleFilter(category, value);
+  }, [handleToggleFilter]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
+    handleClearAllFilters();
     resetFilters();
-  }, [resetFilters]);
-
-  // Calculate the total number of applied filters
-  const appliedFiltersCount = useMemo(() => {
-    return Object.values(filters).reduce((count, selectedOptions) => {
-      return count + selectedOptions.length;
-    }, 0);
-  }, [filters]);
+  }, [handleClearAllFilters, resetFilters]);
 
   return {
     isFilterPaneVisible,

@@ -3,6 +3,9 @@ import React from 'react';
 import SelectionScreen from '../components/SelectionScreen';
 import { useMarketData } from '../hooks/useMarketData';
 
+/**
+ * Markets selection screen that uses the shared sliding side drawer for filtering
+ */
 const MarketsSelectionScreen: React.FC = () => {
   // Fetch market data with the dedicated hook
   const { data, loading, error } = useMarketData();
