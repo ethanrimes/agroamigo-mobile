@@ -7,7 +7,7 @@ import {
   PriceQuantityToggle,
   DataLastUpdated 
 } from '../../components/common';
-import { MarketPriceHeader } from '../../components/header';
+import { DetailHeader } from '../../components/header';
 import { usePriceQuantityToggle, useDetailNavigation } from '../../hooks/common';
 
 /**
@@ -40,7 +40,7 @@ const MercadoPrecioScreen: React.FC = () => {
 
   return (
     <DetailPageWrapper
-      header={<MarketPriceHeader marketId={id} />}
+      header={<DetailHeader title="Agro Amigo" />}
       toggleComponent={toggleComponent}
     >
       <DataLastUpdated lastUpdated={"4/27/2025"} />

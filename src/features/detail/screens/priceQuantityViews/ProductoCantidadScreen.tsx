@@ -7,7 +7,7 @@ import {
   PriceQuantityToggle,
   DataLastUpdated 
 } from '@/src/features/detail/components/common';
-import { ProductQuantityHeader } from '@/src/features/detail/components/header';
+import { DetailHeader } from '@/src/features/detail/components/header';
 import { usePriceQuantityToggle, useDetailNavigation } from '@/src/features/detail/hooks/common';
 
 /**
@@ -40,7 +40,7 @@ const ProductoCantidadScreen: React.FC = () => {
 
   return (
     <DetailPageWrapper
-      header={<ProductQuantityHeader productId={id} />}
+      header={<DetailHeader title="Agro Amigo" />}
       toggleComponent={toggleComponent}
     >
       <DataLastUpdated lastUpdated={"4/27/2025"} />

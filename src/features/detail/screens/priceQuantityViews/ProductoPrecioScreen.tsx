@@ -7,7 +7,7 @@ import {
   PriceQuantityToggle,
   DataLastUpdated 
 } from '@/src/features/detail/components/common';
-import { ProductPriceHeader } from '@/src/features/detail/components/header';
+import { DetailHeader } from '@/src/features/detail/components/header';
 import { usePriceQuantityToggle, useDetailNavigation } from '@/src/features/detail/hooks/common';
 import useProductPriceData from '@/src/features/detail/hooks/product/useProductPriceData';
 import { Apple } from 'lucide-react-native';
@@ -56,7 +56,7 @@ const ProductoPrecioScreen: React.FC = () => {
 
   // Simplified header that doesn't contain price data
   const simplifiedHeader = (
-    <ProductPriceHeader productId={id} />
+    <DetailHeader title="Agro Amigo" />
   );
 
   return (
