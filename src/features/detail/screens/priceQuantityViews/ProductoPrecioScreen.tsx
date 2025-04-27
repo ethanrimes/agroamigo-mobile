@@ -1,6 +1,6 @@
 // src/features/detail/screens/priceQuantityViews/ProductoPrecioScreen.tsx
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { 
   DetailPageWrapper, 
@@ -13,6 +13,8 @@ import useProductPriceData, { useFormattedPriceData } from '@/src/features/detai
 import { Apple } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
 import PriceDistributionHistogram from '@/src/features/detail/components/graphs/PriceDistributionHistogram';
+import RankedListTable from '@/src/features/detail/components/rankedLists/RankedListTable';
+import { transformMarketsToRankedList } from '@/src/features/detail/utils/dataTransformers';
 
 /**
  * Screen component for displaying product price details
@@ -40,7 +42,8 @@ const ProductoPrecioScreen: React.FC = () => {
   } = useProductPriceData(parseInt(id || '0', 10));
   
   // Get formatted price data for histogram
-  const formattedPriceData = useFormattedPriceData(parseInt(id || '0', 10));
+  const [minPriceFormatted, avgPriceFormatted, maxPriceFormatted, dataPoints] = 
+    useFormattedPriceData(parseInt(id || '0', 10));
   
   // Handle toggle between price and quantity views
   const handleToggle = (isPrice: boolean) => {
@@ -54,6 +57,11 @@ const ProductoPrecioScreen: React.FC = () => {
     }
   };
 
+  // Transform data points to ranked list items
+  const marketRankedItems = useMemo(() => {
+    return transformMarketsToRankedList(dataPoints);
+  }, [dataPoints]);
+
   // Create toggle component to pass to the DetailPageWrapper
   const toggleComponent = (
     <PriceQuantityToggle 
@@ -64,26 +72,50 @@ const ProductoPrecioScreen: React.FC = () => {
 
   // Simplified header that doesn't contain price data
   const simplifiedHeader = (
-    <DetailHeader title="Agro Amigo" />
+    <DetailHeader title="AgroAmigo" />
   );
   
-  // Create histogram component for bottom content
+  // Create histogram component for the main content
   const histogramComponent = (
-    <PriceDistributionHistogram 
-      artiId={parseInt(id || '0', 10)}
-      width={histogramWidth}
-      height={220}
-    />
+    <View style={styles.histogramContainer}>
+      <Text style={[typography.textStyles.body2 as any, styles.histogramTitle]}>
+        Distribución precio por mercado
+      </Text>
+      <PriceDistributionHistogram 
+        artiId={parseInt(id || '0', 10)}
+        width={histogramWidth}
+        height={220}
+      />
+    </View>
   );
+
+  // Create ranked list component for bottom content
+  const rankedListComponent = useMemo(() => {
+    if (marketRankedItems.length === 0) {
+      return null;
+    }
+    
+    return (
+      <View style={styles.rankedListContainer}>
+        <RankedListTable
+          title="Mercados específicos"
+          subtitle={`${marketRankedItems.length} mercados con precios recientes`}
+          items={marketRankedItems}
+          onOrderPress={() => {
+            // This would be implemented to handle sorting logic
+            console.log('Order button pressed');
+          }}
+        />
+      </View>
+    );
+  }, [marketRankedItems]);
 
   return (
     <DetailPageWrapper
       header={simplifiedHeader}
       toggleComponent={toggleComponent}
-      bottomContent={histogramComponent}
+      bottomContent={rankedListComponent} // Add the ranked list as bottom content
     >
-      {/* Removed DataLastUpdated component since we'll show date with prices */}
-      
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Cargando datos...</Text>
@@ -167,6 +199,9 @@ const ProductoPrecioScreen: React.FC = () => {
               Ultima actualización - {date}
             </Text>
           </View>
+
+          {/* Histogram area */}
+          {histogramComponent}
         </View>
       )}
     </DetailPageWrapper>
@@ -180,7 +215,8 @@ const styles = StyleSheet.create({
   loadingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 8,
+    padding: 16,
+    minHeight: 200,
   },
   loadingText: {
     fontSize: 14,
@@ -189,7 +225,8 @@ const styles = StyleSheet.create({
   errorContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 8,
+    padding: 16,
+    minHeight: 200,
   },
   errorText: {
     fontSize: 14,
@@ -198,17 +235,17 @@ const styles = StyleSheet.create({
   productInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   iconContainer: {
-    marginRight: 8,
+    marginRight: 12,
   },
   productTextContainer: {
     flex: 1,
   },
   productName: {
     color: '#000',
-    marginBottom: 2,
+    marginBottom: 4,
     fontSize: 20,
   },
   presentationButton: {
@@ -219,12 +256,18 @@ const styles = StyleSheet.create({
   pricesContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 8,
+    padding: 12,
     marginTop: 12,
+    marginBottom: 16,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   pricesTitle: {
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 12,
     textAlign: 'center',
     fontSize: 14,
   },
@@ -239,7 +282,7 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     color: '#000',
-    marginBottom: 2,
+    marginBottom: 4,
     fontSize: 14,
   },
   priceValue: {
@@ -252,6 +295,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontStyle: 'italic',
+    marginTop: 4,
+  },
+  histogramContainer: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  histogramTitle: {
+    color: '#000',
+    marginBottom: 12,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  rankedListContainer: {
+    marginTop: 8,
+    marginBottom: 24,
   },
 });
 
