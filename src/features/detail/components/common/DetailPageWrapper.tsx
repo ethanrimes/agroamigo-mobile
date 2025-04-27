@@ -7,6 +7,8 @@ interface DetailPageWrapperProps {
   header: React.ReactNode;
   toggleComponent?: React.ReactNode;
   children: React.ReactNode;
+  bottomContent?: React.ReactNode; // New prop for content below the card
+  topContent?: React.ReactNode;    // New prop for content above the card
 }
 
 /**
@@ -16,7 +18,9 @@ interface DetailPageWrapperProps {
 const DetailPageWrapper: React.FC<DetailPageWrapperProps> = ({ 
   header, 
   toggleComponent,
-  children 
+  children,
+  bottomContent,
+  topContent
 }) => {
   const { theme, colors, borders, shadows } = useTheme();
   
@@ -31,6 +35,13 @@ const DetailPageWrapper: React.FC<DetailPageWrapperProps> = ({
           {toggleComponent && (
             <View style={styles.toggleContainer}>
               {toggleComponent}
+            </View>
+          )}
+          
+          {/* Content above the card */}
+          {topContent && (
+            <View style={styles.topContentContainer}>
+              {topContent}
             </View>
           )}
           
@@ -51,6 +62,13 @@ const DetailPageWrapper: React.FC<DetailPageWrapperProps> = ({
               {children}
             </ScrollView>
           </View>
+          
+          {/* Content below the card */}
+          {bottomContent && (
+            <View style={styles.bottomContentContainer}>
+              {bottomContent}
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -79,6 +97,10 @@ const styles = StyleSheet.create({
     right: 28,
     zIndex: 10,
   },
+  topContentContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
   contentCard: {
     flex: 1,
     marginTop: 16,
@@ -89,6 +111,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
+  },
+  bottomContentContainer: {
+    marginTop: -8,
+    marginBottom: 16,
   },
 });
 

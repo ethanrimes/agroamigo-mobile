@@ -1,6 +1,6 @@
 // src/features/detail/screens/priceQuantityViews/ProductoPrecioScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { 
   DetailPageWrapper, 
@@ -9,9 +9,10 @@ import {
 } from '@/src/features/detail/components/common';
 import { DetailHeader } from '@/src/features/detail/components/header';
 import { usePriceQuantityToggle, useDetailNavigation } from '@/src/features/detail/hooks/common';
-import useProductPriceData from '@/src/features/detail/hooks/product/useProductPriceData';
+import useProductPriceData, { useFormattedPriceData } from '@/src/features/detail/hooks/product/useProductPriceData';
 import { Apple } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/providers/ThemeProvider';
+import PriceDistributionHistogram from '@/src/features/detail/components/graphs/PriceDistributionHistogram';
 
 /**
  * Screen component for displaying product price details
@@ -21,6 +22,10 @@ const ProductoPrecioScreen: React.FC = () => {
   const { isPriceView, setIsPriceView } = usePriceQuantityToggle(true);
   const { navigateToProductQuantity } = useDetailNavigation();
   const { colors, typography, spacing, borders } = useTheme();
+  
+  // Get screen width for histogram sizing
+  const screenWidth = Dimensions.get('window').width;
+  const histogramWidth = screenWidth - 50; // Account for padding
   
   // Get product price data
   const {
@@ -33,6 +38,9 @@ const ProductoPrecioScreen: React.FC = () => {
     isLoading,
     error
   } = useProductPriceData(parseInt(id || '0', 10));
+  
+  // Get formatted price data for histogram
+  const formattedPriceData = useFormattedPriceData(parseInt(id || '0', 10));
   
   // Handle toggle between price and quantity views
   const handleToggle = (isPrice: boolean) => {
@@ -58,11 +66,21 @@ const ProductoPrecioScreen: React.FC = () => {
   const simplifiedHeader = (
     <DetailHeader title="Agro Amigo" />
   );
+  
+  // Create histogram component for bottom content
+  const histogramComponent = (
+    <PriceDistributionHistogram 
+      artiId={parseInt(id || '0', 10)}
+      width={histogramWidth}
+      height={220}
+    />
+  );
 
   return (
     <DetailPageWrapper
       header={simplifiedHeader}
       toggleComponent={toggleComponent}
+      bottomContent={histogramComponent}
     >
       {/* Removed DataLastUpdated component since we'll show date with prices */}
       
