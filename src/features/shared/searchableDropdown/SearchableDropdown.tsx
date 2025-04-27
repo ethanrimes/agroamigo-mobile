@@ -1,4 +1,3 @@
-// src/features/shared/searchableDropdown/SearchableDropdown.tsx
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Animated, TouchableWithoutFeedback, Keyboard, Text, ViewStyle, TextStyle } from 'react-native';
 import SearchBar from '@/src/components/ui/search/SearchBar';
@@ -98,9 +97,9 @@ const SearchableDropdown = <T extends SelectableItem = SelectableItem>({
     }
   };
   
-  const handleInputBlur = () => {
-    setIsInputFocused(false);
-    // Only hide if no text and not interacting with dropdown
+  // Using onClear callback from SearchBar instead of onBlur
+  const handleClear = () => {
+    setSearchText('');
     if (searchText.length === 0 && !isInteractingWithDropdown) {
       hideDropdown();
     }
@@ -139,8 +138,9 @@ const SearchableDropdown = <T extends SelectableItem = SelectableItem>({
     setIsInteractingWithDropdown(interacting);
   };
   
-  // Listen for keyboard hide to close dropdown
+  // Listen for keyboard events to handle focus state changes
   useEffect(() => {
+    // When keyboard hides, we can assume the input has lost focus
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
@@ -151,10 +151,27 @@ const SearchableDropdown = <T extends SelectableItem = SelectableItem>({
       }
     );
     
+    // Listen for when a field loses focus (good substitute for onBlur)
+    const keyboardDidHideSubscription = Keyboard.addListener(
+      'keyboardWillHide', 
+      () => {
+        // Short delay to allow for dropdown interactions
+        setTimeout(() => {
+          if (!isInteractingWithDropdown) {
+            setIsInputFocused(false);
+            if (searchText.length === 0) {
+              hideDropdown();
+            }
+          }
+        }, 150);
+      }
+    );
+    
     return () => {
       keyboardDidHideListener.remove();
+      keyboardDidHideSubscription.remove();
     };
-  }, [hideDropdown, isInteractingWithDropdown]);
+  }, [hideDropdown, isInteractingWithDropdown, searchText]);
   
   // Return the JSX
   return (
@@ -174,32 +191,34 @@ const SearchableDropdown = <T extends SelectableItem = SelectableItem>({
       )}
       
       {/* Enhanced SearchBar */}
-      <View style={[
-        hasSelection && !isInputFocused ? styles.selectedContainer : undefined,
-        hasSelection && !isInputFocused ? selectionContainerStyle : {}
-      ]}>
-        <SearchBar
-          placeholder={hasSelection && !isInputFocused && !searchText ? getDisplayText() : placeholder}
-          value={searchText}
-          onChangeText={handleSearchTextChange}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          containerStyle={[
-            hasSelection && !isInputFocused && !searchText ? styles.enhancedSearchContainer : undefined,
-            hasSelection && !isInputFocused && !searchText ? selectionContainerStyle : {}
-          ] as ViewStyle[]}
-          inputStyle={hasSelection && !isInputFocused && !searchText ? textStyle : TextStyle}
-          rightElement={
-            hasSelection && !isInputFocused && !searchText ? (
-              <TouchableWithoutFeedback onPress={clearSelection}>
-                <View style={styles.clearButton}>
-                  <Text style={{ color: theme.colors.text.secondary }}>✕</Text>
-                </View>
-              </TouchableWithoutFeedback>
-            ) : undefined
-          }
-        />
-      </View>
+      <TouchableWithoutFeedback onPress={handleInputFocus}>
+        <View style={[
+          hasSelection && !isInputFocused ? styles.selectedContainer : undefined,
+          hasSelection && !isInputFocused ? selectionContainerStyle : {}
+        ]}>
+          <SearchBar
+            placeholder={hasSelection && !isInputFocused && !searchText ? getDisplayText() : placeholder}
+            value={searchText}
+            onChangeText={handleSearchTextChange}
+            onFocus={handleInputFocus}
+            onClear={handleClear}
+            containerStyle={[
+              hasSelection && !isInputFocused && !searchText ? styles.enhancedSearchContainer : undefined,
+              hasSelection && !isInputFocused && !searchText ? selectionContainerStyle : {}
+            ] as ViewStyle[]}
+            inputStyle={hasSelection && !isInputFocused && !searchText ? textStyle as TextStyle : undefined}
+            rightElement={
+              hasSelection && !isInputFocused && !searchText ? (
+                <TouchableWithoutFeedback onPress={clearSelection}>
+                  <View style={styles.clearButton}>
+                    <Text style={{ color: theme.colors.text.secondary }}>✕</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              ) : undefined
+            }
+          />
+        </View>
+      </TouchableWithoutFeedback>
       
       {/* Dropdown List */}
       {isVisible && (
