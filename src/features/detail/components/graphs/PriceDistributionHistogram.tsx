@@ -72,7 +72,6 @@ const PriceDistributionHistogram: React.FC<PriceDistributionHistogramProps> = ({
           color: colors.text.primary,
           marginBottom: spacing.spacing.sm
         }]}>
-          Distribución precio por mercado
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary.default} />
@@ -83,14 +82,6 @@ const PriceDistributionHistogram: React.FC<PriceDistributionHistogramProps> = ({
   
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { 
-        fontFamily: typography.fontFamilies.heading,
-        fontSize: typography.fontSizes.body2,
-        color: colors.text.primary,
-        marginBottom: spacing.spacing.sm
-      }]}>
-        Distribución precio por mercado
-      </Text>
       <BaseD3Histogram
         data={histogramData}
         width={width}

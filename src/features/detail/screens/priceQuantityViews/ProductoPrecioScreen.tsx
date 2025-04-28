@@ -114,7 +114,15 @@ const ProductoPrecioScreen: React.FC = () => {
     <DetailPageWrapper
       header={simplifiedHeader}
       toggleComponent={toggleComponent}
-      bottomContent={rankedListComponent} // Add the ranked list as bottom content
+      bottomContent={
+        <View>
+          {/* Histogram area */}
+          {histogramComponent}
+          
+          {/* Ranked list */}
+          {rankedListComponent}
+        </View>
+      }
     >
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -199,9 +207,6 @@ const ProductoPrecioScreen: React.FC = () => {
               Ultima actualización - {date}
             </Text>
           </View>
-
-          {/* Histogram area */}
-          {histogramComponent}
         </View>
       )}
     </DetailPageWrapper>
